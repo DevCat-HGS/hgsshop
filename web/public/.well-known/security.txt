@@ -1,0 +1,6 @@
+# Cómo reportar un problema de seguridad de shop.hgsportafolio.site (RFC 9116).
+# How to report a security issue in shop.hgsportafolio.site (RFC 9116).
+Contact: mailto:hdevelopergs@gmail.com
+Expires: 2027-10-21T00:00:00.000Z
+Preferred-Languages: es, en
+Canonical: https://shop.hgsportafolio.site/.well-known/security.txt

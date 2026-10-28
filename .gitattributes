@@ -1,0 +1,13 @@
+# Saltos de línea LF en el repo y en la copia de trabajo, sin importar core.autocrlf de cada máquina.
+* text=auto eol=lf
+
+# Binarios: nunca convertir.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.zip binary
