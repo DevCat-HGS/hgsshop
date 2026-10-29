@@ -157,6 +157,69 @@
     }
   }
 
+  /* Trazo del cierre (S9): se dibuja con el punto en la punta, se sostiene y vuelve a empezar. */
+  .trace-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .trace-tip {
+    stroke-dasharray: 0.0001 0.9999;
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+
+  .is-drawing .trace-line {
+    animation: trace-line 5s var(--ease-in-out) infinite;
+  }
+
+  .is-drawing .trace-tip {
+    animation: trace-tip 5s var(--ease-in-out) infinite;
+  }
+
+  @keyframes trace-line {
+    0% {
+      stroke-dashoffset: 1;
+      opacity: 1;
+    }
+    55%,
+    88% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+  }
+
+  /* La punta se detiene justo antes del final: con offset 0 saltaría al inicio del trazo. */
+  @keyframes trace-tip {
+    0% {
+      stroke-dashoffset: 1;
+      opacity: 1;
+    }
+    55% {
+      stroke-dashoffset: 0.0008;
+      opacity: 1;
+    }
+    68%,
+    100% {
+      stroke-dashoffset: 0.0008;
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trace-line {
+      animation: none !important;
+      stroke-dashoffset: 0;
+    }
+    .trace-tip {
+      animation: none !important;
+    }
+  }
+
   .font-display {
     font-family: var(--font-display);
     font-weight: 700;
