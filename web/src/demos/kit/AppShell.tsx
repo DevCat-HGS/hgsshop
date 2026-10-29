@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CommandPalette, type Command } from "@/demos/kit/CommandPalette";
+import { themeStyle, type ProductTheme } from "@/demos/kit/themes";
 
 /** Props que reciben todas las demos. `embedded`: incrustada en la portada (S5), sin tocar la URL. */
 export interface DemoAppProps {
@@ -28,6 +29,8 @@ export function AppShell<V extends string>({
   sidebarFooter,
   commands,
   embedded = false,
+  theme,
+  logo,
   children,
 }: {
   appName: string;
@@ -42,14 +45,21 @@ export function AppShell<V extends string>({
   commands?: Command[];
   /** Incrustada en la portada: sin atajo de teclado, que chocaría con el del navegador en esa página. */
   embedded?: boolean;
+  /** Acento propio del producto (ver `productThemes`). */
+  theme?: ProductTheme;
+  /** Isotipo del producto, ~28 px, junto al nombre. */
+  logo?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <div data-ui className="flex h-full min-h-0 flex-col bg-bg-raised text-text lg:flex-row">
+    <div data-ui style={theme ? themeStyle(theme) : undefined} className="flex h-full min-h-0 flex-col bg-bg-raised text-text lg:flex-row">
       <nav aria-label={`Secciones de ${appName}`} className="shrink-0 border-b border-border bg-bg lg:flex lg:w-56 lg:flex-col lg:border-r lg:border-b-0">
-        <div className="hidden px-5 pt-5 pb-4 lg:block">
-          <p className="font-display text-xl text-text">{appName}</p>
-          {tagline && <p className="text-[12px] text-text-subtle">{tagline}</p>}
+        <div className="hidden items-center gap-3 px-5 pt-5 pb-4 lg:flex">
+          {logo && <span className="shrink-0" aria-hidden="true">{logo}</span>}
+          <div className="min-w-0">
+            <p className="font-display text-xl text-text">{appName}</p>
+            {tagline && <p className="truncate text-[12px] text-text-subtle">{tagline}</p>}
+          </div>
         </div>
         <ul className="flex gap-1 overflow-x-auto px-2 py-2 lg:flex-1 lg:flex-col lg:overflow-x-visible lg:py-0">
           {nav.map((item) => {

@@ -45,7 +45,7 @@ export function Services({
       ) : (
         <Table label="Servicios" head={["Servicio", "Duración", "Precio", "Citas próximas", "Acciones"]} minWidth="40rem">
           {services.map((s) => {
-            const upcoming = appointments.filter((a) => a.serviceId === s.id && a.status === "scheduled" && a.start > now).length;
+            const upcoming = appointments.filter((a) => a.serviceId === s.id && (a.status === "scheduled" || a.status === "pending") && a.start > now).length;
             return (
               <tr key={s.id}>
                 <th scope="row" className="font-semibold text-text">

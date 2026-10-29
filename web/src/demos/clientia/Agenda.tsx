@@ -7,6 +7,7 @@ import {
   apptEnd,
   atMinutes,
   durationLabel,
+  isActive,
   minutesLabel,
   minutesOfDay,
   SLOT,
@@ -69,7 +70,7 @@ export function Agenda({
   // Citas visibles: las mismas que pinta la grilla (sin canceladas, días abiertos, profesionales mostradas).
   const shownIds = shownPros.map((p) => p.id);
   const visibleAppts = appointments
-    .filter((a) => a.status !== "cancelled" && shownIds.includes(a.professionalId) && days.includes(startOfDay(a.start)) && schedule[new Date(a.start).getDay()].open)
+    .filter((a) => isActive(a) && shownIds.includes(a.professionalId) && days.includes(startOfDay(a.start)) && schedule[new Date(a.start).getDay()].open)
     .sort((a, b) => a.start - b.start);
 
   function exportCsv() {
@@ -205,7 +206,7 @@ function DayHeader({ day, now, onPick }: { day: number; now: number; onPick: () 
 }
 
 function ProHeader({ pro, day, store }: { pro: Professional; day: number; store: ClientiaStore }) {
-  const count = store.appointments.filter((a) => a.professionalId === pro.id && a.status !== "cancelled" && startOfDay(a.start) === day).length;
+  const count = store.appointments.filter((a) => a.professionalId === pro.id && isActive(a) && startOfDay(a.start) === day).length;
   const works = pro.days.includes(new Date(day).getDay());
   return (
     <div>
@@ -236,7 +237,7 @@ function DayColumn({
   const single = lanes.length === 1 ? lanes[0] : undefined;
   const working = lanes.filter((p) => p.days.includes(weekday));
   const laneIds = lanes.map((p) => p.id);
-  const dayAppts = appointments.filter((a) => a.status !== "cancelled" && startOfDay(a.start) === day && laneIds.includes(a.professionalId));
+  const dayAppts = appointments.filter((a) => isActive(a) && startOfDay(a.start) === day && laneIds.includes(a.professionalId));
   const dateLabel = `${WEEKDAYS[weekday].toLowerCase()} ${formatDate(day)}`;
   // En la agenda compartida, la franja se propone a la primera profesional libre a esa hora.
   const freePro = (start: number) => working.find((p) => !dayAppts.some((a) => a.professionalId === p.id && a.start <= start && apptEnd(a) > start));
@@ -314,7 +315,8 @@ function ApptBlock({
   const height = (appt.duration / SLOT) * ROW_REM;
   const width = 100 / lanes;
   const pending = appt.status === "scheduled" && appt.start <= now;
-  const statusText = appt.status === "attended" ? "Asistió" : appt.status === "no_show" ? "No asistió" : pending ? "Por marcar" : "";
+  const statusText =
+    appt.status === "attended" ? "Asistió" : appt.status === "no_show" ? "No asistió" : appt.status === "pending" ? "Por confirmar" : pending ? "Por marcar" : "";
   const initials = pro ? pro.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("") : "";
 
   return (
@@ -322,7 +324,7 @@ function ApptBlock({
       type="button"
       onClick={onOpen}
       aria-label={`Cita: ${clientName}, ${appt.serviceName}, ${formatTime(appt.start)} a ${formatTime(apptEnd(appt))}${pro ? `, con ${pro.name}` : ""}${statusText ? `, ${statusText.toLowerCase()}` : ""}`}
-      className={`absolute overflow-hidden rounded-md border border-l-[3px] border-border px-1.5 py-1 text-left hover:brightness-125 ${TONE_BLOCK[tone]} ${appt.status === "no_show" ? "opacity-60" : ""}`}
+      className={`absolute overflow-hidden rounded-md border border-l-[3px] border-border px-1.5 py-1 text-left hover:brightness-125 ${TONE_BLOCK[tone]} ${appt.status === "no_show" ? "opacity-60" : ""} ${appt.status === "pending" ? "border-dashed" : ""}`}
       style={{ top: `calc(${top}rem + 2px)`, height: `calc(${height}rem - 4px)`, left: `calc(${lane * width}% + 2px)`, width: `calc(${width}% - 4px)` }}
     >
       <span className="flex items-start justify-between gap-1">

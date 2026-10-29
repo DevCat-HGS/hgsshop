@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Pill, inputClass } from "@/demos/kit/ui";
 import { RISK_THRESHOLD, type Group } from "./data";
 
@@ -61,5 +62,48 @@ export function GroupSelect({ id, groups, value, onChange, allLabel }: { id: str
         </option>
       ))}
     </select>
+  );
+}
+
+/** Estado vacío útil: qué falta y la acción para empezar. */
+export function EmptyState({ title, children, actions }: { title: string; children?: ReactNode; actions?: ReactNode }) {
+  return (
+    <section aria-label={title} className="rounded-lg border border-dashed border-border-strong bg-bg px-5 py-10 text-center">
+      <h3 className="text-base font-semibold text-text">{title}</h3>
+      {children && <div className="mx-auto mt-1.5 max-w-md text-sm text-text-muted">{children}</div>}
+      {actions && <div className="mt-5 flex flex-wrap justify-center gap-2">{actions}</div>}
+    </section>
+  );
+}
+
+/**
+ * Marco de las vistas "como las ve el acudiente": deja claro que es la pantalla del cliente final y que en la
+ * demo no existe un enlace público real.
+ */
+export function ClientFrame({ label, address, notice, toolbar, children }: { label: string; address: string; notice: ReactNode; toolbar?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg p-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 text-sm">
+          <p className="flex flex-wrap items-center gap-2 font-semibold text-text">
+            <Pill tone="brand">{label}</Pill>
+            Así lo ve el acudiente
+          </p>
+          <p className="mt-1 text-text-muted">{notice}</p>
+        </div>
+        {toolbar}
+      </div>
+      <section aria-label={label} className="mx-auto max-w-3xl overflow-hidden rounded-xl border-2 border-brand/60 bg-bg shadow-[var(--shadow-float)]">
+        <div className="flex items-center gap-2 border-b border-border bg-surface px-3 py-2" aria-hidden="true">
+          <span className="flex gap-1">
+            <span className="size-2.5 rounded-full bg-surface-hover" />
+            <span className="size-2.5 rounded-full bg-surface-hover" />
+            <span className="size-2.5 rounded-full bg-surface-hover" />
+          </span>
+          <span className="min-w-0 flex-1 truncate rounded-md bg-bg px-3 py-1 text-center text-[12px] text-text-subtle">{address}</span>
+        </div>
+        <div className="p-4 sm:p-7">{children}</div>
+      </section>
+    </div>
   );
 }

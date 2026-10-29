@@ -1,7 +1,7 @@
 import { DAY_MS, daysFromToday, startOfDay } from "@/demos/kit/format";
+import { isBlankStart } from "@/demos/kit/storage";
 
 export const SLUG = "roboacademy";
-export const ACADEMY_NAME = "Academia Circuito";
 
 export interface Module {
   id: string;
@@ -19,6 +19,9 @@ export interface Group {
   capacity: number;
   /** Mensualidad en COP. */
   fee: number;
+  /** Edades recomendadas (incluidas): orientan el formulario de inscripción. */
+  minAge: number;
+  maxAge: number;
   modules: Module[];
 }
 
@@ -30,6 +33,8 @@ export interface Student {
   age: number;
   guardian: string;
   guardianPhone: string;
+  /** Opcional: los estudiantes creados antes de las inscripciones no lo tienen. */
+  guardianEmail?: string;
   groupId: string;
   joinedAt: number;
   status: StudentStatus;
@@ -64,8 +69,116 @@ export interface Payment {
   amount: number;
   paidAt: number;
   method: PayMethod;
+  /** Número consecutivo del recibo de caja (RC-0001…). Nunca se reutiliza. */
+  receipt: number;
 }
 
+/** Recibo de un pago deshecho: el número queda anulado para que la numeración no tenga huecos sin explicar. */
+export interface VoidedReceipt {
+  receipt: number;
+  studentId: string;
+  studentName: string;
+  month: string;
+  amount: number;
+  paidAt: number;
+  voidedAt: number;
+}
+
+/* ---------- Inscripciones ---------- */
+
+export type ApplicantStatus = "nuevo" | "contactado" | "prueba" | "inscrito" | "descartado";
+
+export const APPLICANT_STATUS: { id: ApplicantStatus; label: string; tone: "brand" | "neutral" | "warning" | "success" | "danger" }[] = [
+  { id: "nuevo", label: "Nuevo", tone: "warning" },
+  { id: "contactado", label: "Contactado", tone: "neutral" },
+  { id: "prueba", label: "Clase de prueba", tone: "brand" },
+  { id: "inscrito", label: "Inscrito", tone: "success" },
+  { id: "descartado", label: "Descartado", tone: "danger" },
+];
+
+export const SOURCES = ["Instagram", "Facebook", "Google", "Recomendación de otro acudiente", "Volante o feria escolar", "Otro"];
+
+export const DISCARD_REASONS = ["El horario no le sirve", "Precio", "No respondió", "Se inscribió en otro lugar", "Edad fuera de rango", "Otro"];
+
+/** Entrada del seguimiento: una nota escrita a mano o un cambio de estado. */
+export interface FollowUp {
+  id: string;
+  at: number;
+  kind: "nota" | "estado";
+  text: string;
+}
+
+export interface Applicant {
+  id: string;
+  childName: string;
+  age: number;
+  guardian: string;
+  phone: string;
+  email: string;
+  /** Grupo de interés; vacío si el acudiente pidió recomendación. */
+  groupId: string;
+  source: string;
+  message: string;
+  createdAt: number;
+  status: ApplicantStatus;
+  /** Fecha y hora de la clase de prueba. */
+  trialAt: number | null;
+  discardReason: string;
+  /** Estudiante creado al inscribir. */
+  studentId: string | null;
+  log: FollowUp[];
+}
+
+export function statusInfo(status: ApplicantStatus) {
+  return APPLICANT_STATUS.find((x) => x.id === status)!;
+}
+
+/** Grupos recomendados para una edad. */
+export function groupsForAge(groups: Group[], age: number) {
+  return groups.filter((g) => age >= g.minAge && age <= g.maxAge);
+}
+
+/* ---------- Ajustes de la academia ---------- */
+
+export interface Settings {
+  name: string;
+  nit: string;
+  address: string;
+  city: string;
+  phone: string;
+  /** Texto al pie de recibos y reportes. */
+  footer: string;
+}
+
+export const DEFAULT_SETTINGS: Settings = {
+  name: "Academia Circuito",
+  nit: "901.456.789-3",
+  address: "Calle 10 # 43D-25, oficina 302",
+  city: "Medellín",
+  phone: "6043221188",
+  footer: "Gracias por confiar en nosotros. Las mensualidades se pagan dentro de los primeros 10 días de cada mes.",
+};
+
+export const FOOTER_MAX = 300;
+
+/** Valida los ajustes; devuelve el mensaje de error o null. */
+export function validateSettings(s: Settings): string | null {
+  if (s.name.trim().length < 3) return "El nombre de la academia debe tener al menos 3 caracteres.";
+  if (s.name.trim().length > 60) return "El nombre de la academia no puede pasar de 60 caracteres.";
+  // NIT colombiano: 9 dígitos y dígito de verificación, con o sin puntos y guion ("901.456.789-3").
+  if (s.nit.trim() && !/^\d{1,3}(\.?\d{3}){2}-?\d$/.test(s.nit.trim())) return 'El NIT debe tener 9 dígitos y el de verificación, por ejemplo "901.456.789-3".';
+  const phone = digitsOnly(s.phone);
+  if (s.phone.trim() && (phone.length < 7 || phone.length > 10)) return "El teléfono debe tener entre 7 y 10 dígitos.";
+  if (s.footer.length > FOOTER_MAX) return `El texto del pie no puede pasar de ${FOOTER_MAX} caracteres.`;
+  return null;
+}
+
+/** Día del mes hasta el que se paga la mensualidad sin quedar en mora. */
+export const DUE_DAY = 10;
+
+export function receiptLabel(n: number) {
+  return `RC-${String(n).padStart(4, "0")}`;
+}
 export const WEEKDAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 export const PAY_METHODS: { id: PayMethod; label: string }[] = [
   { id: "efectivo", label: "Efectivo" },
@@ -213,6 +326,8 @@ function seedGroups(): Group[] {
       teacher: "Laura Méndez",
       capacity: 8,
       fee: 180_000,
+      minAge: 7,
+      maxAge: 10,
       modules: mods("ini", ["Motores y engranajes", "Sensores de luz", "Sensores de distancia", "Proyecto: carro seguidor de línea"]),
     },
     {
@@ -223,6 +338,8 @@ function seedGroups(): Group[] {
       teacher: "Andrés Rojas",
       capacity: 6,
       fee: 160_000,
+      minAge: 9,
+      maxAge: 12,
       modules: mods("blo", ["Secuencias", "Ciclos", "Condicionales", "Variables", "Proyecto: videojuego"]),
     },
     {
@@ -233,6 +350,8 @@ function seedGroups(): Group[] {
       teacher: "Camila Ortiz",
       capacity: 5,
       fee: 220_000,
+      minAge: 12,
+      maxAge: 16,
       modules: mods("ava", ["Arduino básico", "Servomotores", "Comunicación serial", "Proyecto: brazo robótico"]),
     },
     {
@@ -243,6 +362,8 @@ function seedGroups(): Group[] {
       teacher: "Laura Méndez",
       capacity: 6,
       fee: 200_000,
+      minAge: 10,
+      maxAge: 13,
       modules: mods("inv", ["Electrónica básica", "Impresión 3D", "Micro:bit", "Proyecto libre"]),
     },
   ];
@@ -290,11 +411,19 @@ export interface AcademyData {
   sessions: Session[];
   notes: Note[];
   payments: Payment[];
+  applicants: Applicant[];
+  /** Próximo número de recibo. */
+  nextReceipt: number;
 }
 
+/**
+ * Datos de ejemplo. Con "Empezar vacío" solo quedan los grupos con sus módulos y horarios (la configuración que
+ * la academia necesita para inscribir estudiantes); sin estudiantes, asistencia, pagos ni aspirantes.
+ */
 export function seedAcademy(): AcademyData {
-  const rand = rng(20_260_115);
   const groups = seedGroups();
+  if (isBlankStart(SLUG)) return { groups, students: [], sessions: [], notes: [], payments: [], applicants: [], nextReceipt: 1 };
+  const rand = rng(20_260_115);
   const today = startOfDay(Date.now());
 
   const students: Student[] = SEED_STUDENTS.map(([name, age, guardian, guardianPhone, groupId, since, moduleIndex], i) => ({
@@ -360,6 +489,7 @@ export function seedAcademy(): AcademyData {
         amount: group.fee,
         paidAt: Math.min(start + Math.floor(rand() * (maxDay + 1)) * DAY_MS + 10 * 3_600_000, Date.now()),
         method: methods[Math.floor(rand() * methods.length)],
+        receipt: 0,
       });
     }
   }
@@ -378,7 +508,124 @@ export function seedAcademy(): AcademyData {
   // Las notas sobre faltas, para quienes de verdad faltan.
   for (const id of ["e-3", "e-9", "e-18"]) notes.push({ id: `n-${id}-riesgo`, studentId: id, date: today - 4 * DAY_MS, text: NOTE_TEXTS[5] });
 
-  return { groups, students, sessions, notes, payments };
+  // Recibos consecutivos en el orden en que se pagó.
+  payments.sort((a, b) => a.paidAt - b.paidAt).forEach((p, i) => (p.receipt = i + 1));
+
+  return { groups, students, sessions, notes, payments, applicants: seedApplicants(), nextReceipt: payments.length + 1 };
+}
+
+function seedApplicants(): Applicant[] {
+  const at = (days: number, h = 10, m = 0) => daysFromToday(days, h, m);
+  const log = (entries: [number, FollowUp["kind"], string][]) => entries.map(([days, kind, text], i) => ({ id: `f-${days}-${i}`, at: at(days, 9 + i), kind, text }));
+  // Próxima clase del grupo de bloques (miércoles) para la clase de prueba agendada.
+  let trial = startOfDay(Date.now()) + DAY_MS;
+  while (new Date(trial).getDay() !== 3) trial += DAY_MS;
+  const trialAt = new Date(trial).setHours(16, 0, 0, 0);
+  const base = { email: "", message: "", trialAt: null, discardReason: "", studentId: null };
+  return [
+    {
+      ...base,
+      id: "a-1",
+      childName: "Emiliano Correa",
+      age: 8,
+      guardian: "Juliana Correa",
+      phone: "3117742290",
+      email: "juliana.correa@correo.com",
+      groupId: "g-inicial",
+      source: "Instagram",
+      message: "Le encantan los legos. ¿Hay cupo los sábados?",
+      createdAt: at(0, 7, 40),
+      status: "nuevo",
+      log: [],
+    },
+    {
+      ...base,
+      id: "a-2",
+      childName: "Renata Villegas",
+      age: 13,
+      guardian: "Mauricio Villegas",
+      phone: "3046619935",
+      email: "mvillegas@correo.com",
+      groupId: "",
+      source: "Recomendación de otro acudiente",
+      createdAt: at(-1, 18, 15),
+      status: "nuevo",
+      log: [],
+    },
+    {
+      ...base,
+      id: "a-3",
+      childName: "Pablo Henao",
+      age: 11,
+      guardian: "Carolina Henao",
+      phone: "3205581147",
+      email: "carohenao@correo.com",
+      groupId: "g-inventores",
+      source: "Google",
+      createdAt: at(-4),
+      status: "contactado",
+      log: log([
+        [-3, "estado", "Marcado como contactado"],
+        [-3, "nota", "Llamada: quiere saber si puede pagar por trimestre. Le enviamos la información por WhatsApp."],
+      ]),
+    },
+    {
+      ...base,
+      id: "a-4",
+      childName: "Violeta Arias",
+      age: 10,
+      guardian: "Esteban Arias",
+      phone: "3152238804",
+      email: "earias@correo.com",
+      groupId: "g-bloques",
+      source: "Volante o feria escolar",
+      createdAt: at(-6),
+      status: "prueba",
+      trialAt,
+      log: log([
+        [-5, "estado", "Marcado como contactado"],
+        [-5, "estado", "Clase de prueba agendada"],
+      ]),
+    },
+    {
+      ...base,
+      id: "a-5",
+      childName: "Jerónimo Vélez",
+      age: 8,
+      guardian: "Marcela Vélez",
+      phone: "3013348875",
+      email: "marcela.velez@correo.com",
+      groupId: "g-inicial",
+      source: "Facebook",
+      createdAt: at(-32),
+      status: "inscrito",
+      studentId: "e-5",
+      log: log([
+        [-31, "estado", "Marcado como contactado"],
+        [-29, "estado", "Clase de prueba agendada"],
+        [-25, "estado", "Inscrito en Robótica inicial"],
+      ]),
+    },
+    {
+      ...base,
+      id: "a-6",
+      childName: "Martina Gómez",
+      age: 6,
+      guardian: "Laura Gómez",
+      phone: "3008853316",
+      email: "",
+      groupId: "",
+      source: "Instagram",
+      createdAt: at(-12),
+      status: "descartado",
+      discardReason: "Edad fuera de rango",
+      log: log([
+        [-11, "estado", "Marcado como contactado"],
+        [-11, "estado", "Descartado: Edad fuera de rango"],
+        [-11, "nota", "Le ofrecimos avisarle cuando abramos el grupo de 6 años."],
+      ]),
+    },
+  ];
 }
 
 /** Medianoche de hoy y el instante actual (fuera del render, para las reglas de pureza). */
@@ -398,4 +645,57 @@ export function formatDateYear(value: number) {
 /** "1 ausencia", "3 ausencias". */
 export function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
+}
+
+/* ---------- Valor en letras (recibos) ---------- */
+
+const UNITS = [
+  "", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "once", "doce", "trece", "catorce", "quince",
+  "dieciséis", "diecisiete", "dieciocho", "diecinueve", "veinte", "veintiuno", "veintidós", "veintitrés", "veinticuatro", "veinticinco",
+  "veintiséis", "veintisiete", "veintiocho", "veintinueve",
+];
+const TENS = ["", "", "", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
+const HUNDREDS = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
+
+function below1000(n: number) {
+  if (n === 100) return "cien";
+  const rest = n % 100;
+  const tens = rest < 30 ? UNITS[rest] : `${TENS[Math.floor(rest / 10)]}${rest % 10 ? ` y ${UNITS[rest % 10]}` : ""}`;
+  return [HUNDREDS[Math.floor(n / 100)], tens].filter(Boolean).join(" ");
+}
+
+/** "uno" pierde la última sílaba delante de "mil" y "millones": veintiún mil, un millón. */
+const apocope = (text: string) => text.replace(/veintiuno$/, "veintiún").replace(/uno$/, "un");
+
+/** 180000 → "Ciento ochenta mil pesos m/cte". Hasta 999.999.999. */
+export function amountInWords(value: number) {
+  const n = Math.round(Math.abs(value));
+  if (n === 0) return "Cero pesos m/cte";
+  const millions = Math.floor(n / 1_000_000);
+  const thousands = Math.floor((n % 1_000_000) / 1000);
+  const rest = n % 1000;
+  const parts: string[] = [];
+  if (millions) parts.push(millions === 1 ? "un millón" : `${apocope(below1000(millions))} millones`);
+  if (thousands) parts.push(thousands === 1 ? "mil" : `${apocope(below1000(thousands))} mil`);
+  if (rest) parts.push(below1000(rest));
+  const text = `${parts.join(" ")}${millions && !thousands && !rest ? " de" : ""} ${n === 1 ? "peso" : "pesos"} m/cte`;
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** Fecha escrita en un CSV: "2025-03-14", "14/03/2025" o "14-03-2025". Medianoche local, o null si no es válida. */
+export function parseDateText(raw: string): number | null {
+  const text = raw.trim();
+  let y: number, m: number, d: number;
+  let match = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(text);
+  if (match) [y, m, d] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  else if ((match = /^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/.exec(text))) [d, m, y] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  else return null;
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d ? date.getTime() : null;
+}
+
+/** Compara nombres sin tildes, mayúsculas ni espacios de más (para detectar duplicados). */
+export function sameName(a: string, b: string) {
+  const norm = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/\s+/g, " ").trim();
+  return norm(a) === norm(b);
 }

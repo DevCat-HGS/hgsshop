@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { formatDate, formatDateTime, formatTime } from "@/demos/kit/format";
 import { Btn, Dialog, Empty, Field, FormError, inputClass, Panel, Pill, Table } from "@/demos/kit/ui";
-import { BUSINESS, buildReminders, CHANNEL_LABEL, DEFAULT_TEMPLATE, LEAD_LABEL, renderTemplate, type Reminder, type ReminderLead, type ReminderSettings } from "./data";
+import { buildReminders, CHANNEL_LABEL, DEFAULT_TEMPLATE, LEAD_LABEL, renderTemplate, type Reminder, type ReminderLead, type ReminderSettings } from "./data";
 import type { ClientiaStore } from "./store";
 
-const VARIABLES = ["{cliente}", "{servicio}", "{fecha}", "{hora}", "{profesional}"];
+const VARIABLES = ["{cliente}", "{servicio}", "{fecha}", "{hora}", "{profesional}", "{negocio}"];
 const STATE_LABEL: Record<Reminder["state"], string> = { scheduled: "Programado", sent: "Enviado (simulado)", skipped: "Omitido: sin canal" };
 
 export function Reminders({ store, notify }: { store: ClientiaStore; notify: (msg: string) => void }) {
@@ -100,11 +100,11 @@ export function Reminders({ store, notify }: { store: ClientiaStore; notify: (ms
               {preview.client?.channel === "email" && (
                 <>
                   <dt className="text-text-muted">Asunto</dt>
-                  <dd className="text-text">Recordatorio de tu cita en {BUSINESS}</dd>
+                  <dd className="text-text">Recordatorio de tu cita en {store.business.name}</dd>
                 </>
               )}
             </dl>
-            <p className="rounded-lg border border-border bg-bg px-4 py-3 whitespace-pre-wrap text-text">{renderTemplate(settings.template, preview.appointment, preview.client, proOf(preview))}</p>
+            <p className="rounded-lg border border-border bg-bg px-4 py-3 whitespace-pre-wrap text-text">{renderTemplate(settings.template, preview.appointment, preview.client, proOf(preview), store.business.name)}</p>
             <p className="text-[12px] text-text-subtle">
               {preview.state === "skipped"
                 ? "Este cliente eligió no recibir recordatorios, así que no se enviaría."
@@ -209,7 +209,7 @@ function SettingsForm({ store, notify }: { store: ClientiaStore; notify: (msg: s
         {sample && (
           <div>
             <p className="text-[13px] font-semibold text-text-muted">Vista previa con la próxima cita</p>
-            <p className="mt-1.5 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm whitespace-pre-wrap text-text">{renderTemplate(draft.template, sample, sampleClient, samplePro)}</p>
+            <p className="mt-1.5 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm whitespace-pre-wrap text-text">{renderTemplate(draft.template, sample, sampleClient, samplePro, store.business.name)}</p>
           </div>
         )}
 

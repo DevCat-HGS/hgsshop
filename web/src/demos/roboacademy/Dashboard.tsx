@@ -2,12 +2,12 @@ import { useState } from "react";
 import { DAY_MS, formatDateLong, formatMoney } from "@/demos/kit/format";
 import { Btn, Empty, Panel, Pill, Stat } from "@/demos/kit/ui";
 import { RISK_THRESHOLD, RISK_WINDOW_DAYS, activeIn, billedStudents, monthKey, monthLabel, sessionDateTime, sessionDates, summarize, timeLabel, todayStart, plural } from "./data";
-import { CapacityBar, RatePill } from "./shared";
+import { CapacityBar, EmptyState, RatePill } from "./shared";
 import { StudentProfile } from "./StudentProfile";
-import type { ScreenProps } from "./store";
+import type { GoTo, ScreenProps } from "./store";
 
-export function Dashboard({ academy, onNavigate }: Omit<ScreenProps, "notify"> & { onNavigate: (view: "pagos" | "asistencia") => void }) {
-  const { groups, students, sessions, payments } = academy;
+export function Dashboard({ academy, onNavigate }: Omit<ScreenProps, "notify"> & { onNavigate: GoTo }) {
+  const { groups, students, sessions, payments, applicants } = academy;
   const [profileId, setProfileId] = useState<string | null>(null);
 
   const today = todayStart();
@@ -43,8 +43,61 @@ export function Dashboard({ academy, onNavigate }: Omit<ScreenProps, "notify"> &
     .filter((r) => r.summary.rate !== null && r.summary.presente + r.summary.ausente >= 3 && r.summary.rate < RISK_THRESHOLD)
     .sort((a, b) => a.summary.rate! - b.summary.rate!);
 
+  const trials = applicants
+    .filter((a) => a.status === "prueba" && a.trialAt !== null && a.trialAt >= today)
+    .sort((a, b) => a.trialAt! - b.trialAt!);
+  const newApplicants = applicants.filter((a) => a.status === "nuevo").length;
+
   return (
     <div className="space-y-5">
+      {students.length === 0 && (
+        <EmptyState
+          title="Tu academia está lista para empezar"
+          actions={
+            <>
+              <Btn variant="primary" onClick={() => onNavigate("estudiantes")}>
+                Crear o importar estudiantes
+              </Btn>
+              <Btn onClick={() => onNavigate("formulario")}>Ver el formulario de inscripción</Btn>
+              <Btn variant="ghost" onClick={() => onNavigate("ajustes")}>
+                Ajustes de la academia
+              </Btn>
+            </>
+          }
+        >
+          Ya tienes {plural(groups.length, "grupo", "grupos")} con sus horarios y módulos. Agrega a tus estudiantes (uno por uno o desde Excel) y el panel
+          mostrará asistencia, pagos y estudiantes en riesgo.
+        </EmptyState>
+      )}
+      {(newApplicants > 0 || trials.length > 0) && (
+        <Panel
+          title="Inscripciones"
+          actions={
+            <Btn size="sm" variant="ghost" onClick={() => onNavigate("inscripciones")}>
+              Ver aspirantes
+            </Btn>
+          }
+        >
+          <p className="text-sm text-text-muted">
+            {plural(newApplicants, "aspirante nuevo por contactar", "aspirantes nuevos por contactar")}
+            {trials.length > 0 && ` · ${plural(trials.length, "clase de prueba agendada", "clases de prueba agendadas")}`}
+          </p>
+          {trials.length > 0 && (
+            <ul className="mt-2 divide-y divide-border">
+              {trials.slice(0, 3).map((a) => (
+                <li key={a.id} className="flex flex-wrap items-center justify-between gap-x-3 py-2 last:pb-0">
+                  <span className="font-semibold text-text">
+                    {a.childName} <span className="font-normal text-text-muted">· {a.age} años</span>
+                  </span>
+                  <span className="text-[13px] text-text-muted">
+                    Clase de prueba: {formatDateLong(a.trialAt!)}, {timeLabel(new Date(a.trialAt!).toTimeString().slice(0, 5))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      )}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Estudiantes activos" value={active.length} detail={`En ${groups.length} grupos`} />
         <Stat

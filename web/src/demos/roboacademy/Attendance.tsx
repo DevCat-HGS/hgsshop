@@ -3,8 +3,8 @@ import { downloadCsv } from "@/demos/kit/csv";
 import { DAY_MS, formatDate, formatDateLong, startOfDay } from "@/demos/kit/format";
 import { Btn, Empty, Field, Panel, Table, inputClass } from "@/demos/kit/ui";
 import { MARK_LABEL, sessionDates, sessionId, timeLabel, type Group, type Mark, type Session, type Student, todayStart, plural } from "./data";
-import { GroupSelect } from "./shared";
-import type { ScreenProps } from "./store";
+import { EmptyState, GroupSelect } from "./shared";
+import type { GoTo, ScreenProps } from "./store";
 
 const MARKS: Mark[] = ["presente", "ausente", "excusa"];
 const markActive: Record<Mark, string> = {
@@ -20,13 +20,26 @@ function rosterFor(students: Student[], group: Group, date: number, session?: Se
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
 }
 
-export function Attendance({ academy, notify }: ScreenProps) {
+export function Attendance({ academy, notify, goTo }: ScreenProps & { goTo: GoTo }) {
   const { groups, students, sessions } = academy;
   const [groupId, setGroupId] = useState(groups[0]?.id ?? "");
   const [picked, setPicked] = useState<number | null>(null);
 
   const group = groups.find((g) => g.id === groupId);
   if (!group) return <Empty>Crea un grupo para tomar asistencia.</Empty>;
+  if (students.length === 0)
+    return (
+      <EmptyState
+        title="Aún no hay estudiantes"
+        actions={
+          <Btn variant="primary" onClick={() => goTo("estudiantes")}>
+            Ir a Estudiantes
+          </Btn>
+        }
+      >
+        La asistencia se toma por grupo y sesión con los estudiantes inscritos. Crea o importa tus estudiantes para empezar.
+      </EmptyState>
+    );
 
   const today = todayStart();
   const dates = sessionDates(group, today - 10 * 7 * DAY_MS, today);

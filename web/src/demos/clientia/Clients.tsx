@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { downloadCsv } from "@/demos/kit/csv";
+import { normalizeHeader } from "@/demos/kit/csvImport";
+import { ImportDialog, type ImportField, type RowResult } from "@/demos/kit/ImportDialog";
 import { formatDate, formatDateLong, formatDateTime, formatMoney, formatTime, matches, relativeDays } from "@/demos/kit/format";
 import { uid } from "@/demos/kit/storage";
 import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, inputClass, Panel, Pill, SearchField, Stat, Table } from "@/demos/kit/ui";
-import { CHANNEL_LABEL, clientStats, percent, STATUS_LABEL, STATUS_TONE, type Appointment, type Channel, type Client, type Editor } from "./data";
+import { CHANNEL_LABEL, clientStats, isValidPhone, percent, phoneDigits, STATUS_LABEL, STATUS_TONE, type Appointment, type Channel, type Client, type Editor } from "./data";
 import type { ClientiaStore } from "./store";
 
 interface Props {
@@ -15,9 +17,12 @@ interface Props {
   /** Formulario de cliente abierto desde la acción de la cabecera. */
   creating: boolean;
   onCreatingChange: (open: boolean) => void;
+  /** Importación desde Excel o CSV abierta desde la cabecera. */
+  importing: boolean;
+  onImportingChange: (open: boolean) => void;
 }
 
-export function Clients({ store, selectedId, onSelect, onEdit, notify, creating, onCreatingChange }: Props) {
+export function Clients({ store, selectedId, onSelect, onEdit, notify, creating, onCreatingChange, importing, onImportingChange }: Props) {
   const { clients, appointments, now } = store;
   const [query, setQuery] = useState("");
   const [channel, setChannel] = useState<"all" | Channel>("all");
@@ -33,19 +38,27 @@ export function Clients({ store, selectedId, onSelect, onEdit, notify, creating,
   }
 
   const form = (
-    <ClientForm
-      open={creating || editing !== null}
-      client={editing}
-      store={store}
-      onClose={() => {
-        setEditing(null);
-        onCreatingChange(false);
-      }}
-      onSaved={(client, isNew) => {
-        notify(isNew ? "Cliente creado" : "Cliente actualizado");
-        if (isNew) onSelect(client.id);
-      }}
-    />
+    <>
+      <ClientImport
+        store={store}
+        open={importing}
+        onClose={() => onImportingChange(false)}
+        onDone={(n) => notify(`${n} ${n === 1 ? "cliente importado" : "clientes importados"}`)}
+      />
+      <ClientForm
+        open={creating || editing !== null}
+        client={editing}
+        store={store}
+        onClose={() => {
+          setEditing(null);
+          onCreatingChange(false);
+        }}
+        onSaved={(client, isNew) => {
+          notify(isNew ? "Cliente creado" : "Cliente actualizado");
+          if (isNew) onSelect(client.id);
+        }}
+      />
+    </>
   );
 
   if (selected) {
@@ -99,7 +112,19 @@ export function Clients({ store, selectedId, onSelect, onEdit, notify, creating,
 
       {visible.length === 0 ? (
         <div className="rounded-lg border border-border bg-bg">
-          <Empty>{clients.length ? "Ningún cliente coincide con la búsqueda." : "Todavía no hay clientes. Crea el primero."}</Empty>
+          {clients.length ? (
+            <Empty>Ningún cliente coincide con la búsqueda.</Empty>
+          ) : (
+            <div className="flex flex-col items-center gap-3 px-2 py-8 text-center">
+              <p className="text-sm text-text-muted">Todavía no hay clientes. Créalos uno a uno o tráelos desde tu Excel.</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Btn onClick={() => onImportingChange(true)}>Importar desde Excel o CSV</Btn>
+                <Btn variant="primary" onClick={() => onCreatingChange(true)}>
+                  Nuevo cliente
+                </Btn>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <Table label="Clientes" head={["Cliente", "Teléfono", "Recordatorio", "Próxima cita", "Gasto total", "Inasistencia", "Acciones"]} minWidth="54rem">
@@ -239,6 +264,70 @@ function ClientCard({
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const IMPORT_FIELDS: ImportField<Record<string, string>>[] = [
+  { key: "name", label: "Nombre", required: true, aliases: ["cliente", "nombre completo", "nombres", "nombre del cliente"], example: "Lucía Arango" },
+  { key: "phone", label: "Teléfono", aliases: ["telefono", "celular", "whatsapp", "móvil", "movil", "tel"], example: "300 123 4567" },
+  { key: "email", label: "Correo", aliases: ["email", "e-mail", "correo electrónico", "mail"], example: "lucia@ejemplo.com" },
+  { key: "channel", label: "Recordatorio", aliases: ["canal", "recordatorios", "recordatorios por", "canal de recordatorio"], example: "WhatsApp" },
+  { key: "notes", label: "Notas", aliases: ["nota", "observaciones", "comentarios"], example: "Prefiere citas en la tarde" },
+];
+
+/** Canal escrito en el archivo ("WhatsApp", "correo", "ninguno"…); vacío = el mejor según los datos. */
+function parseChannel(raw: string, phone: string, email: string): Channel | null {
+  const text = normalizeHeader(raw);
+  if (!text) return phone ? "whatsapp" : email ? "email" : "none";
+  if (["whatsapp", "wsp", "wa", "telefono", "celular"].includes(text)) return "whatsapp";
+  if (["correo", "email", "e mail", "mail", "correo electronico"].includes(text)) return "email";
+  if (["ninguno", "no", "none", "sin recordatorio", "ningun"].includes(text)) return "none";
+  return null;
+}
+
+/** Importar clientes desde Excel o CSV, con las mismas reglas del formulario (teléfonos repetidos incluidos). */
+function ClientImport({ store, open, onClose, onDone }: { store: ClientiaStore; open: boolean; onClose: () => void; onDone: (count: number) => void }) {
+  const { clients } = store;
+  // Teléfonos ya aceptados en la revisión actual del archivo; la revisión empieza siempre por la fila 1.
+  const seen = useRef<string[]>([]);
+
+  const validate = useCallback(
+    (values: Record<string, string>, index: number): RowResult<Client> => {
+      if (index === 1) seen.current = [];
+      const name = values.name.trim().replace(/\s+/g, " ");
+      const phone = values.phone.trim();
+      const email = values.email.trim();
+      const digits = phoneDigits(phone);
+      if (name.length < 3) return { ok: false, error: "el nombre es muy corto (mínimo 3 letras)" };
+      if (name.length > 80) return { ok: false, error: "el nombre es muy largo" };
+      if (phone && !isValidPhone(phone)) return { ok: false, error: `teléfono "${phone}" no válido (7 a 15 dígitos)` };
+      if (email && !EMAIL_RE.test(email)) return { ok: false, error: `correo "${email}" no válido` };
+      const channel = parseChannel(values.channel, phone, email);
+      if (!channel) return { ok: false, error: `recordatorio "${values.channel}" no válido (WhatsApp, Correo o Ninguno)` };
+      if (channel === "whatsapp" && !digits) return { ok: false, error: "para recordar por WhatsApp hace falta un teléfono" };
+      if (channel === "email" && !email) return { ok: false, error: "para recordar por correo hace falta un correo" };
+      if (digits && clients.some((c) => phoneDigits(c.phone) === digits)) return { ok: false, error: `ya hay un cliente con el teléfono ${phone}` };
+      if (digits && seen.current.includes(digits)) return { ok: false, error: `el teléfono ${phone} está repetido en el archivo` };
+      if (digits) seen.current.push(digits);
+      return { ok: true, record: { id: uid("c"), name, phone, email, channel, notes: values.notes.trim().slice(0, 500) } };
+    },
+    [clients],
+  );
+
+  return (
+    <ImportDialog
+      open={open}
+      onClose={onClose}
+      title="Importar clientes"
+      entityPlural="clientes"
+      templateName="plantilla-clientes-clientia"
+      fields={IMPORT_FIELDS}
+      validate={validate}
+      onImport={(records) => {
+        store.setClients((list) => [...list, ...records]);
+        onDone(records.length);
+      }}
+    />
+  );
+}
 
 function ClientForm({
   open,

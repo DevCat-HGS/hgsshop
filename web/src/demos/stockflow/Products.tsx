@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { downloadCsv } from "@/demos/kit/csv";
+import { parseNumber } from "@/demos/kit/csvImport";
 import { formatMoney, matches } from "@/demos/kit/format";
+import { ImportDialog, type ImportField, type RowResult } from "@/demos/kit/ImportDialog";
 import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, inputClass, Pill, SearchField, Table } from "@/demos/kit/ui";
 import { CATEGORIES, STOCK_LABELS, stockStatus, UNITS, type Product, type StockStatus } from "./data";
-import { PermBtn, RoleNote, StockPill, Toolbar, type MovementPreset } from "./common";
-import type { ProductDraft, StockFlow } from "./store";
+import { EmptyState, PermBtn, RoleNote, StockPill, Toolbar, type MovementPreset } from "./common";
+import { checkProduct, sameName, type ProductDraft, type StockFlow } from "./store";
 
 type StatusFilter = "all" | StockStatus | "archived";
 
@@ -23,6 +25,7 @@ export function Products({
   onMove,
   editing,
   setEditing,
+  onImport,
   focus = null,
 }: {
   store: StockFlow;
@@ -30,6 +33,7 @@ export function Products({
   onMove: (preset: MovementPreset) => void;
   editing: Editing;
   setEditing: (editing: Editing) => void;
+  onImport: () => void;
   /** Solo se lee al montar: la raíz cambia la `key` para aplicarlo. */
   focus?: ProductFocus | null;
 }) {
@@ -48,8 +52,39 @@ export function Products({
   function exportCsv() {
     downloadCsv(
       "stockflow-productos",
-      ["Producto", "SKU", "Categoría", "Unidad", "Stock", "Mínimo", "Costo (COP)", "Precio (COP)", "Estado"],
-      rows.map((p) => [p.name, p.sku, p.category, p.unit, p.stock, p.min, p.cost, p.price, p.archived ? "Archivado" : STOCK_LABELS[stockStatus(p)]]),
+      ["Producto", "SKU", "Categoría", "Unidad", "Stock", "Mínimo", "Costo (COP)", "Precio (COP)", "Estado", "Proveedor"],
+      rows.map((p) => [
+        p.name,
+        p.sku,
+        p.category,
+        p.unit,
+        p.stock,
+        p.min,
+        p.cost,
+        p.price,
+        p.archived ? "Archivado" : STOCK_LABELS[stockStatus(p)],
+        store.supplierById.get(p.supplierId)?.name ?? "",
+      ]),
+    );
+  }
+
+  if (store.products.length === 0) {
+    return (
+      <div>
+        <EmptyState
+          title="Aún no tienes productos"
+          actions={
+            <>
+              <NewProductButton store={store} onClick={() => setEditing("new")} />
+              <ImportProductsButton store={store} onClick={onImport} />
+            </>
+          }
+        >
+          Crea tu primer producto con su SKU, costo, precio y stock mínimo, o trae tu catálogo completo desde Excel o CSV. Con productos ya puedes registrar
+          movimientos, pedidos y compras.
+        </EmptyState>
+        <ProductDialog store={store} editing={editing} onClose={() => setEditing(null)} notify={notify} />
+      </div>
     );
   }
 
@@ -77,6 +112,7 @@ export function Products({
         <Btn size="sm" className="sm:self-center" aria-label="Exportar productos a CSV" disabled={rows.length === 0} onClick={exportCsv}>
           Exportar CSV
         </Btn>
+        <ImportProductsButton store={store} onClick={onImport} size="sm" className="sm:self-center" />
       </Toolbar>
 
       {rows.length === 0 ? (
@@ -104,7 +140,10 @@ export function Products({
             <tr key={p.id}>
               <th scope="row" className="font-normal">
                 <p className="font-semibold text-text">{p.name}</p>
-                <p className="text-[12px] text-text-subtle">{p.sku}</p>
+                <p className="text-[12px] text-text-subtle">
+                  {p.sku}
+                  {store.can("purchase.view") && ` · ${store.supplierById.get(p.supplierId)?.name ?? "Sin proveedor"}`}
+                </p>
               </th>
               <td className="text-text-muted">{p.category}</td>
               <td className="tabular-nums whitespace-nowrap">
@@ -188,6 +227,7 @@ interface FormState {
   price: string;
   min: string;
   initialStock: string;
+  supplierId: string;
 }
 
 function toForm(p: Product | null): FormState {
@@ -201,6 +241,7 @@ function toForm(p: Product | null): FormState {
         price: String(p.price),
         min: String(p.min),
         initialStock: String(p.stock),
+        supplierId: p.supplierId,
       }
     : {
         name: "",
@@ -211,6 +252,7 @@ function toForm(p: Product | null): FormState {
         price: "",
         min: "5",
         initialStock: "0",
+        supplierId: "",
       };
 }
 
@@ -242,6 +284,7 @@ function ProductDialog({ store, editing, onClose, notify }: { store: StockFlow; 
       price,
       min: num(form.min),
       initialStock: num(form.initialStock),
+      supplierId: form.supplierId,
     };
     const message = store.saveProduct(draft, product?.id);
     if (message) {
@@ -283,7 +326,21 @@ function ProductDialog({ store, editing, onClose, notify }: { store: StockFlow; 
         <Field label="Stock mínimo" hint="Por debajo de esta cantidad, el producto aparece en alertas.">
           {(id) => <input id={id} type="number" inputMode="numeric" min={0} step={1} value={form.min} onChange={set("min")} className={inputClass} />}
         </Field>
-        <Field label="Costo (COP)">
+        <Field label="Proveedor habitual" hint="Agrupa la sugerencia de compra y define el plazo de entrega." className="sm:col-span-2">
+          {(id) => (
+            <select id={id} value={form.supplierId} onChange={set("supplierId")} className={inputClass}>
+              <option value="">Sin proveedor habitual</option>
+              {[...store.suppliers]
+                .sort((a, b) => a.name.localeCompare(b.name, "es"))
+                .map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.leadDays} día{s.leadDays === 1 ? "" : "s"} de plazo)
+                  </option>
+                ))}
+            </select>
+          )}
+        </Field>
+        <Field label="Costo (COP)" hint={product ? "Costo promedio: se recalcula solo al recibir compras." : undefined}>
           {(id) => <input id={id} type="number" inputMode="numeric" min={0} step={50} value={form.cost} onChange={set("cost")} className={inputClass} />}
         </Field>
         <Field label="Precio de venta (COP)" hint={margin !== null ? `Margen: ${margin} %` : undefined}>
@@ -315,6 +372,90 @@ function ProductDialog({ store, editing, onClose, notify }: { store: StockFlow; 
         </div>
       </div>
     </Dialog>
+  );
+}
+
+export function ImportProductsButton({ store, onClick, size, className }: { store: StockFlow; onClick: () => void; size?: "sm" | "md"; className?: string }) {
+  return (
+    <PermBtn store={store} permission="product.edit" onClick={onClick} size={size} className={className}>
+      Importar
+    </PermBtn>
+  );
+}
+
+const IMPORT_FIELDS: ImportField<Record<string, string>>[] = [
+  { key: "name", label: "Nombre", required: true, aliases: ["producto", "descripcion", "nombre del producto"], example: 'Tornillo drywall 6×1" (caja x100)' },
+  { key: "sku", label: "SKU", required: true, aliases: ["codigo", "referencia", "ref"], example: "TOR-0610" },
+  { key: "category", label: "Categoría", required: true, aliases: ["categoria", "linea", "grupo"], example: "Tornillería" },
+  { key: "unit", label: "Unidad", aliases: ["unidad de medida", "um", "presentacion"], example: "caja" },
+  { key: "cost", label: "Costo", required: true, aliases: ["costo cop", "costo unitario", "precio compra", "precio de compra"], example: "9500" },
+  { key: "price", label: "Precio de venta", required: true, aliases: ["precio", "precio cop", "valor", "pvp"], example: "14000" },
+  { key: "min", label: "Stock mínimo", aliases: ["minimo", "stock min", "punto de reorden"], example: "15" },
+  { key: "initialStock", label: "Stock inicial", aliases: ["stock", "existencias", "cantidad", "inventario"], example: "40" },
+  { key: "supplier", label: "Proveedor", aliases: ["proveedor habitual"], example: "Tornillos y Pernos del Norte" },
+];
+
+const norm = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .trim();
+
+/** Importar productos desde Excel o CSV, con las mismas reglas del formulario (SKU único también dentro del archivo). */
+export function ImportProducts({ store, open, onClose, notify }: { store: StockFlow; open: boolean; onClose: () => void; notify: (m: string) => void }) {
+  const fields = useMemo(() => IMPORT_FIELDS, []);
+  const { products, suppliers } = store;
+  // SKU ya vistos en la pasada actual por el archivo. ImportDialog valida las filas en orden; cuando el índice
+  // vuelve a empezar, es una pasada nueva (otro archivo u otro mapeo de columnas) y se limpia.
+  const seen = useRef(new Map<string, number>());
+  const lastIndex = useRef(0);
+  const validate = useCallback(
+    (values: Record<string, string>, index: number): RowResult<ProductDraft> => {
+      if (index <= lastIndex.current) seen.current.clear();
+      lastIndex.current = index;
+      const category = CATEGORIES.find((c) => norm(c) === norm(values.category));
+      if (!category) return { ok: false, error: `La categoría "${values.category}" no existe. Usa una de: ${CATEGORIES.join(", ")}.` };
+      const unit = values.unit ? UNITS.find((u) => norm(u) === norm(values.unit)) : "unidad";
+      if (!unit) return { ok: false, error: `La unidad "${values.unit}" no existe. Usa una de: ${UNITS.join(", ")}.` };
+      const supplier = values.supplier ? suppliers.find((s) => sameName(s.name, values.supplier)) : undefined;
+      if (values.supplier && !supplier) return { ok: false, error: `El proveedor "${values.supplier}" no existe: créalo en Proveedores o deja la columna vacía.` };
+      const draft: ProductDraft = {
+        name: values.name,
+        sku: values.sku,
+        category,
+        unit,
+        cost: parseNumber(values.cost) ?? NaN,
+        price: parseNumber(values.price) ?? NaN,
+        min: values.min ? (parseNumber(values.min) ?? NaN) : 0,
+        initialStock: values.initialStock ? (parseNumber(values.initialStock) ?? NaN) : 0,
+        supplierId: supplier?.id ?? "",
+      };
+      const error = checkProduct(draft, products, suppliers);
+      if (error) return { ok: false, error };
+      // El SKU no puede repetirse dentro del mismo archivo: entra la primera fila que lo usa.
+      const sku = draft.sku.trim().toUpperCase();
+      const first = seen.current.get(sku);
+      if (first !== undefined) return { ok: false, error: `El SKU ${sku} ya está en la fila ${first + 1} del archivo.` };
+      seen.current.set(sku, index);
+      return { ok: true, record: draft };
+    },
+    [products, suppliers],
+  );
+  return (
+    <ImportDialog
+      open={open}
+      onClose={onClose}
+      title="Importar productos"
+      entityPlural="productos"
+      templateName="stockflow-plantilla-productos"
+      fields={fields}
+      validate={validate}
+      onImport={(records) => {
+        const error = store.importProducts(records);
+        notify(error ?? `${records.length} producto${records.length === 1 ? "" : "s"} importado${records.length === 1 ? "" : "s"}`);
+      }}
+    />
   );
 }
 

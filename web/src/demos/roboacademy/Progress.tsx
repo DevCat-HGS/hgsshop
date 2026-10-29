@@ -2,16 +2,29 @@ import { useState } from "react";
 import { formatDate, fromDateInput, toDateInput } from "@/demos/kit/format";
 import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, Pill, inputClass } from "@/demos/kit/ui";
 import { activeIn, type Student, todayStart, nowMs } from "./data";
-import { GroupSelect, StepBar } from "./shared";
-import type { ScreenProps } from "./store";
+import { EmptyState, GroupSelect, StepBar } from "./shared";
+import type { GoTo, ScreenProps } from "./store";
 
-export function Progress({ academy, notify }: ScreenProps) {
+export function Progress({ academy, notify, goTo }: ScreenProps & { goTo: GoTo }) {
   const { groups, students, notes } = academy;
   const [groupId, setGroupId] = useState(groups[0]?.id ?? "");
   const [notesFor, setNotesFor] = useState<string | null>(null);
 
   const group = groups.find((g) => g.id === groupId) ?? groups[0];
   if (!group) return <Empty>Crea un grupo para seguir el progreso.</Empty>;
+  if (students.length === 0)
+    return (
+      <EmptyState
+        title="Aún no hay estudiantes"
+        actions={
+          <Btn variant="primary" onClick={() => goTo("estudiantes")}>
+            Ir a Estudiantes
+          </Btn>
+        }
+      >
+        El progreso muestra en qué módulo va cada estudiante de su grupo. Crea o importa tus estudiantes para empezar.
+      </EmptyState>
+    );
 
   const roster = activeIn(students, group.id).sort((a, b) => b.moduleIndex - a.moduleIndex || a.name.localeCompare(b.name, "es"));
   const total = group.modules.length;

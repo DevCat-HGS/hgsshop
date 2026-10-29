@@ -1,7 +1,51 @@
 import { DAY_MS, daysFromToday, startOfDay } from "@/demos/kit/format";
+import { isBlankStart, storageKey } from "@/demos/kit/storage";
 import type { Tone } from "@/demos/kit/ui";
+import { buildTimeLines, billTotal } from "./billing";
 
 export const SLUG = "taskpro";
+
+/** Nombres de almacén. Proyectos y tiempo pasaron a v2 al llegar los clientes y las tarifas. */
+export const STORES = {
+  clients: "clientes.v1",
+  projects: "proyectos.v2",
+  tasks: "tareas.v1",
+  notes: "notas.v1",
+  entries: "tiempo.v2",
+  bills: "cuentas.v1",
+  issuer: "emisor.v1",
+  timer: "temporizador.v1",
+} as const;
+
+export type DocType = "NIT" | "CC" | "CE" | "PP";
+
+export const DOC_TYPES: { id: DocType; label: string }[] = [
+  { id: "NIT", label: "NIT" },
+  { id: "CC", label: "Cédula de ciudadanía" },
+  { id: "CE", label: "Cédula de extranjería" },
+  { id: "PP", label: "Pasaporte" },
+];
+
+/** "NIT 900.123.456-7", "C.C. 1.036.987.654". */
+export function docLabel(type: DocType, number: string) {
+  const prefix = type === "NIT" ? "NIT" : type === "CC" ? "C.C." : type === "CE" ? "C.E." : "Pasaporte";
+  return number ? `${prefix} ${number}` : `${prefix} sin registrar`;
+}
+
+export interface Client {
+  id: string;
+  /** Nombre o razón social. */
+  name: string;
+  docType: DocType;
+  docNumber: string;
+  /** Persona de contacto. */
+  contact: string;
+  email: string;
+  city: string;
+  createdAt: number;
+}
+
+export type BillingMode = "hourly" | "fixed";
 
 export type ProjectStatus = "active" | "paused" | "archived";
 export type TaskStatus = "todo" | "doing" | "review" | "done";
@@ -10,10 +54,27 @@ export type Priority = "low" | "medium" | "high" | "urgent";
 export interface Project {
   id: string;
   name: string;
-  client: string;
+  clientId: string;
   color: ProjectColor;
   status: ProjectStatus;
   /** Solo texto: la demo nunca abre el repositorio. */
+  repo: string;
+  createdAt: number;
+  /** Por hora (COP por hora) o por precio fijo. */
+  billing: BillingMode;
+  /** Por hora: la tarifa. Precio fijo: tarifa de las horas adicionales que se marquen facturables (0 = no se cobran). */
+  hourlyRate: number;
+  /** Solo en precio fijo: el valor total pactado. */
+  fixedPrice: number;
+}
+
+/** Forma de la v1, antes de los clientes: el cliente era un texto libre. */
+interface LegacyProject {
+  id: string;
+  name: string;
+  client: string;
+  color: ProjectColor;
+  status: ProjectStatus;
   repo: string;
   createdAt: number;
 }
@@ -57,6 +118,95 @@ export interface TimeEntry {
   start: number;
   end: number;
   note: string;
+  /** Se puede cobrar. Por defecto, sí en los proyectos por hora. */
+  billable: boolean;
+  /** Cuenta de cobro que la incluye (borrador, enviada o pagada). Null: sin cobrar. */
+  billId: string | null;
+}
+
+export type BillStatus = "draft" | "sent" | "paid" | "void";
+
+export const BILL_STATUS: Record<BillStatus, { label: string; tone: Tone }> = {
+  draft: { label: "Borrador", tone: "neutral" },
+  sent: { label: "Enviada", tone: "warning" },
+  paid: { label: "Pagada", tone: "success" },
+  void: { label: "Anulada", tone: "danger" },
+};
+
+export interface BillLine {
+  id: string;
+  /** "time": horas × tarifa, a partir de entradas de tiempo. "manual": concepto con valor (precio fijo, otros). */
+  kind: "time" | "manual";
+  projectId: string | null;
+  /** Nombre del proyecto al crear la cuenta: el documento no cambia si luego se renombra. */
+  projectName: string;
+  description: string;
+  /** Solo en líneas de tiempo. */
+  minutes: number;
+  rate: number;
+  amount: number;
+}
+
+/** Cuenta de cobro (Colombia): documento de cobro de quien no está obligado a facturar. No es factura electrónica. */
+export interface Bill {
+  id: string;
+  /** Consecutivo: 1 = CC-0001. */
+  number: number;
+  clientId: string;
+  /** Medianoche local del día de expedición. */
+  issuedAt: number;
+  periodFrom: number;
+  periodTo: number;
+  status: BillStatus;
+  lines: BillLine[];
+  total: number;
+  notes: string;
+  /** Entradas de tiempo cobradas en esta cuenta (se liberan al anularla). */
+  entryIds: string[];
+  createdAt: number;
+  sentAt: number | null;
+  paidAt: number | null;
+  voidedAt: number | null;
+}
+
+export type AccountType = "ahorros" | "corriente";
+
+/** Datos de quien cobra: salen en las cuentas de cobro y en los informes. */
+export interface Issuer {
+  name: string;
+  docType: DocType;
+  docNumber: string;
+  city: string;
+  email: string;
+  phone: string;
+  bank: string;
+  accountType: AccountType;
+  accountNumber: string;
+  footer: string;
+}
+
+export const DEFAULT_FOOTER =
+  "Declaro que no soy responsable del impuesto sobre las ventas (IVA) ni estoy obligado a expedir factura electrónica, y que no contraté ni vinculé a dos o más trabajadores para esta actividad. Para la retención en la fuente, solicito aplicar la tabla del artículo 383 del Estatuto Tributario.";
+
+export function defaultIssuer(): Issuer {
+  return {
+    name: "Daniel Restrepo Ortiz",
+    docType: "CC",
+    docNumber: "1.036.987.654",
+    city: "Medellín",
+    email: "daniel@estudio.ejemplo.co",
+    phone: "300 123 4567",
+    bank: "Banco de Ejemplo",
+    accountType: "ahorros",
+    accountNumber: "000-123456-78",
+    footer: DEFAULT_FOOTER,
+  };
+}
+
+/** Ajustes iniciales del emisor. Con "Empezar vacío" quedan en blanco (salvo el pie sugerido) para poner los propios. */
+export function createIssuer(): Issuer {
+  if (!isBlankStart(SLUG)) return defaultIssuer();
+  return { name: "", docType: "CC", docNumber: "", city: "", email: "", phone: "", bank: "", accountType: "ahorros", accountNumber: "", footer: DEFAULT_FOOTER };
 }
 
 /** Temporizador activo: solo se guarda la marca de inicio, así sobrevive a la recarga. */
@@ -144,10 +294,12 @@ export function isDueToday(task: Task, now = Date.now()) {
 // ---------- Datos de ejemplo ----------
 
 export interface Seed {
+  clients: Client[];
   projects: Project[];
   tasks: Task[];
   notes: Note[];
   entries: TimeEntry[];
+  bills: Bill[];
 }
 
 type TaskRow = [
@@ -163,44 +315,64 @@ type TaskRow = [
 ];
 
 export function createSeed(): Seed {
+  const clients: Client[] = [
+    { id: "c-altamira", name: "Café Altamira S.A.S.", docType: "NIT", docNumber: "901.234.567-1", contact: "Laura Gómez", email: "laura@cafealtamira.ejemplo.co", city: "Manizales", createdAt: daysFromToday(-95) },
+    { id: "c-recaudo", name: "Cooperativa Recaudo+", docType: "NIT", docNumber: "800.456.789-3", contact: "Andrés Pineda", email: "tesoreria@recaudomas.ejemplo.co", city: "Bogotá", createdAt: daysFromToday(-65) },
+    { id: "c-bienestar", name: "Clínica Dental Bienestar", docType: "NIT", docNumber: "900.876.543-2", contact: "Paula Ríos", email: "administracion@bienestar.ejemplo.co", city: "Medellín", createdAt: daysFromToday(-45) },
+    { id: "c-habitar", name: "Inmobiliaria Habitar Ltda.", docType: "NIT", docNumber: "830.112.233-5", contact: "Jorge Salcedo", email: "jsalcedo@habitar.ejemplo.co", city: "Cali", createdAt: daysFromToday(-125) },
+  ];
+
   const projects: Project[] = [
     {
       id: "p-altamira",
       name: "Tienda Café Altamira",
-      client: "Café Altamira S.A.S.",
+      clientId: "c-altamira",
       color: "azul",
       status: "active",
       repo: "https://git.ejemplo.co/estudio/cafe-altamira-tienda",
       createdAt: daysFromToday(-90),
+      billing: "hourly",
+      hourlyRate: 120_000,
+      fixedPrice: 0,
     },
     {
       id: "p-recaudo",
       name: "API de pagos Recaudo+",
-      client: "Cooperativa Recaudo+",
+      clientId: "c-recaudo",
       color: "menta",
       status: "active",
       repo: "https://git.ejemplo.co/estudio/recaudo-api",
       createdAt: daysFromToday(-60),
+      billing: "hourly",
+      hourlyRate: 150_000,
+      fixedPrice: 0,
     },
     {
       id: "p-bienestar",
       name: "App de citas Bienestar",
-      client: "Clínica Dental Bienestar",
+      clientId: "c-bienestar",
       color: "ambar",
       status: "active",
       repo: "https://git.ejemplo.co/estudio/bienestar-citas",
       createdAt: daysFromToday(-40),
+      billing: "fixed",
+      hourlyRate: 0,
+      fixedPrice: 9_600_000,
     },
     {
       id: "p-habitar",
       name: "Portal Habitar",
-      client: "Inmobiliaria Habitar Ltda.",
+      clientId: "c-habitar",
       color: "lila",
       status: "paused",
       repo: "https://git.ejemplo.co/estudio/habitar-portal",
       createdAt: daysFromToday(-120),
+      billing: "hourly",
+      hourlyRate: 110_000,
+      fixedPrice: 0,
     },
   ];
+  const hourly = new Set(projects.filter((p) => p.billing === "hourly").map((p) => p.id));
 
   const rows: TaskRow[] = [
     // Tienda Café Altamira
@@ -378,7 +550,7 @@ export function createSeed(): Seed {
       const end = start + minutes * 60_000;
       k++;
       if (end > now) continue;
-      entries.push({ id: `e-${entries.length + 1}`, projectId: task.projectId, taskId: task.id, start, end, note: "" });
+      entries.push({ id: `e-${entries.length + 1}`, projectId: task.projectId, taskId: task.id, start, end, note: "", billable: hourly.has(task.projectId), billId: null });
     }
   }
   entries.push({
@@ -388,7 +560,121 @@ export function createSeed(): Seed {
     start: daysFromToday(-5, 17, 30),
     end: daysFromToday(-5, 18, 15),
     note: "Llamada con la clínica",
+    billable: false,
+    billId: null,
   });
 
-  return { projects, tasks, notes, entries: entries.sort((a, b) => b.start - a.start) };
+  // Dos cuentas de cobro de ejemplo: el anticipo del proyecto de precio fijo (pagada) y la primera semana de
+  // horas de Recaudo+ (enviada, sin pagar). Sus horas quedan marcadas como cobradas.
+  const bills: Bill[] = [];
+  const advanceIssued = daysFromToday(-24);
+  bills.push({
+    id: "b-1",
+    number: 1,
+    clientId: "c-bienestar",
+    issuedAt: advanceIssued,
+    periodFrom: daysFromToday(-40),
+    periodTo: advanceIssued,
+    status: "paid",
+    lines: [{ id: "bl-1", kind: "manual", projectId: "p-bienestar", projectName: "App de citas Bienestar", description: "Anticipo del 50 % del desarrollo", minutes: 0, rate: 0, amount: 4_800_000 }],
+    total: 4_800_000,
+    notes: "",
+    entryIds: [],
+    createdAt: daysFromToday(-24, 10),
+    sentAt: daysFromToday(-24, 10, 30),
+    paidAt: daysFromToday(-18, 9),
+    voidedAt: null,
+  });
+  const from = daysFromToday(-13);
+  const to = daysFromToday(-7);
+  const firstWeek = entries.filter((e) => e.projectId === "p-recaudo" && e.billable && e.start >= from && e.start < to + DAY_MS);
+  if (firstWeek.length) {
+    const { lines } = buildTimeLines(firstWeek, projects, tasks);
+    bills.push({
+      id: "b-2",
+      number: 2,
+      clientId: "c-recaudo",
+      issuedAt: daysFromToday(-6),
+      periodFrom: from,
+      periodTo: to,
+      status: "sent",
+      lines,
+      total: billTotal(lines),
+      notes: "",
+      entryIds: firstWeek.map((e) => e.id),
+      createdAt: daysFromToday(-6, 9),
+      sentAt: daysFromToday(-6, 9, 20),
+      paidAt: null,
+      voidedAt: null,
+    });
+    const billed = new Set(firstWeek.map((e) => e.id));
+    for (const e of entries) if (billed.has(e.id)) e.billId = "b-2";
+  }
+
+  return { clients, projects, tasks, notes, entries: entries.sort((a, b) => b.start - a.start), bills };
+}
+
+/** "Empezar vacío": sin registros de negocio. Los ajustes del emisor van aparte (`createIssuer`). */
+export function createBlankSeed(): Seed {
+  return { clients: [], projects: [], tasks: [], notes: [], entries: [], bills: [] };
+}
+
+function readStored<T>(name: string): T | undefined {
+  try {
+    const raw = window.localStorage.getItem(storageKey(SLUG, name));
+    return raw == null ? undefined : (JSON.parse(raw) as T);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Datos iniciales de la app. Si hay datos de la v1 (proyectos con el cliente como texto) y aún no de la v2, los
+ * migra: un cliente por cada nombre distinto, cada proyecto ligado a su cliente y cobrado por hora (sin tarifa
+ * hasta que se defina), y las entradas de tiempo facturables y sin cobrar. Si no hay nada guardado, usa los datos
+ * de ejemplo o, con "Empezar vacío", ninguno.
+ */
+export function createInitialData(): Seed & { migrated: boolean } {
+  const legacyProjects = readStored<LegacyProject[]>("proyectos.v1");
+  if (Array.isArray(legacyProjects) && readStored(STORES.projects) === undefined) {
+    const now = Date.now();
+    const clients: Client[] = [];
+    const byName = new Map<string, Client>();
+    for (const p of legacyProjects) {
+      const name = (p.client ?? "").trim() || "Cliente sin nombre";
+      const key = name.toLowerCase();
+      if (!byName.has(key)) {
+        const client: Client = { id: `c-m${clients.length + 1}`, name, docType: "NIT", docNumber: "", contact: "", email: "", city: "", createdAt: now };
+        byName.set(key, client);
+        clients.push(client);
+      }
+    }
+    const projects: Project[] = legacyProjects.map((p) => ({
+      id: p.id,
+      name: p.name,
+      clientId: byName.get(((p.client ?? "").trim() || "Cliente sin nombre").toLowerCase())!.id,
+      color: p.color,
+      status: p.status,
+      repo: p.repo ?? "",
+      createdAt: p.createdAt,
+      billing: "hourly",
+      hourlyRate: 0,
+      fixedPrice: 0,
+    }));
+    const legacyEntries = readStored<Omit<TimeEntry, "billable" | "billId">[]>("tiempo.v1") ?? [];
+    const entries: TimeEntry[] = legacyEntries.map((e) => ({ ...e, billable: true, billId: null }));
+    // Las tareas y las notas no cambiaron de forma: siguen en sus almacenes y no se tocan.
+    return { clients, projects, entries, bills: [], tasks: [], notes: [], migrated: true };
+  }
+  return { ...(isBlankStart(SLUG) ? createBlankSeed() : createSeed()), migrated: false };
+}
+
+/** Borra los almacenes de la v1 ya migrados, para que la copia de seguridad no los arrastre. */
+export function dropLegacyStores() {
+  try {
+    window.localStorage.removeItem(storageKey(SLUG, "proyectos.v1"));
+    window.localStorage.removeItem(storageKey(SLUG, "tiempo.v1"));
+  } catch {
+    // Sin almacenamiento: nada que borrar.
+  }
 }

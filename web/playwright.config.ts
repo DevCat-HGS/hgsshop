@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// E2E_PORT permite correr varias copias del repo a la vez sin que una reutilice el servidor de otra.
+const PORT = process.env.E2E_PORT ?? "5173";
+
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: true,
@@ -7,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: `http://127.0.0.1:${PORT}`,
     trace: "on-first-retry",
   },
   projects: [
@@ -15,8 +18,8 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
-    command: "npm run dev -- --host 127.0.0.1 --port 5173 --strictPort",
-    url: "http://127.0.0.1:5173",
+    command: `npm run dev -- --host 127.0.0.1 --port ${PORT} --strictPort`,
+    url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
   },
 });

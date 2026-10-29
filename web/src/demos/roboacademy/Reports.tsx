@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { DAY_MS, formatDate, formatDateLong, formatMoney } from "@/demos/kit/format";
-import { Btn, Empty, Field, Pill, inputClass } from "@/demos/kit/ui";
-import { ACADEMY_NAME, MARK_LABEL, PAY_METHODS, formatPhone, monthEnd, monthKey, monthLabel, monthStart, scheduleLabel, shiftMonth, summarize, todayStart, nowMs, plural } from "./data";
-import { StepBar } from "./shared";
-import type { ScreenProps } from "./store";
+import { Btn, Field, Pill, inputClass } from "@/demos/kit/ui";
+import { MARK_LABEL, PAY_METHODS, formatPhone, monthEnd, monthKey, monthLabel, monthStart, scheduleLabel, shiftMonth, summarize, todayStart, nowMs, plural } from "./data";
+import { DocFooter, DocHeader, PRINT_CSS } from "./Document";
+import { EmptyState, StepBar } from "./shared";
+import type { GoTo, ScreenProps } from "./store";
 
 type Period = "mes-actual" | "mes-anterior" | "ultimos-3-meses" | "ultimas-8-semanas";
 
@@ -33,34 +34,27 @@ function periodRange(period: Period) {
   }
 }
 
-/* Al imprimir solo queda el reporte: en cada nivel se ocultan los hermanos de la rama que lo contiene. */
-const PRINT_CSS = `
-.ra-print-only { display: none; }
-@media print {
-  @page { margin: 14mm; }
-  *:has(.ra-report) { display: block !important; height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; position: static !important; padding: 0 !important; border: 0 !important; background: #fff !important; }
-  *:has(.ra-report) > :not(:has(.ra-report)):not(.ra-report) { display: none !important; }
-  .ra-report { border: 0 !important; padding: 0 !important; background: #fff !important; color: #111 !important; font-size: 11pt; }
-  .ra-report * { color: #111 !important; border-color: #ccc !important; background: transparent !important; box-shadow: none !important; }
-  .ra-report .ra-muted { color: #555 !important; }
-  .ra-report .ra-step-done { background: #2f7d4f !important; }
-  .ra-report .ra-step-current { background: #2459b3 !important; }
-  .ra-report .ra-step-todo { background: #ddd !important; }
-  .ra-report section { break-inside: avoid; }
-  .ra-no-print { display: none !important; }
-  .ra-print-only { display: block !important; }
-  .ra-report, .ra-report * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-}
-`;
 
-export function Reports({ academy, initialStudentId = null }: Omit<ScreenProps, "notify"> & { initialStudentId?: string | null }) {
-  const { groups, students, sessions, notes, payments, comments } = academy;
+export function Reports({ academy, goTo, initialStudentId = null }: Omit<ScreenProps, "notify"> & { goTo: GoTo; initialStudentId?: string | null }) {
+  const { groups, students, sessions, notes, payments, comments, settings } = academy;
   const sorted = [...students].sort((a, b) => a.name.localeCompare(b.name, "es"));
   const [studentId, setStudentId] = useState(initialStudentId ?? sorted[0]?.id ?? "");
   const [period, setPeriod] = useState<Period>("mes-actual");
 
   const student = students.find((s) => s.id === studentId) ?? sorted[0];
-  if (!student) return <Empty>No hay estudiantes para generar reportes.</Empty>;
+  if (!student)
+    return (
+      <EmptyState
+        title="Aún no hay estudiantes"
+        actions={
+          <Btn variant="primary" onClick={() => goTo("estudiantes")}>
+            Ir a Estudiantes
+          </Btn>
+        }
+      >
+        Los reportes para acudientes salen de la asistencia, el progreso y los pagos de cada estudiante. Crea o importa tus estudiantes para empezar.
+      </EmptyState>
+    );
 
   const group = groups.find((g) => g.id === student.groupId);
   const range = periodRange(period);
@@ -105,15 +99,14 @@ export function Reports({ academy, initialStudentId = null }: Omit<ScreenProps, 
         </Btn>
       </div>
 
-      <article aria-label={`Reporte de ${student.name}`} className="ra-report mx-auto max-w-3xl space-y-6 rounded-lg border border-border bg-bg p-5 text-sm sm:p-8">
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-4">
-          <div>
-            <p className="ra-muted text-[13px] text-text-muted">{ACADEMY_NAME} · Reporte para acudientes</p>
-            <h3 className="font-display text-2xl text-text">{student.name}</h3>
-            <p className="ra-muted text-text-muted">Periodo: {range.title}</p>
-          </div>
+      <article aria-label={`Reporte de ${student.name}`} className="ra-doc mx-auto max-w-3xl space-y-6 rounded-lg border border-border bg-bg p-5 text-sm sm:p-8">
+        <DocHeader settings={settings} kind="Reporte para acudientes">
           <p className="ra-muted text-[13px] text-text-muted">Emitido el {formatDateLong(nowMs())}</p>
-        </header>
+        </DocHeader>
+        <div>
+          <h3 className="font-display text-2xl text-text">{student.name}</h3>
+          <p className="ra-muted text-text-muted">Periodo: {range.title}</p>
+        </div>
 
         <dl className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
           <Row label="Grupo" value={group?.name ?? "Sin grupo"} />
@@ -221,9 +214,7 @@ export function Reports({ academy, initialStudentId = null }: Omit<ScreenProps, 
           <p className="ra-print-only whitespace-pre-wrap text-text">{comment || "Sin comentarios adicionales."}</p>
         </section>
 
-        <footer className="ra-muted border-t border-border pt-3 text-[12px] text-text-subtle">
-          {ACADEMY_NAME} · Reporte generado con RoboAcademy. Las excusas no cuentan en contra del porcentaje de asistencia.
-        </footer>
+        <DocFooter settings={settings} extra="Las excusas no cuentan en contra del porcentaje de asistencia." />
       </article>
     </div>
   );

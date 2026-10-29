@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppShell, type DemoAppProps } from "@/demos/kit/AppShell";
 import type { Command } from "@/demos/kit/CommandPalette";
 import { formatMoney } from "@/demos/kit/format";
+import { productThemes, themeStyle } from "@/demos/kit/themes";
 import { Btn } from "@/demos/kit/ui";
 import { useToast } from "@/demos/kit/useToast";
 import { useView } from "@/demos/kit/useView";
@@ -10,21 +11,29 @@ import { AppointmentDialog } from "./AppointmentDialog";
 import { Availability } from "./Availability";
 import { Clients } from "./Clients";
 import { Dashboard } from "./Dashboard";
-import { BUSINESS, durationLabel, type Editor } from "./data";
+import { Booking } from "./Booking";
+import { durationLabel, type Editor } from "./data";
+import { ClientiaLogo } from "./Logo";
+import { PublicBooking } from "./PublicBooking";
 import { Reminders } from "./Reminders";
+import { Requests } from "./Requests";
 import { Services } from "./Services";
 import { useClientiaStore } from "./store";
 
-const VIEWS = ["panel", "agenda", "clientes", "servicios", "disponibilidad", "recordatorios"] as const;
+const VIEWS = ["panel", "agenda", "solicitudes", "clientes", "servicios", "disponibilidad", "recordatorios", "reservas"] as const;
 type View = (typeof VIEWS)[number];
+/** Vistas que acepta la URL: las de la app más la página pública de reservas ("Así la ve tu cliente"). */
+const ROUTES = [...VIEWS, "reservar"] as const;
 
 const TITLES: Record<View, string> = {
   panel: "Panel",
   agenda: "Agenda",
+  solicitudes: "Solicitudes",
   clientes: "Clientes",
   servicios: "Servicios",
   disponibilidad: "Disponibilidad",
   recordatorios: "Recordatorios",
+  reservas: "Reservas en línea",
 };
 
 /**
@@ -33,15 +42,32 @@ const TITLES: Record<View, string> = {
  */
 export function ClientiaDemo({ embedded }: DemoAppProps) {
   const store = useClientiaStore();
-  const [view, setView] = useView(VIEWS, "panel", embedded);
+  const [route, setView] = useView(ROUTES, "panel", embedded);
+  const view: View = route === "reservar" ? "reservas" : route;
   const { notify, toast } = useToast();
   const [editor, setEditor] = useState<Editor | null>(null);
   const [clientId, setClientId] = useState<string | null>(null);
   const [creating, setCreating] = useState<View | null>(null);
   const [agendaPro, setAgendaPro] = useState("all");
   const [serviceFocus, setServiceFocus] = useState<{ id: string } | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const pendingMarks = store.appointments.filter((a) => a.status === "scheduled" && a.start <= store.now).length;
+  const pendingRequests = store.appointments.filter((a) => a.status === "pending").length;
+
+  // Pestaña del navegador con el nombre del negocio y del producto, como una app real. Se aplica después del
+  // título genérico que pone la página de la demo al montar (sus efectos corren después de los de la app).
+  const businessName = store.business.name;
+  useEffect(() => {
+    if (embedded) return;
+    let active = true;
+    queueMicrotask(() => {
+      if (active) document.title = `${businessName} · Clientia`;
+    });
+    return () => {
+      active = false;
+    };
+  }, [embedded, businessName]);
 
   const navigate = useCallback(
     (next: View) => {
@@ -106,10 +132,14 @@ export function ClientiaDemo({ embedded }: DemoAppProps) {
     panel: newAppt,
     agenda: newAppt,
     clientes: (
-      <Btn variant="primary" onClick={() => setCreating("clientes")}>
-        Nuevo cliente
-      </Btn>
+      <>
+        <Btn onClick={() => setImporting(true)}>Importar</Btn>
+        <Btn variant="primary" onClick={() => setCreating("clientes")}>
+          Nuevo cliente
+        </Btn>
+      </>
     ),
+    solicitudes: null,
     servicios: (
       <Btn variant="primary" onClick={() => setCreating("servicios")}>
         Nuevo servicio
@@ -117,16 +147,36 @@ export function ClientiaDemo({ embedded }: DemoAppProps) {
     ),
     disponibilidad: null,
     recordatorios: null,
+    reservas: null,
   };
 
   const creatingProps = (v: View) => ({ creating: creating === v, onCreatingChange: (open: boolean) => setCreating(open ? v : null) });
+
+  if (route === "reservar") {
+    return (
+      <div data-ui style={themeStyle(productThemes.clientia)} className="flex h-full min-h-0 flex-col bg-bg-raised text-text">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-bg px-4 py-2 text-[13px] text-text-muted">
+          <span>Así ve tu cliente la página de reservas de {businessName}.</span>
+          <Btn size="sm" onClick={() => navigate("reservas")}>
+            Volver a Clientia
+          </Btn>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+          <PublicBooking store={store} notify={notify} />
+        </div>
+        {toast}
+      </div>
+    );
+  }
 
   return (
     <>
       <AppShell
         appName="Clientia"
-        tagline={BUSINESS}
-        nav={VIEWS.map((id) => ({ id, label: TITLES[id], badge: id === "panel" ? pendingMarks : undefined }))}
+        tagline={businessName}
+        theme={productThemes.clientia}
+        logo={<ClientiaLogo />}
+        nav={VIEWS.map((id) => ({ id, label: TITLES[id], badge: id === "panel" ? pendingMarks : id === "solicitudes" ? pendingRequests : undefined }))}
         view={view}
         onNavigate={navigate}
         title={TITLES[view]}
@@ -136,13 +186,26 @@ export function ClientiaDemo({ embedded }: DemoAppProps) {
         sidebarFooter={<p className="text-[12px] text-text-subtle">Datos ficticios guardados solo en este navegador. Los recordatorios se simulan.</p>}
       >
         {view === "panel" && <Dashboard store={store} onEdit={setEditor} onGo={navigate} onOpenClient={openClient} />}
+        {view === "solicitudes" && <Requests store={store} notify={notify} onEdit={setEditor} onOpenClient={openClient} onGoBooking={() => navigate("reservas")} />}
         {view === "agenda" && <Agenda store={store} onEdit={setEditor} proFilter={agendaPro} onProFilterChange={setAgendaPro} />}
-        {view === "clientes" && <Clients store={store} selectedId={clientId} onSelect={setClientId} onEdit={setEditor} notify={notify} {...creatingProps("clientes")} />}
+        {view === "clientes" && (
+          <Clients
+            store={store}
+            selectedId={clientId}
+            onSelect={setClientId}
+            onEdit={setEditor}
+            notify={notify}
+            importing={importing}
+            onImportingChange={setImporting}
+            {...creatingProps("clientes")}
+          />
+        )}
         {view === "servicios" && <Services store={store} notify={notify} focus={serviceFocus} {...creatingProps("servicios")} />}
         {view === "disponibilidad" && (
           <Availability store={store} notify={notify} onEdit={setEditor} creatingPro={creating === "disponibilidad"} onCreatingProChange={(open) => setCreating(open ? "disponibilidad" : null)} />
         )}
         {view === "recordatorios" && <Reminders store={store} notify={notify} />}
+        {view === "reservas" && <Booking store={store} notify={notify} onOpenPublic={() => setView("reservar")} />}
       </AppShell>
       <AppointmentDialog store={store} editor={editor} onClose={() => setEditor(null)} notify={notify} />
       {toast}

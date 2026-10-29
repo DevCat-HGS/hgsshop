@@ -16,6 +16,7 @@ export function Orders({
   setEditing,
   viewingId,
   setViewingId,
+  onRemission,
 }: {
   store: StockFlow;
   notify: (m: string) => void;
@@ -24,6 +25,8 @@ export function Orders({
   /** Pedido cuyo detalle está abierto. Vive en la raíz para que la búsqueda global pueda abrirlo. */
   viewingId: string | null;
   setViewingId: (id: string | null) => void;
+  /** Abre la remisión imprimible de un pedido despachado. */
+  onRemission: (orderId: string) => void;
 }) {
   const [status, setStatus] = useState<"" | OrderStatus>("");
   const [query, setQuery] = useState("");
@@ -128,6 +131,10 @@ export function Orders({
           setViewingId(null);
           setEditing(o);
         }}
+        onRemission={(o) => {
+          setViewingId(null);
+          onRemission(o.id);
+        }}
       />
       <OrderForm store={store} editing={editing} onClose={() => setEditing(null)} notify={notify} />
     </div>
@@ -140,12 +147,14 @@ function OrderDetail({
   onClose,
   notify,
   onEdit,
+  onRemission,
 }: {
   store: StockFlow;
   order: Order | null;
   onClose: () => void;
   notify: (m: string) => void;
   onEdit: (o: Order) => void;
+  onRemission: (o: Order) => void;
 }) {
   const [error, setError] = useState("");
   const [lastId, setLastId] = useState(order?.id);
@@ -203,6 +212,15 @@ function OrderDetail({
           <p className="text-right text-base font-semibold tabular-nums">Total: {formatMoney(orderTotal(order))}</p>
 
           <FormError>{error}</FormError>
+
+          {order.status === "dispatched" && order.remission && (
+            <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+              <p className="mr-auto text-[13px] text-text-subtle">Despachado con la remisión {order.remission}.</p>
+              <Btn variant="primary" onClick={() => onRemission(order)}>
+                Ver remisión {order.remission}
+              </Btn>
+            </div>
+          )}
 
           {order.status === "pending" && (
             <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-4">

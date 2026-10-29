@@ -51,6 +51,43 @@ function write(key: string, json: string) {
   }
 }
 
+export function clearUiFlag(name: string) {
+  try {
+    window.localStorage.removeItem(`hgs-demo-ui:${name}`);
+  } catch {
+    // Nada que borrar.
+  }
+}
+
+/**
+ * "Empezar vacío": la demo arranca sin registros (pero con su configuración básica) para cargar datos propios.
+ * Las semillas de cada app lo consultan; se mantiene hasta volver a elegir los datos de ejemplo.
+ */
+export function isBlankStart(slug: string) {
+  return readUiFlag(`blank:${slug}`);
+}
+
+/** Todos los datos guardados de una demo, por nombre de almacén (para la copia de seguridad). */
+export function exportDemoData(slug: string): Record<string, unknown> {
+  const data: Record<string, unknown> = {};
+  try {
+    const prefix = `${PREFIX}${slug}:`;
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (key?.startsWith(prefix)) data[key.slice(prefix.length)] = JSON.parse(window.localStorage.getItem(key) ?? "null");
+    }
+  } catch {
+    // Sin almacenamiento: copia vacía.
+  }
+  return data;
+}
+
+/** Reemplaza los datos de una demo por los de una copia de seguridad. */
+export function importDemoData(slug: string, data: Record<string, unknown>) {
+  clearDemoData(slug);
+  for (const [name, value] of Object.entries(data)) write(storageKey(slug, name), JSON.stringify(value));
+}
+
 /** Borra todos los datos guardados de una demo; la página la vuelve a montar con los datos de ejemplo. */
 export function clearDemoData(slug: string) {
   try {

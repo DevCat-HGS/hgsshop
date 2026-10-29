@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { formatMoney } from "@/demos/kit/format";
 import { uid } from "@/demos/kit/storage";
-import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, inputClass } from "@/demos/kit/ui";
+import { Btn, ConfirmButton, Dialog, Field, FormError, inputClass } from "@/demos/kit/ui";
 import { WEEKDAYS, activeIn, scheduleLabel, type Group, type Module } from "./data";
-import { CapacityBar } from "./shared";
+import { CapacityBar, EmptyState } from "./shared";
 import type { ScreenProps } from "./store";
 
 interface Draft {
@@ -14,12 +14,14 @@ interface Draft {
   teacher: string;
   capacity: string;
   fee: string;
+  minAge: string;
+  maxAge: string;
   modules: Module[];
 }
 
-const emptyDraft = (): Draft => ({ id: null, name: "", day: 6, time: "09:00", teacher: "", capacity: "8", fee: "180000", modules: [] });
+const emptyDraft = (): Draft => ({ id: null, name: "", day: 6, time: "09:00", teacher: "", capacity: "8", fee: "180000", minAge: "7", maxAge: "12", modules: [] });
 
-const draftOf = (g: Group): Draft => ({ ...g, capacity: String(g.capacity), fee: String(g.fee), modules: g.modules.map((m) => ({ ...m })) });
+const draftOf = (g: Group): Draft => ({ ...g, capacity: String(g.capacity), fee: String(g.fee), minAge: String(g.minAge), maxAge: String(g.maxAge), modules: g.modules.map((m) => ({ ...m })) });
 
 export function Groups({ academy, notify, initialEditId = null }: ScreenProps & { initialEditId?: string | null }) {
   const { groups, students } = academy;
@@ -42,7 +44,16 @@ export function Groups({ academy, notify, initialEditId = null }: ScreenProps & 
         </Btn>
       </div>
       {groups.length === 0 ? (
-        <Empty>No hay grupos. Crea el primero con "Nuevo grupo".</Empty>
+        <EmptyState
+          title="Aún no hay grupos"
+          actions={
+            <Btn variant="primary" onClick={() => setDraft(emptyDraft())}>
+              Crear el primer grupo
+            </Btn>
+          }
+        >
+          Un grupo tiene su horario, profesor, cupo, mensualidad, rango de edad y los módulos de su ruta. Los estudiantes se inscriben en un grupo.
+        </EmptyState>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {groups.map((g) => {
@@ -55,6 +66,9 @@ export function Groups({ academy, notify, initialEditId = null }: ScreenProps & 
                     <h3 className="font-semibold text-text">{g.name}</h3>
                     <p className="text-[13px] text-text-muted">
                       {scheduleLabel(g)} · {g.teacher}
+                    </p>
+                    <p className="text-[13px] text-text-subtle">
+                      De {g.minAge} a {g.maxAge} años
                     </p>
                   </div>
                   <p className="shrink-0 text-sm font-semibold text-text tabular-nums">{formatMoney(g.fee)}</p>
@@ -162,6 +176,10 @@ function GroupForm({ initial, enrolled, onClose, onSave }: { initial: Draft; enr
     if (!Number.isInteger(capacity) || capacity < 1 || capacity > 30) return setError("El cupo debe ser un número entero entre 1 y 30.");
     if (capacity < enrolled) return setError(`El grupo ya tiene ${enrolled} estudiantes activos: el cupo no puede ser menor.`);
     if (!Number.isFinite(fee) || fee <= 0) return setError("La mensualidad debe ser mayor que cero.");
+    const minAge = Number(d.minAge);
+    const maxAge = Number(d.maxAge);
+    if (!Number.isInteger(minAge) || !Number.isInteger(maxAge) || minAge < 4 || maxAge > 18 || minAge > maxAge)
+      return setError("Las edades deben ser números enteros entre 4 y 18, y la mínima no puede superar a la máxima.");
     if (d.modules.length === 0) return setError("Agrega al menos un módulo.");
     if (d.modules.some((m) => !m.name.trim())) return setError("Todos los módulos necesitan un nombre.");
     onSave(
@@ -173,6 +191,8 @@ function GroupForm({ initial, enrolled, onClose, onSave }: { initial: Draft; enr
         teacher: d.teacher.trim(),
         capacity,
         fee: Math.round(fee),
+        minAge,
+        maxAge,
         modules: d.modules.map((m) => ({ ...m, name: m.name.trim() })),
       },
       !d.id,
@@ -205,6 +225,12 @@ function GroupForm({ initial, enrolled, onClose, onSave }: { initial: Draft; enr
         </Field>
         <Field label="Mensualidad (COP)" hint={Number(d.fee) > 0 ? formatMoney(Number(d.fee)) : undefined}>
           {(id) => <input id={id} type="number" min={0} step={1000} value={d.fee} onChange={(e) => set({ fee: e.target.value })} className={inputClass} />}
+        </Field>
+        <Field label="Edad mínima" hint="Orienta el formulario de inscripción">
+          {(id) => <input id={id} type="number" min={4} max={18} value={d.minAge} onChange={(e) => set({ minAge: e.target.value })} className={inputClass} />}
+        </Field>
+        <Field label="Edad máxima">
+          {(id) => <input id={id} type="number" min={4} max={18} value={d.maxAge} onChange={(e) => set({ maxAge: e.target.value })} className={inputClass} />}
         </Field>
       </div>
 

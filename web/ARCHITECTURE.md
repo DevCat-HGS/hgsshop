@@ -168,6 +168,18 @@ Encima de las apps, la página de demo agrega:
 - **Búsqueda global** Ctrl+K o Cmd+K (`kit/CommandPalette.tsx`): pantallas y registros de cada app. Es un
   combobox accesible. Incrustada en la portada no registra el atajo, que chocaría con el del navegador.
 
+Para que se sientan como productos reales y no como plantillas:
+
+- **Identidad propia** (`kit/themes.ts`): cada app redefine los tokens `--color-brand*` en su contenedor
+  (ámbar, rosa, verde, violeta) y trae su isotipo. Los acentos son claros, así que el texto encima sigue en
+  navy (AA). La barra de la demo conserva la marca HGS.
+- **Tus datos** (barra de la demo): volver a los datos de ejemplo, **empezar vacío** (flag `blank:<slug>`,
+  que las semillas consultan con `isBlankStart`) y **copia de seguridad** en JSON (descargar o restaurar,
+  validando que sea del mismo producto).
+- **Importar desde Excel o CSV** (`kit/ImportDialog.tsx` y `kit/csvImport.ts`): detecta `;` o `,`, quita el
+  BOM, mapea columnas por nombre (editable), valida cada fila con las reglas de la app e importa solo las
+  válidas, con una plantilla descargable.
+
 FlowAuto no tiene demo a propósito: es un servicio a medida sin un flujo genérico que mostrar. La sección S5
 de la portada incrusta TaskPro con `embedded` (pantalla en estado local, sin tocar la URL). Las
 páginas `/demos/*` llevan `noindex` (meta y cabecera `X-Robots-Tag`) y están fuera del sitemap.

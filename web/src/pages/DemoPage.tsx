@@ -5,9 +5,9 @@ import { getProductBySlug } from "@/lib/catalog";
 import { trackEvent } from "@/lib/analytics";
 import type { Product } from "@/types/product";
 import { inAppDemos } from "@/demos/registry";
-import { clearDemoData, DEMO_CHANGE_EVENT, readUiFlag, setUiFlag } from "@/demos/kit/storage";
+import { clearDemoData, clearUiFlag, DEMO_CHANGE_EVENT, exportDemoData, importDemoData, readUiFlag, setUiFlag } from "@/demos/kit/storage";
 import { tours } from "@/demos/kit/tours";
-import { Btn, ConfirmButton, Dialog } from "@/demos/kit/ui";
+import { Btn, ConfirmButton, Dialog, FormError } from "@/demos/kit/ui";
 import { LogoMark } from "@/components/layout/Logo";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
@@ -52,6 +52,7 @@ function DemoView({ product }: { product: Product }) {
   // Cambiar la clave vuelve a montar la app, que relee el almacenamiento ya vacío y siembra los datos de ejemplo.
   const [generation, setGeneration] = useState(0);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [dataOpen, setDataOpen] = useState(false);
   const tour = tours[product.slug] ?? [];
   // Recorrido: se abre solo en la primera visita a esta demo.
   const [tourStep, setTourStep] = useState<number | null>(() => (tour.length && !readUiFlag(`tour:${product.slug}`) ? 0 : null));
@@ -106,16 +107,9 @@ function DemoView({ product }: { product: Product }) {
           <Btn variant="ghost" size="sm" onClick={() => setAboutOpen(true)}>
             Acerca de la demo
           </Btn>
-          <ConfirmButton
-            label="Reiniciar datos"
-            title="Reiniciar la demo"
-            message="Se borran los cambios que hiciste y vuelven los datos de ejemplo. No afecta nada fuera de este navegador."
-            confirmLabel="Reiniciar"
-            onConfirm={() => {
-              clearDemoData(product.slug);
-              setGeneration((g) => g + 1);
-            }}
-          />
+          <Btn variant="ghost" size="sm" onClick={() => setDataOpen(true)}>
+            Tus datos
+          </Btn>
           <Button to={`/desarrollo-a-medida?producto=${product.slug}`} size="sm" className="ml-1 !py-1 !text-[13px]">
             Cotizar
           </Button>
@@ -181,6 +175,16 @@ function DemoView({ product }: { product: Product }) {
         </div>
       </Dialog>
 
+      <DataDialog
+        open={dataOpen}
+        onClose={() => setDataOpen(false)}
+        product={product}
+        onChanged={() => {
+          setDataOpen(false);
+          setGeneration((g) => g + 1);
+        }}
+      />
+
       {tourStep !== null && tour[tourStep] && (
         <Dialog open onClose={() => closeTour(false)} title={tour[tourStep].title}>
           <p className="text-[13px] text-text-muted">
@@ -207,6 +211,108 @@ function DemoView({ product }: { product: Product }) {
         </Dialog>
       )}
     </div>
+  );
+}
+
+/** Versión del formato de la copia de seguridad. */
+const BACKUP_VERSION = 1;
+
+/**
+ * "Tus datos": volver a los datos de ejemplo, empezar vacío para cargar datos propios, y descargar o restaurar una
+ * copia de seguridad en JSON. Todo en el navegador.
+ */
+function DataDialog({ open, onClose, product, onChanged }: { open: boolean; onClose: () => void; product: Product; onChanged: () => void }) {
+  const [error, setError] = useState("");
+  const slug = product.slug;
+
+  function restart(blank: boolean) {
+    if (blank) setUiFlag(`blank:${slug}`);
+    else clearUiFlag(`blank:${slug}`);
+    clearDemoData(slug);
+    onChanged();
+  }
+
+  function download() {
+    const backup = { app: "hgs-demo", product: slug, version: BACKUP_VERSION, exportedAt: new Date().toISOString(), data: exportDemoData(slug) };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${slug}-copia-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function restore(file: File | undefined) {
+    if (!file) return;
+    try {
+      const backup = JSON.parse(await file.text());
+      if (backup?.app !== "hgs-demo" || typeof backup.data !== "object" || backup.data === null) {
+        setError("Ese archivo no es una copia de seguridad de una demo de HGS.");
+        return;
+      }
+      if (backup.product !== slug) {
+        setError(`Esa copia es de otro producto (${backup.product}); aquí solo se puede restaurar una copia de ${product.name}.`);
+        return;
+      }
+      importDemoData(slug, backup.data);
+      setError("");
+      onChanged();
+    } catch {
+      setError("No se pudo leer el archivo. Debe ser el JSON que descargaste con \"Descargar copia\".");
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={() => { setError(""); onClose(); }} title="Tus datos en esta demo">
+      <div className="flex flex-col gap-5 text-sm">
+        <p className="text-text-muted">Lo que haces aquí se guarda solo en este navegador. Desde aquí lo controlas.</p>
+
+        <section aria-label="Empezar de nuevo" className="flex flex-col gap-2">
+          <h3 className="font-semibold text-text">Empezar de nuevo</h3>
+          <div className="flex flex-wrap gap-2">
+            <ConfirmButton
+              label="Volver a los datos de ejemplo"
+              title="Volver a los datos de ejemplo"
+              message="Se borran los cambios que hiciste y vuelven los datos ficticios de la demo."
+              confirmLabel="Usar datos de ejemplo"
+              size="md"
+              onConfirm={() => restart(false)}
+            />
+            <ConfirmButton
+              label="Empezar vacío"
+              title="Empezar vacío"
+              message={`${product.name} queda sin registros, lista para que cargues los tuyos a mano o importándolos desde Excel. Se borran los datos actuales.`}
+              confirmLabel="Empezar vacío"
+              size="md"
+              onConfirm={() => restart(true)}
+            />
+          </div>
+        </section>
+
+        <section aria-label="Copia de seguridad" className="flex flex-col gap-2">
+          <h3 className="font-semibold text-text">Copia de seguridad</h3>
+          <p className="text-text-muted">Descarga todo en un archivo y restáuralo después, en este u otro navegador.</p>
+          <div className="flex flex-wrap gap-2">
+            <Btn onClick={download}>Descargar copia</Btn>
+            <label className="inline-flex cursor-pointer items-center rounded-md bg-surface-hover px-3.5 py-2 text-sm font-semibold text-text hover:bg-depth focus-within:outline-2 focus-within:outline-brand">
+              Restaurar copia
+              <input
+                type="file"
+                accept=".json,application/json"
+                className="sr-only"
+                onChange={(e) => {
+                  void restore(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+          <FormError>{error}</FormError>
+        </section>
+      </div>
+    </Dialog>
   );
 }
 

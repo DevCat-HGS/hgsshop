@@ -210,6 +210,17 @@ export function MovementDialog({
   );
 }
 
+/** Estado vacío útil: qué falta y la acción para empezar. */
+export function EmptyState({ title, children, actions }: { title: string; children: ReactNode; actions?: ReactNode }) {
+  return (
+    <section aria-label={title} className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border-strong bg-bg px-5 py-10 text-center">
+      <h3 className="text-base font-semibold text-text">{title}</h3>
+      <div className="max-w-md text-sm text-text-muted">{children}</div>
+      {actions && <div className="mt-1 flex flex-wrap justify-center gap-2">{actions}</div>}
+    </section>
+  );
+}
+
 export function Toolbar({ children }: { children: ReactNode }) {
   return <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">{children}</div>;
 }

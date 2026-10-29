@@ -25,7 +25,7 @@ export function Availability({
   const [editingPro, setEditingPro] = useState<Professional | null>(null);
 
   // Citas próximas que quedaron fuera del horario o de los días de su profesional tras un cambio.
-  const conflicts = appointments.filter((a) => a.status === "scheduled" && a.start > now && validateSlot(a, store, { allowPast: true }));
+  const conflicts = appointments.filter((a) => (a.status === "scheduled" || a.status === "pending") && a.start > now && validateSlot(a, store, { allowPast: true }));
 
   function removePro(pro: Professional) {
     store.setProfessionals((list) => list.filter((p) => p.id !== pro.id));
@@ -73,7 +73,7 @@ export function Availability({
           ) : (
             <ul className="-my-2 divide-y divide-border">
               {professionals.map((p) => {
-                const upcoming = appointments.filter((a) => a.professionalId === p.id && a.status === "scheduled" && a.start > now).length;
+                const upcoming = appointments.filter((a) => a.professionalId === p.id && (a.status === "scheduled" || a.status === "pending") && a.start > now).length;
                 return (
                   <li key={p.id} className="flex flex-wrap items-start justify-between gap-2 py-3">
                     <div className="min-w-0">

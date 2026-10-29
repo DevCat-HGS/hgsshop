@@ -2,17 +2,20 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import { DAY_MS, formatDate, formatTime, fromDateInput, startOfDay, toDateInput } from "@/demos/kit/format";
 import { downloadCsv } from "@/demos/kit/csv";
 import { uid } from "@/demos/kit/storage";
-import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, Panel, Table, inputClass } from "@/demos/kit/ui";
-import { colorHex, formatClock, formatDuration, startOfWeek, type Project, type RunningTimer, type Task, type TimeEntry } from "./data";
+import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, Panel, Pill, Table, inputClass } from "@/demos/kit/ui";
+import { colorHex, formatClock, formatDuration, startOfWeek, type Bill, type Project, type RunningTimer, type Task, type TimeEntry } from "./data";
+import { billNumber, defaultBillable, formatHours, unbilledSummary } from "./billing";
 import { ProjectDot } from "./TaskDialog";
 
 type Range = "week" | "two-weeks" | "all";
+type BillingFilter = "all" | "unbilled" | "billed" | "nonbillable";
 
 export function TimeView({
   projects,
   tasks,
   now,
   entries,
+  bills,
   setEntries,
   timer,
   onStartTimer,
@@ -24,6 +27,7 @@ export function TimeView({
   tasks: Task[];
   now: number;
   entries: TimeEntry[];
+  bills: Bill[];
   setEntries: Dispatch<SetStateAction<TimeEntry[]>>;
   timer: RunningTimer | null;
   onStartTimer: (taskId: string) => void;
@@ -38,6 +42,8 @@ export function TimeView({
   const [pickTask, setPickTask] = useState(startable[0]?.id ?? "");
   const [range, setRange] = useState<Range>("two-weeks");
   const [projectFilter, setProjectFilter] = useState("all");
+  const [billingFilter, setBillingFilter] = useState<BillingFilter>("all");
+  const byBill = new Map(bills.map((b) => [b.id, b]));
   const [editing, setEditing] = useState<TimeEntry | null | "new">(null);
 
   const timerTask = timer ? byTask.get(timer.taskId) : undefined;
@@ -54,8 +60,19 @@ export function TimeView({
   const rangeStart = range === "week" ? weekStart : range === "two-weeks" ? startOfDay(now) - 13 * DAY_MS : 0;
   const listed = entries
     .filter((e) => e.start >= rangeStart && (projectFilter === "all" || e.projectId === projectFilter))
+    .filter((e) =>
+      billingFilter === "all" ? true : billingFilter === "nonbillable" ? !e.billable : billingFilter === "billed" ? e.billable && e.billId != null : e.billable && e.billId == null,
+    )
     .sort((a, b) => b.start - a.start);
   const listedTotal = listed.reduce((sum, e) => sum + (e.end - e.start), 0);
+  const listedPending = unbilledSummary(listed, projects);
+
+  function billingState(e: TimeEntry) {
+    if (!e.billable) return "No facturable";
+    if (e.billId == null) return "Por cobrar";
+    const bill = byBill.get(e.billId);
+    return bill ? `Cobrada en ${billNumber(bill.number)}` : "Cobrada";
+  }
 
   function exportCsv() {
     const rows = listed.map((e) => {
@@ -68,9 +85,10 @@ export function TimeView({
         byProject.get(e.projectId)?.name ?? "Proyecto eliminado",
         task?.title ?? (e.taskId ? "Tarea eliminada" : "Sin tarea"),
         e.note,
+        billingState(e),
       ];
     });
-    downloadCsv("taskpro-tiempo", ["Fecha", "Inicio", "Fin", "Duración (horas)", "Proyecto", "Tarea", "Nota"], rows);
+    downloadCsv("taskpro-tiempo", ["Fecha", "Inicio", "Fin", "Duración (horas)", "Proyecto", "Tarea", "Nota", "Cobro"], rows);
   }
 
   function save(entry: TimeEntry) {
@@ -78,6 +96,12 @@ export function TimeView({
     setEntries((list) => (exists ? list.map((e) => (e.id === entry.id ? entry : e)) : [entry, ...list]));
     setEditing(null);
     notify(exists ? "Entrada actualizada" : "Entrada agregada");
+  }
+
+  function toggleBillable(entry: TimeEntry) {
+    if (entry.billId != null) return;
+    setEntries((list) => list.map((e) => (e.id === entry.id ? { ...e, billable: !e.billable } : e)));
+    notify(entry.billable ? "Entrada marcada como no facturable" : "Entrada marcada como facturable");
   }
 
   function remove(entry: TimeEntry) {
@@ -200,9 +224,20 @@ export function TimeView({
                 </select>
               )}
             </Field>
+            <Field label="Cobro" className="col-span-2 sm:w-44">
+              {(id) => (
+                <select id={id} className={inputClass} value={billingFilter} onChange={(e) => setBillingFilter(e.target.value as BillingFilter)}>
+                  <option value="all">Todas</option>
+                  <option value="unbilled">Por cobrar</option>
+                  <option value="billed">Cobradas</option>
+                  <option value="nonbillable">No facturables</option>
+                </select>
+              )}
+            </Field>
           </div>
           <p className="text-sm text-text-muted sm:pb-2">
             {listed.length} entradas · <span className="font-semibold text-text tabular-nums">{formatDuration(listedTotal)}</span>
+            {listedPending.minutes > 0 && <span> · {formatHours(listedPending.minutes)} por cobrar</span>}
           </p>
           <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
             <Btn size="sm" onClick={exportCsv} disabled={listed.length === 0} aria-label="Exportar entradas de tiempo a CSV">
@@ -217,11 +252,13 @@ export function TimeView({
         {listed.length === 0 ? (
           <Empty>No hay entradas en este periodo.</Empty>
         ) : (
-          <Table label="Entradas de tiempo" head={["Fecha", "Horario", "Duración", "Proyecto", "Tarea o nota", ""]} minWidth="46rem">
+          <Table label="Entradas de tiempo" head={["Fecha", "Horario", "Duración", "Proyecto", "Tarea o nota", "Cobro", ""]} minWidth="54rem">
             {listed.map((e) => {
               const project = byProject.get(e.projectId);
               const task = e.taskId ? byTask.get(e.taskId) : undefined;
               const label = task?.title ?? (e.taskId ? "Tarea eliminada" : "Sin tarea");
+              const billed = e.billId != null;
+              const when = `del ${formatDate(e.start)} a las ${formatTime(e.start)}`;
               return (
                 <tr key={e.id}>
                   <th scope="row" className="font-normal whitespace-nowrap text-text tabular-nums">
@@ -241,17 +278,33 @@ export function TimeView({
                     {label}
                     {e.note && <span className="block text-[12px] text-text-subtle">{e.note}</span>}
                   </td>
+                  <td className="whitespace-nowrap">
+                    {billed ? (
+                      <Pill tone="success">{billingState(e)}</Pill>
+                    ) : (
+                      <label className="flex items-center gap-2 text-[13px] text-text-muted">
+                        <input type="checkbox" className="size-4 accent-[var(--color-brand)]" checked={e.billable} onChange={() => toggleBillable(e)} aria-label={`Facturable: entrada ${when}`} />
+                        {e.billable ? "Por cobrar" : "No facturable"}
+                      </label>
+                    )}
+                  </td>
                   <td className="text-right whitespace-nowrap">
-                    <Btn variant="ghost" size="sm" onClick={() => setEditing(e)} aria-label={`Editar entrada del ${formatDate(e.start)} a las ${formatTime(e.start)}`}>
-                      Editar
-                    </Btn>
-                    <ConfirmButton
-                      label="Eliminar"
-                      ariaLabel={`Eliminar entrada del ${formatDate(e.start)} a las ${formatTime(e.start)}`}
-                      title="Eliminar entrada"
-                      message={`¿Eliminar ${formatDuration(e.end - e.start)} registrados el ${formatDate(e.start)} en "${label}"?`}
-                      onConfirm={() => remove(e)}
-                    />
+                    {billed ? (
+                      <span className="text-[12px] text-text-subtle">Bloqueada</span>
+                    ) : (
+                      <>
+                        <Btn variant="ghost" size="sm" onClick={() => setEditing(e)} aria-label={`Editar entrada ${when}`}>
+                          Editar
+                        </Btn>
+                        <ConfirmButton
+                          label="Eliminar"
+                          ariaLabel={`Eliminar entrada ${when}`}
+                          title="Eliminar entrada"
+                          message={`¿Eliminar ${formatDuration(e.end - e.start)} registrados el ${formatDate(e.start)} en "${label}"?`}
+                          onConfirm={() => remove(e)}
+                        />
+                      </>
+                    )}
                   </td>
                 </tr>
               );
@@ -306,6 +359,8 @@ function EntryDialog({
   const [hours, setHours] = useState(String(Math.floor(initialMinutes / 60)));
   const [minutes, setMinutes] = useState(String(initialMinutes % 60));
   const [note, setNote] = useState(entry?.note ?? "");
+  const projectOf = (id: string) => projects.find((p) => p.id === id);
+  const [billable, setBillable] = useState(entry?.billable ?? defaultBillable(projectOf(entry?.projectId ?? choices[0]?.id ?? "")));
   const [error, setError] = useState("");
   const [maxDate] = useState(() => toDateInput(Date.now()));
 
@@ -327,7 +382,7 @@ function EntryDialog({
     const clash = entries.find((e) => e.id !== entry?.id && e.start < endMs && startMs < e.end);
     if (clash) return setError(`Se cruza con otra entrada del ${formatDate(clash.start)} (${formatTime(clash.start)} – ${formatTime(clash.end)}).`);
     const validTask = projectTasks.some((t) => t.id === taskId) ? taskId : null;
-    onSave({ id: entry?.id ?? uid("e"), projectId, taskId: validTask, start: startMs, end: endMs, note: note.trim() });
+    onSave({ id: entry?.id ?? uid("e"), projectId, taskId: validTask, start: startMs, end: endMs, note: note.trim(), billable, billId: entry?.billId ?? null });
   }
 
   return (
@@ -342,6 +397,7 @@ function EntryDialog({
               onChange={(e) => {
                 setProjectId(e.target.value);
                 setTaskId("");
+                if (!entry) setBillable(defaultBillable(projectOf(e.target.value)));
               }}
             >
               {choices.map((p) => (
@@ -373,6 +429,13 @@ function EntryDialog({
         <Field label="Nota" hint="Opcional, p. ej. llamada con el cliente">
           {(id) => <input id={id} className={inputClass} value={note} maxLength={120} onChange={(e) => setNote(e.target.value)} />}
         </Field>
+        <label className="flex items-center gap-2 text-sm text-text">
+          <input type="checkbox" className="size-4 accent-[var(--color-brand)]" checked={billable} onChange={(e) => setBillable(e.target.checked)} />
+          Facturable (se puede incluir en una cuenta de cobro)
+        </label>
+        {billable && projectOf(projectId) && projectOf(projectId)!.hourlyRate <= 0 && (
+          <p className="text-[13px] text-warning">Este proyecto no tiene tarifa por hora: defínela en Proyectos para poder cobrar estas horas.</p>
+        )}
         <FormError>{error}</FormError>
       </div>
     </Dialog>

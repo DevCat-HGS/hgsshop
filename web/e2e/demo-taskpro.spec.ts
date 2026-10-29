@@ -62,7 +62,10 @@ test("crea un proyecto con validación y lo archiva", async ({ page }) => {
   await page.getByRole("button", { name: "Nuevo proyecto" }).click();
   const dialog = page.getByRole("dialog", { name: "Nuevo proyecto" });
   await dialog.getByLabel("Nombre").fill("Landing Ferretería Norte");
-  await dialog.getByLabel("Cliente").fill("Ferretería Norte");
+  await dialog.getByLabel("Cliente").selectOption({ label: "Café Altamira S.A.S." });
+  await dialog.getByRole("button", { name: "Guardar" }).click();
+  await expect(dialog.getByRole("alert")).toContainText("La tarifa por hora debe ser un valor entero");
+  await dialog.getByLabel("Tarifa por hora (COP)").fill("95.000");
   await dialog.getByLabel("Repositorio").fill("no es una url");
   await dialog.getByRole("button", { name: "Guardar" }).click();
   await expect(dialog.getByRole("alert")).toContainText("El repositorio debe ser una URL");
