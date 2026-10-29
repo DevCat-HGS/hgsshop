@@ -15,7 +15,7 @@ const icons: Record<AlertVariant, ReactNode> = {
 
 export function Alert({ variant, children }: { variant: AlertVariant; children: ReactNode }) {
   return (
-    <div role="status" className={`flex items-start gap-3 rounded-md border px-4 py-3 text-sm ${variantClasses[variant]}`}>
+    <div role={variant === "error" ? "alert" : "status"} className={`flex items-start gap-3 rounded-md border px-4 py-3 text-sm ${variantClasses[variant]}`}>
       {icons[variant]}
       <div>{children}</div>
     </div>

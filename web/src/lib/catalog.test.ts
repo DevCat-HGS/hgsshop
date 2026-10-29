@@ -59,6 +59,11 @@ describe("búsqueda y filtros", () => {
     expect((await getProducts({ query: "automatizar reportes" })).map((p) => p.slug)).toContain("flowauto");
   });
 
+  it("compara por comienzo de palabra, no por subcadena", async () => {
+    expect(await getProducts({ query: "ia" })).toEqual([]);
+    expect((await getProducts({ query: "pos" })).length).toBeLessThan(5);
+  });
+
   it("ordena por relevancia: más términos coincidentes primero", async () => {
     const result = await getProducts({ query: "inventario pedidos tienda" });
     expect(result[0].slug).toBe("stockflow");

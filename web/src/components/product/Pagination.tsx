@@ -17,7 +17,7 @@ export function Pagination({
           type="button"
           aria-current={number === page ? "page" : undefined}
           onClick={() => onPageChange(number)}
-          className={`size-9 rounded-md text-sm font-medium transition-colors duration-150 ${
+          className={`size-9 rounded-md text-sm font-semibold transition-colors duration-150 ${
             number === page ? "bg-brand text-brand-contrast" : "text-text-muted hover:bg-surface-hover"
           }`}
         >

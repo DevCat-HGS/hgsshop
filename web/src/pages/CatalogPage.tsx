@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDocumentHead } from "@/hooks/useDocumentHead";
 import { getCategories, getProducts } from "@/lib/catalog";
+import { statusLabels } from "@/lib/format";
 import type { Category } from "@/types/category";
 import type { Product, ProductStatus } from "@/types/product";
 import { Container } from "@/components/ui/Container";
@@ -13,6 +14,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SearchIcon } from "@/components/icons";
 
 const PAGE_SIZE = 12;
+const SORT_OPTIONS: readonly SortOption[] = ["relevance", "name-asc", "name-desc"];
 const SEARCH_DEBOUNCE_MS = 250;
 
 function sortProducts(products: Product[], sort: SortOption): Product[] {
@@ -31,11 +33,21 @@ export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
   const categorySlug = searchParams.get("categoria") ?? "";
-  const status = (searchParams.get("estado") as ProductStatus | null) ?? "";
-  const sort = (searchParams.get("orden") as SortOption | null) ?? "relevance";
-  const page = Number(searchParams.get("pagina") ?? "1");
+  // La URL la puede escribir cualquiera: lo que no sea un valor conocido se ignora.
+  const rawStatus = searchParams.get("estado") ?? "";
+  const status: ProductStatus | "" = rawStatus in statusLabels ? (rawStatus as ProductStatus) : "";
+  const rawSort = searchParams.get("orden") ?? "";
+  const sort: SortOption = SORT_OPTIONS.includes(rawSort as SortOption) ? (rawSort as SortOption) : "relevance";
+  const rawPage = Number.parseInt(searchParams.get("pagina") ?? "1", 10);
+  const page = Number.isFinite(rawPage) ? rawPage : 1;
 
   const [queryInput, setQueryInput] = useState(urlQuery);
+  // Si la búsqueda cambia desde fuera del campo (Atrás, el enlace "Productos" de la cabecera), el campo la sigue.
+  const [syncedQuery, setSyncedQuery] = useState(urlQuery);
+  if (urlQuery !== syncedQuery) {
+    setSyncedQuery(urlQuery);
+    setQueryInput(urlQuery);
+  }
   const [categories, setCategories] = useState<Category[]>([]);
   const [results, setResults] = useState<Product[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,7 +98,8 @@ export function CatalogPage() {
     const next = new URLSearchParams(window.location.search);
     if (value) next.set(key, value);
     else next.delete(key);
-    next.delete("pagina");
+    // Un filtro nuevo vuelve a la primera página; cambiar de página, obviamente, no.
+    if (key !== "pagina") next.delete("pagina");
     setSearchParams(next);
   }
 

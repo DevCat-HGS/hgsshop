@@ -24,7 +24,7 @@ function FieldWrapper({ label, error, hint, required, children }: FieldWrapperPr
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-text">
+      <label htmlFor={id} className="text-sm font-semibold text-text">
         {label}
         {required && <span className="ml-0.5 text-danger">*</span>}
       </label>

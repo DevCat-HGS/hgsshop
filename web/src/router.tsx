@@ -37,7 +37,7 @@ function Root() {
   );
 }
 
-/** Mantener sincronizado con las rutas de `netlify.toml` y `public/sitemap.xml`. */
+/** Mantener sincronizado con las rutas de `netlify.toml` y con `scripts/generate-sitemap.ts`. */
 export const router = createBrowserRouter([
   {
     element: <Root />,

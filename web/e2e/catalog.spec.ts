@@ -35,6 +35,22 @@ test.describe("descubrimiento de productos", () => {
     await expect(page.getByRole("main").getByRole("link", { name: /DevPanel/ })).toBeVisible();
   });
 
+  test("el campo de búsqueda sigue a la URL y los parámetros inválidos se ignoran", async ({ page }) => {
+    await page.goto("/productos?q=agenda");
+    const search = page.getByRole("main").getByRole("searchbox");
+    await expect(search).toHaveValue("agenda");
+    await page.goto("/productos?q=agenda&pagina=abc&estado=xyz&orden=zzz");
+    await expect(page.getByRole("link", { name: "Clientia: ver detalle" })).toBeVisible();
+    // En móvil el enlace está dentro del menú.
+    const mobile = (page.viewportSize()?.width ?? 1280) < 768;
+    if (mobile) await page.getByRole("button", { name: "Abrir menú" }).click();
+    const nav = page.getByRole("navigation", { name: mobile ? "Navegación principal (móvil)" : "Navegación principal", exact: true });
+    await nav.getByRole("link", { name: "Productos", exact: true }).click();
+    await expect(page).toHaveURL(/\/productos$/);
+    await expect(search).toHaveValue("");
+    await expect(page.getByRole("link", { name: /ver detalle/i })).toHaveCount(11);
+  });
+
   test("muestra un estado vacío cuando nada coincide", async ({ page }) => {
     await page.goto("/productos?q=zzqx-wvkj");
     await expect(page.getByText("No encontramos productos con esos filtros")).toBeVisible();

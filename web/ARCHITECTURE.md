@@ -18,8 +18,8 @@ coinciden, el documento está desactualizado: corrígelo en el mismo cambio.
 | Pagos | **No existen** | Fase 4, con demanda validada |
 | Despliegue | Netlify (`netlify.toml`), Base directory `web` | — |
 
-Dependencias de runtime: `react`, `react-dom`, `react-router-dom`, `@fontsource/inter`,
-`@fontsource/jetbrains-mono`. Nada más: iconos en SVG inline (`src/components/icons.tsx`) y animaciones
+Dependencias de runtime: `react`, `react-dom`, `react-router-dom`, `@fontsource/figtree`,
+`@fontsource/league-spartan`. Nada más: iconos en SVG inline (`src/components/icons.tsx`) y animaciones
 en CSS. Cada dependencia nueva debe justificarse aquí.
 
 ## Estructura de `src/`
@@ -33,7 +33,7 @@ lib/validation.ts       reglas de formularios, puras: reutilizables en un backen
 lib/format.ts           etiquetas de estado, línea de vida, formato de precio
 lib/netlifyForm.ts      envío a Netlify Forms
 lib/analytics.ts        eventos comerciales, sin proveedor
-hooks/                  useDocumentHead (SEO por ruta), useFormSubmission
+hooks/                  useDocumentHead (SEO por ruta), useFormSubmission, useSlideDeck, useReveal
 components/ui/          sistema de diseño: Button, StatusBadge, FormField, Accordion…
 components/product/     tarjeta, filtros, línea de vida, ilustraciones por categoría
 components/home/        secciones de la portada
@@ -173,7 +173,7 @@ páginas `/demos/*` llevan `noindex` (meta y cabecera `X-Robots-Tag`) y están f
 ## Seguridad
 
 - CSP estricta en `netlify.toml`: scripts y estilos del propio origen, sin `unsafe-inline` en scripts,
-  fuentes autoalojadas (por eso Inter y JetBrains Mono van por `@fontsource` y no por Google Fonts).
+  fuentes autoalojadas (por eso Figtree y League Spartan van por `@fontsource` y no por Google Fonts).
   Además HSTS, `X-Frame-Options: DENY`, `nosniff`, `Permissions-Policy` y `Referrer-Policy`.
 - No hay secretos en el cliente ni variables de entorno todavía; por eso no existe `.env.example`. El
   día que haya backend, sus secretos van en variables de entorno del proveedor, nunca con prefijo `VITE_`

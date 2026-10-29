@@ -69,7 +69,7 @@ export function QuoteForm({ products, initialProductSlug = "" }: { products: Pro
     return (
       <div className="flex flex-col gap-4">
         <Alert variant="success">
-          <p className="font-medium">Recibí tu solicitud.</p>
+          <p className="font-semibold">Recibí tu solicitud.</p>
           <p className="mt-1 text-text-muted">
             La reviso personalmente y te respondo a <strong className="text-text">{values.email}</strong> con preguntas
             sobre el alcance o una primera propuesta. Normalmente en uno o dos días hábiles.

@@ -45,13 +45,17 @@ export function Buscador() {
             aria-label="Describe lo que necesitas resolver"
             aria-describedby="buscador-ayuda"
             spellCheck={false}
-            className="font-display w-full bg-transparent text-[8.4vw] text-text caret-brand placeholder:text-text-subtle focus:outline-none sm:text-[clamp(3rem,6.4vw,7rem)] [&::-webkit-search-cancel-button]:hidden"
+            className="font-display w-full bg-transparent text-[8.4vw] text-text caret-brand placeholder:text-text-subtle border-b-2 border-transparent focus:outline-none focus-visible:border-brand sm:text-[clamp(3rem,6.4vw,7rem)] [&::-webkit-search-cancel-button]:hidden"
             placeholder="Escribe aquí…"
           />
         </div>
 
-        <div data-reveal className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,35rem)_1fr]" aria-live="polite">
+        <div data-reveal className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,35rem)_1fr]">
           <div>
+            {/* Se anuncia solo el número de resultados, no la lista entera en cada tecla. */}
+            <p role="status" className="sr-only">
+              {hasTerms ? (results.length === 0 ? "Ningún producto coincide" : `${results.length} ${results.length === 1 ? "producto coincide" : "productos coinciden"}`) : ""}
+            </p>
             {hasTerms && results.length > 0 && (
               <ul data-ui className="overflow-hidden rounded-[6px] border border-border-strong bg-bg">
                 {results.slice(0, MAX_RESULTS).map((product) => (

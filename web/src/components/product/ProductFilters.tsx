@@ -34,7 +34,7 @@ export function ProductFilters({
 }: ProductFiltersProps) {
   return (
     <div className="flex flex-wrap gap-3">
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-muted">
+      <label className="flex flex-col gap-1 text-[13px] font-semibold text-text-muted">
         Categoría
         <select
           value={categorySlug}
@@ -50,7 +50,7 @@ export function ProductFilters({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-muted">
+      <label className="flex flex-col gap-1 text-[13px] font-semibold text-text-muted">
         Estado
         <select
           value={status}
@@ -66,7 +66,7 @@ export function ProductFilters({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-muted">
+      <label className="flex flex-col gap-1 text-[13px] font-semibold text-text-muted">
         Ordenar por
         <select value={sort} onChange={(event) => onSortChange(event.target.value as SortOption)} className={selectClasses}>
           {(Object.keys(sortLabels) as SortOption[]).map((key) => (

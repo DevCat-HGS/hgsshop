@@ -47,7 +47,7 @@ export function ContactForm() {
     return (
       <div className="flex flex-col gap-4">
         <Alert variant="success">
-          <p className="font-medium">Mensaje enviado.</p>
+          <p className="font-semibold">Mensaje enviado.</p>
           <p className="mt-1 text-text-muted">
             Te respondo a <strong className="text-text">{values.email}</strong> lo antes posible.
           </p>

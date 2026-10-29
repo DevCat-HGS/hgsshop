@@ -25,9 +25,13 @@ function normalize(text: string): string {
   return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
-/** Raíz corta para que "automatizar" encuentre "automatización" y "tiendas" encuentre "tienda". */
+/**
+ * Raíz corta para que "automatizar" encuentre "automatización" y "tiendas" encuentre "tienda". Las palabras
+ * cortas no pierden la "s": "pos" no debe quedar en "po".
+ */
 function stem(word: string): string {
-  return word.length > 6 ? word.slice(0, 6) : word.replace(/s$/, "");
+  if (word.length > 6) return word.slice(0, 6);
+  return word.length > 3 ? word.replace(/s$/, "") : word;
 }
 
 export function queryTerms(query: string): string[] {
@@ -40,11 +44,10 @@ export function queryTerms(query: string): string[] {
 /** Cuántos términos de la búsqueda aparecen en el producto (0 = no coincide). */
 function relevance(product: Product, terms: string[]): number {
   const category = categories.find((c) => c.slug === product.categorySlug);
-  const haystack = normalize(
+  const words = normalize(
     [product.name, product.shortDescription, product.problem, product.audience, product.features.join(" "), category?.name ?? "", category?.description ?? ""].join(" "),
-  );
-  // Un término coincide solo al inicio de una palabra: "nada" no debe encontrar "coordinadas".
-  const words = haystack.split(/[^a-z0-9ñ]+/);
+  ).split(/[^a-z0-9ñ]+/);
+  // Por comienzo de palabra, no por subcadena: "ia" no debe coincidir dentro de "diaria" ni "nada" en "coordinadas".
   return terms.filter((term) => words.some((word) => word.startsWith(term))).length;
 }
 

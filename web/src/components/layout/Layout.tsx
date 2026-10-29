@@ -14,7 +14,7 @@ export function Layout() {
   return (
     <div className="relative isolate flex min-h-dvh flex-col">
       <SiteBackground />
-      <a href="#main-content" className="skip-link rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-contrast">
+      <a href="#main-content" className="skip-link rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-contrast">
         Saltar al contenido principal
       </a>
       <Header />
