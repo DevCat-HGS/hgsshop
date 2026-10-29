@@ -9,8 +9,8 @@ import { Categorias } from "@/components/home/Categorias";
 import { Productos } from "@/components/home/Productos";
 import { Demo } from "@/components/home/Demo";
 import { Proceso } from "@/components/home/Proceso";
-import { CustomDevCta } from "@/components/home/CustomDevCta";
-import { HomeFaq } from "@/components/home/HomeFaq";
+import { AMedida } from "@/components/home/AMedida";
+import { Preguntas } from "@/components/home/Preguntas";
 
 export function HomePage() {
   useDocumentHead({
@@ -36,8 +36,8 @@ export function HomePage() {
       <Productos products={products} />
       <Demo products={products} />
       <Proceso />
-      <CustomDevCta />
-      <HomeFaq />
+      <AMedida />
+      <Preguntas />
     </>
   );
 }
