@@ -7,7 +7,7 @@ import { BOOT_DONE_EVENT } from "@/hooks/useReveal";
  * Se mide desde el inicio de la navegación, así que en conexiones lentas no añade espera alguna.
  * Subirlo retrasa el contenido real para todo el mundo; conviene no pasar de ~2 s.
  */
-const MIN_VISIBLE_MS = 1600;
+const MIN_VISIBLE_MS = 1300;
 const FONT_WAIT_LIMIT_MS = 1500;
 const FADE_MS = 450;
 

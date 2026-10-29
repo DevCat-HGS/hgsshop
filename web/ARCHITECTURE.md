@@ -37,7 +37,7 @@ hooks/                  useDocumentHead (SEO por ruta), useFormSubmission
 components/ui/          sistema de diseño: Button, StatusBadge, FormField, Accordion…
 components/product/     tarjeta, filtros, línea de vida, ilustraciones por categoría
 components/home/        secciones de la portada
-components/background/  fondo animado (aurora, partículas, retícula)
+components/background/  fondo animado (aurora y grano)
 components/forms/       formularios de cotización y contacto
 demos/                  demos que corren dentro de la app + su registro
 boot/                   loader de arranque (CSS + retirada)
@@ -86,8 +86,8 @@ producto actúa en la página en lugar de describirse. Hoja guardada en `.taste-
   restricciones conocidas), con un único tratamiento monocromo en la paleta (`ArchivePhoto`), pie de foto y
   crédito en el footer. Muestran el oficio, nunca el producto. Fuentes en `src/assets/photos/credits.json`;
   se buscaron y descargaron con `scripts/assets.mjs` de la skill.
-- **Fondo:** aurora en CSS (solo `transform`), partículas en canvas que se pausan con la pestaña oculta y
-  grano fino de película (ruido SVG incrustado). Todo quieto con `prefers-reduced-motion`.
+- **Fondo:** aurora en CSS (solo `transform`) y grano fino de película (ruido SVG incrustado). Las
+  partículas del diseño original se retiraron a pedido. Todo quieto con `prefers-reduced-motion`.
 
 ### Portada en diapositivas
 
@@ -114,7 +114,7 @@ oculto, y con movimiento reducido solo hay fundido.
 Origen: `docs/marca/recursos/loader-ciervo.md` en el repositorio privado (figura de ciervo low-poly, Uiverse). Se integró sin `styled-components` y con los
 colores remapeados a la paleta (los 103 recorridos de los fragmentos se conservan). Está como HTML estático
 en `index.html` para verse desde el primer pintado; `src/boot/dismissBootLoader.ts` lo retira cuando la app
-montó y las fuentes cargaron, con un mínimo de 1,6 s medido desde el inicio de la navegación (en
+montó y las fuentes cargaron, con un mínimo de 1,3 s medido desde el inicio de la navegación (en
 conexiones lentas no añade espera). Si el JavaScript falla, una animación CSS lo retira a los 12 s; sin
 JavaScript no se muestra.
 
