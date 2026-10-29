@@ -12,7 +12,7 @@ import { ArrowRightIcon } from "@/components/icons";
  */
 export function Productos({ products }: { products: Product[] }) {
   return (
-    <Slide id="productos" tone="surface" labelledBy="productos-titulo">
+    <Slide id="productos" tone="surface" labelledBy="productos-titulo" className="lg:!py-14">
       <Container className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-6 lg:sticky lg:top-28 lg:self-start">
           <h2 id="productos-titulo" className="font-display text-[length:var(--text-step-head)] text-text">
@@ -31,10 +31,10 @@ export function Productos({ products }: { products: Product[] }) {
             <li key={product.id}>
               <Link
                 to={`/productos/${product.slug}`}
-                className="press group grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-3 rounded-sm bg-bg/40 px-6 py-6 transition-colors duration-200 hover:bg-bg sm:grid-cols-[minmax(0,1fr)_14rem_auto]"
+                className="press group grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-3 rounded-sm bg-bg/40 px-6 py-5 transition-colors duration-200 hover:bg-bg sm:grid-cols-[minmax(0,1fr)_14rem_auto]"
               >
                 <span className="min-w-0">
-                  <span className="font-display block text-[clamp(2rem,3.4vw,3.25rem)] text-text">{product.name}</span>
+                  <span className="font-display block text-[clamp(1.75rem,min(3.4vw,5.6vh),3.25rem)] text-text">{product.name}</span>
                   <span className="mt-2 block text-base text-pretty text-text-muted">{product.shortDescription}</span>
                 </span>
                 <span className="col-span-2 row-start-2 sm:col-span-1 sm:row-start-auto">

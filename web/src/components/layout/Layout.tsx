@@ -1,10 +1,12 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SiteBackground } from "@/components/background/SiteBackground";
 import { ScrollLine } from "@/components/layout/ScrollLine";
 
 export function Layout() {
+  const { pathname } = useLocation();
+
   return (
     <div className="relative isolate flex min-h-dvh flex-col">
       <SiteBackground />
@@ -15,7 +17,7 @@ export function Layout() {
       <main id="main-content" className="flex-1">
         <Outlet />
       </main>
-      <ScrollLine />
+      <ScrollLine fullScreen={pathname === "/"} />
       <Footer />
     </div>
   );

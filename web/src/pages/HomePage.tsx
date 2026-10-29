@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDocumentHead } from "@/hooks/useDocumentHead";
+import { useSlideDeck } from "@/hooks/useSlideDeck";
 import { getCategories, getProducts } from "@/lib/catalog";
 import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
@@ -19,6 +20,8 @@ export function HomePage() {
       "Catálogo de aplicaciones y herramientas de software: inventario, agendas, educación, productividad para desarrolladores y automatización. Estado real, demos y desarrollo a medida.",
     path: "/",
   });
+
+  useSlideDeck();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);

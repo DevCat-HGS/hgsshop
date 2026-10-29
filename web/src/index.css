@@ -89,6 +89,7 @@
 
   html {
     color-scheme: dark;
+    scroll-padding-top: 4rem;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -110,6 +111,17 @@
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
+  }
+
+  /* Portada en diapositivas (useSlideDeck): solo donde cada sección cabe entera en la pantalla. */
+  @media (min-width: 1024px) and (min-height: 640px) {
+    html.slide-deck {
+      scroll-snap-type: y mandatory;
+    }
+
+    html.slide-deck-soft {
+      scroll-snap-type: y proximity;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

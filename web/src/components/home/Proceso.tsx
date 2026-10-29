@@ -3,12 +3,12 @@ import { Container } from "@/components/ui/Container";
 import { Slide } from "@/components/home/Slide";
 import { CheckIcon } from "@/components/icons";
 
-function Exchange({ step, call, children, wide = false }: { step: string; call: string; children: ReactNode; wide?: boolean }) {
+function Exchange({ step, call, children }: { step: string; call: string; children: ReactNode }) {
   return (
     <li className="flex flex-col gap-4">
-      <p className="text-xl font-semibold text-text">{step}</p>
-      <p className="max-w-[35rem] rounded-sm bg-surface px-5 py-4 text-lg text-text">“{call}”</p>
-      <div className={`sm:pl-14 ${wide ? "lg:-mr-[33.333%]" : "max-w-[35rem]"}`}>{children}</div>
+      <p className="text-xl font-semibold text-pretty text-text">{step}</p>
+      <p className="rounded-sm bg-surface px-5 py-4 text-lg text-text">“{call}”</p>
+      <div className="pl-6 sm:pl-10 lg:pl-6">{children}</div>
     </li>
   );
 }
@@ -18,21 +18,22 @@ function SampleLabel() {
 }
 
 /**
- * S6 · Proceso. Columna "pregunta y respuesta": cada paso muestra lo que escribes tú y lo que vuelve.
+ * S6 · Proceso. "Pregunta y respuesta": cada paso muestra lo que escribes tú y lo que vuelve. En
+ * escritorio los tres pasos van en columnas para que la sección quepa en una sola diapositiva.
  * La primera respuesta es el mensaje real del formulario; las otras dos son ejemplos y lo dicen.
  */
 export function Proceso() {
   return (
     <Slide id="proceso" labelledBy="proceso-titulo">
-      <Container className="grid gap-12 lg:grid-cols-12">
-        <div className="flex flex-col gap-5 lg:col-span-3">
+      <Container className="flex flex-col gap-12">
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-end">
           <h2 id="proceso-titulo" className="font-display text-[length:var(--text-step-head)] text-text">
             Cómo trabajamos
           </h2>
-          <p className="text-lg text-pretty text-text">Sin carritos ni pagos sorpresa: todo empieza con tu caso.</p>
+          <p className="max-w-lg text-lg text-pretty text-text lg:justify-self-end">Sin carritos ni pagos sorpresa: todo empieza con tu caso.</p>
         </div>
 
-        <ol className="flex flex-col gap-14 lg:col-span-6 lg:col-start-5">
+        <ol className="grid gap-12 lg:grid-cols-3 lg:gap-8">
           <Exchange step="Primero, me cuentas el problema." call="Llevamos el inventario en Excel y siempre se nos acaba algo sin avisar.">
             <p data-ui className="flex items-start gap-3 rounded-[6px] border border-success/30 bg-success-muted px-4 py-3 text-[15px] text-success">
               <CheckIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
@@ -58,7 +59,7 @@ export function Proceso() {
             </div>
           </Exchange>
 
-          <Exchange step="Y lo construimos por entregas que puedes revisar." call="¿Cuándo puedo ver algo funcionando?" wide>
+          <Exchange step="Y lo construimos por entregas que puedes revisar." call="¿Cuándo puedo ver algo funcionando?">
             <div data-ui className="overflow-hidden rounded-[6px] border border-border-strong bg-bg text-[14px]">
               <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
                 <span className="font-semibold text-text">Entregas</span>
