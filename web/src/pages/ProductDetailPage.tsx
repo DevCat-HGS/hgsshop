@@ -15,6 +15,7 @@ import { Accordion } from "@/components/ui/Accordion";
 import { ProductCoverArt } from "@/components/product/ProductCoverArt";
 import { ArchivePhoto } from "@/components/ui/ArchivePhoto";
 import { photoFor } from "@/components/product/categoryPhotos";
+import { ProductIcon, hasProductIcon } from "@/components/product/ProductIcon";
 import { ProductVideo } from "@/components/product/ProductVideo";
 import { clipFor } from "@/components/product/productClips";
 import { ProductGrid } from "@/components/product/ProductGrid";
@@ -96,6 +97,8 @@ function ProductDetail({ product, category, related }: { product: Product; categ
       </div>
     ) : clip ? (
       <ProductVideo clip={clip} />
+    ) : hasProductIcon(product.slug) ? (
+      <ProductIcon slug={product.slug} size={176} className="aspect-[4/3] overflow-hidden rounded-sm" />
     ) : photo ? (
       <ArchivePhoto photo={photo} caption eager className="aspect-[4/3] rounded-sm" />
     ) : (

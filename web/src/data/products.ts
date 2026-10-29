@@ -21,7 +21,7 @@ export const products: Product[] = [
     problem:
       "Negocios pequeños y medianos pierden ventas por quiebres de stock que no ven venir, o inmovilizan dinero en productos que no rotan, porque el control vive en hojas de cálculo que nadie actualiza a tiempo.",
     audience: "Tiendas, distribuidoras y pequeños negocios con inventario físico y más de una persona registrando movimientos.",
-    status: "prototype",
+    status: "in_development",
     commercialModels: ["purchase", "custom"],
     pricing: { type: "quote" },
     coverImage: "",
@@ -32,6 +32,10 @@ export const products: Product[] = [
       "Historial de movimientos con responsable y fecha",
       "Reportes de rotación y productos sin movimiento",
       "Múltiples usuarios con permisos por rol",
+      "Proveedores con plazo de entrega y sugerencia de compra según rotación",
+      "Órdenes de compra con recepción parcial y costo promedio ponderado",
+      "Orden de compra y remisión de despacho imprimibles con los datos del negocio",
+      "Importación de productos desde Excel o CSV y copia de seguridad de los datos",
     ],
     technologies: ["React", "Node.js", "PostgreSQL"],
     benefits: [
@@ -41,17 +45,17 @@ export const products: Product[] = [
     ],
     requirements: ["Conexión a internet", "Navegador moderno (no requiere instalación)"],
     limitations: [
-      "Es un prototipo funcional: el flujo de inventario y reportes básicos ya funcionan, pero no está validado con un negocio real todavía.",
+      "En desarrollo: inventario, pedidos, compras a proveedores y documentos ya funcionan en la demo, pero todavía no está validado con un negocio real ni tiene cuentas en la nube.",
       "No incluye todavía integración con lectores de código de barras ni facturación electrónica.",
     ],
     demo: {
       url: "/demos/stockflow",
       instructions:
-        "Inventario y pedidos de una ferretería ficticia. Registra entradas, salidas y ajustes, despacha un pedido (o intenta despachar uno sin stock) y cambia de usuario con \"Usar la demo como\" para ver cómo cambian los permisos por rol.",
+        "Inventario y pedidos de una ferretería ficticia. Registra entradas y salidas, despacha un pedido, y en Compras crea una orden desde la sugerencia, recíbela en parte y mira cómo cambian el stock y el costo promedio. Con \"Tus datos\" puedes empezar vacío o importar tus productos desde Excel.",
       isolation: "100% local: los datos se guardan solo en este navegador y no se envían a ningún servidor. \"Reiniciar datos\" vuelve a los de ejemplo.",
       limitations: [
         "Sin cuentas reales: el usuario se elige en un selector, sin contraseñas ni invitaciones.",
-        "Una sola bodega, sin lector de código de barras, facturación ni exportación de reportes.",
+        "Una sola bodega, sin lector de código de barras ni facturación electrónica.",
       ],
     },
     faqs: [
@@ -92,6 +96,10 @@ export const products: Product[] = [
       "Recordatorios automáticos antes de cada cita, con plantilla editable",
       "Vista de agenda diaria y semanal, compartida entre profesionales",
       "Servicios con duración y precio, y control de asistencia",
+      "Página pública de reservas: el cliente elige servicio, profesional y horario libre",
+      "Bandeja de solicitudes para confirmar o rechazar, con reglas de anticipación y cancelación",
+      "Enlace de reservas con código QR y comprobante imprimible de la cita",
+      "Importación de clientes desde Excel o CSV y copia de seguridad de los datos",
     ],
     technologies: ["React", "Firebase"],
     benefits: [
@@ -105,11 +113,11 @@ export const products: Product[] = [
     demo: {
       url: "/demos/clientia",
       instructions:
-        "Agenda citas en la vista semanal o diaria del Estudio Brisa e intenta ocupar un horario ya tomado o el almuerzo. Marca la asistencia desde el Panel, abre la ficha de un cliente con su historial y gasto, y ajusta los recordatorios para ver la bandeja de salida simulada.",
+        "Agenda citas en la vista semanal o diaria del Estudio Brisa e intenta ocupar un horario ya tomado. En Reservas en línea abre \"Así la ve tu cliente\", pide una cita y confírmala en Solicitudes. Abre la ficha de un cliente con su historial y ajusta los recordatorios para ver la bandeja de salida simulada.",
       isolation: "100% local: los datos se guardan solo en este navegador y no se envían a ningún servidor. \"Reiniciar datos\" vuelve a los de ejemplo.",
       limitations: [
         "Los recordatorios se simulan: no se envía nada por WhatsApp ni por correo.",
-        "Sin cuentas ni sincronización: los datos viven solo en este navegador.",
+        "Sin cuentas ni sincronización: los datos viven solo en este navegador, así que el enlace de reservas solo funciona en el mismo equipo.",
         "No hay citas recurrentes ni pagos o abonos.",
       ],
     },
@@ -135,7 +143,7 @@ export const products: Product[] = [
     problem:
       "Las academias pequeñas gestionan grupos, asistencia y pagos en hojas sueltas o grupos de chat, y pierden de vista el progreso real de cada estudiante.",
     audience: "Academias y talleres de robótica o programación para niños y jóvenes, con grupos recurrentes.",
-    status: "prototype",
+    status: "in_development",
     commercialModels: ["custom", "subscription"],
     pricing: { type: "quote" },
     coverImage: "",
@@ -146,22 +154,26 @@ export const products: Product[] = [
       "Seguimiento del módulo de cada estudiante y notas del profesor",
       "Mensualidades: pagos pendientes, recaudo y método de pago",
       "Reporte imprimible para acudientes",
+      "Inscripciones: formulario para acudientes y aspirantes con estados hasta quedar inscritos",
+      "Portal del acudiente de solo lectura: asistencia, módulo, notas y pagos",
+      "Recibos de pago imprimibles con número consecutivo",
+      "Importación de estudiantes desde Excel o CSV y copia de seguridad de los datos",
     ],
     benefits: [
       "Una sola vista de grupos, asistencia y progreso",
       "Menos trabajo administrativo para quien dirige la academia",
     ],
     limitations: [
-      "Prototipo construido a partir de un caso real; falta adaptarlo a academias distintas a la original.",
+      "En desarrollo a partir de un caso real: inscripciones, portal del acudiente y recibos ya funcionan en la demo; falta validarlo con academias distintas a la original.",
       "Los reportes para acudientes se imprimen o guardan como PDF; todavía no se envían por correo ni WhatsApp.",
     ],
     demo: {
       url: "/demos/roboacademy",
       instructions:
-        "Una academia ficticia con cuatro grupos y veinte estudiantes. Toma asistencia de una sesión, avanza a un estudiante de módulo, registra una mensualidad pendiente y genera el reporte imprimible para su acudiente.",
+        "Una academia ficticia con cuatro grupos y veinte estudiantes. Toma asistencia de una sesión, registra una mensualidad y mira su recibo, inscribe a un aspirante desde el formulario del acudiente y abre el Portal del acudiente para ver lo que vería un padre.",
       isolation: "100% local: los datos se guardan solo en este navegador y no se envían a ningún servidor. \"Reiniciar datos\" vuelve a los de ejemplo.",
       limitations: [
-        "Sin cuentas reales ni roles: los datos viven solo en este navegador.",
+        "Sin cuentas reales ni roles: los datos viven solo en este navegador, así que el formulario y el portal son vistas previas dentro de la app.",
         "Los reportes se imprimen o se guardan como PDF desde el navegador; no se envían al acudiente.",
         "No hay recordatorios de pago ni pasarela: los pagos se registran a mano.",
       ],
@@ -183,7 +195,7 @@ export const products: Product[] = [
     shortDescription: "Tareas, proyectos, notas y tiempo para desarrolladores y equipos pequeños, en un solo lugar.",
     description: [
       "TaskPro es una herramienta de productividad pensada para desarrolladores y equipos pequeños que necesitan ver sus tareas, proyectos activos y notas técnicas sin saltar entre cinco aplicaciones distintas.",
-      "Junta en un solo lugar el tablero de cada proyecto, las notas técnicas y el tiempo que se le dedica a cada cliente. La demo es la aplicación completa: tablero, proyectos, notas con markdown y registro de tiempo.",
+      "Junta en un solo lugar el tablero de cada proyecto, las notas técnicas y el tiempo que se le dedica a cada cliente, y convierte ese tiempo en cuentas de cobro. La demo es la aplicación completa: tablero, proyectos, clientes, notas con markdown, registro de tiempo y cobros.",
     ],
     problem:
       "Los desarrolladores independientes y equipos pequeños reparten su trabajo entre apps de notas, tableros de tareas y hojas sueltas, y pierden tiempo buscando en qué estaban en lugar de trabajar.",
@@ -198,7 +210,10 @@ export const products: Product[] = [
       "Notas técnicas vinculadas a cada proyecto, con vista previa de markdown",
       "Vista \"Hoy\": lo que está en progreso, lo que vence y lo atrasado",
       "Registro de tiempo con temporizador y totales por proyecto",
-      "Proyectos con cliente, estado y progreso",
+      "Clientes con documento y proyectos con tarifa por hora o precio fijo",
+      "Horas facturables y cuentas de cobro con consecutivo, estados y versión imprimible",
+      "Informe de avance imprimible para cada cliente",
+      "Importación de tareas desde Excel o CSV y copia de seguridad de los datos",
     ],
     technologies: ["React", "TypeScript"],
     benefits: [
@@ -212,7 +227,7 @@ export const products: Product[] = [
     demo: {
       url: "/demos/taskpro",
       instructions:
-        "Crea una tarea en el Tablero y muévela con las flechas o arrastrándola; luego inicia el temporizador desde Hoy, recarga la página y verás que sigue contando. Prueba también una nota con markdown y fíjala para verla en Hoy.",
+        "Crea una tarea en el Tablero y muévela con las flechas o arrastrándola; luego inicia el temporizador desde Hoy, recarga la página y verás que sigue contando. En Clientes genera una cuenta de cobro con las horas facturables y márcala como enviada.",
       isolation: "100% local: los datos se guardan solo en este navegador y no se envían a ningún servidor. \"Reiniciar datos\" vuelve a los de ejemplo.",
       limitations: [
         "Sin cuentas ni sincronización entre dispositivos.",

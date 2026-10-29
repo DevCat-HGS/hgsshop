@@ -5,6 +5,7 @@ import { FacetStage } from "@/components/product/FacetStage";
 import { ProductCoverArt } from "@/components/product/ProductCoverArt";
 import { DemoButton } from "@/components/product/DemoButton";
 import { photoFor } from "@/components/product/categoryPhotos";
+import { ProductIcon, hasProductIcon } from "@/components/product/ProductIcon";
 import { ArrowRightIcon } from "@/components/icons";
 
 /**
@@ -16,7 +17,9 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="press group relative flex flex-col overflow-hidden rounded-sm bg-surface transition-colors duration-200 hover:bg-surface-hover">
-      {photo ? (
+      {hasProductIcon(product.slug) ? (
+        <ProductIcon slug={product.slug} size={96} className="aspect-[16/10]" />
+      ) : photo ? (
         <ArchivePhoto photo={photo} className="aspect-[16/10]" imgClassName="transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100" />
       ) : (
         <ProductCoverArt categorySlug={product.categorySlug} showLabel={false} />
