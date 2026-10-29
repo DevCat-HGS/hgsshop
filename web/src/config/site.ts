@@ -14,6 +14,8 @@ export const site = {
 
   domain: "products.hgsportafolio.site",
   url: "https://products.hgsportafolio.site",
+  /** Imagen para compartir por defecto (design/scripts/generar-marca.py), 1200x630. */
+  ogImage: "/og.png",
 
   owner: {
     name: "Harol Guerrero Salgado",

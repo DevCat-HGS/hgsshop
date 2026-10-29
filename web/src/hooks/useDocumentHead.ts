@@ -6,6 +6,7 @@ interface DocumentHeadOptions {
   description: string;
   /** Ruta sin dominio, ej. "/productos/stockflow". Se usa para canonical y og:url. */
   path: string;
+  /** URL absoluta de la imagen para compartir; sin ella se usa la de la marca. */
   image?: string;
   noindex?: boolean;
 }
@@ -40,6 +41,7 @@ export function useDocumentHead({ title, description, path, image, noindex }: Do
   useEffect(() => {
     const fullTitle = `${title} · ${site.brand.name}`;
     const url = `${site.url}${path}`;
+    const ogImage = image ?? `${site.url}${site.ogImage}`;
 
     document.title = fullTitle;
     setMeta("name", "description", description);
@@ -51,10 +53,11 @@ export function useDocumentHead({ title, description, path, image, noindex }: Do
     setMeta("property", "og:url", url);
     setMeta("property", "og:type", "website");
     setMeta("property", "og:site_name", site.brand.name);
-    if (image) setMeta("property", "og:image", image);
+    setMeta("property", "og:image", ogImage);
 
-    setMeta("name", "twitter:card", image ? "summary_large_image" : "summary");
+    setMeta("name", "twitter:card", "summary_large_image");
     setMeta("name", "twitter:title", fullTitle);
     setMeta("name", "twitter:description", description);
+    setMeta("name", "twitter:image", ogImage);
   }, [title, description, path, image, noindex]);
 }
