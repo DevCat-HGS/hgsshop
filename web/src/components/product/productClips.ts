@@ -1,10 +1,10 @@
-import devpanelMp4 from "@/assets/media/devpanel-demo.mp4";
-import devpanelWebm from "@/assets/media/devpanel-demo.webm";
-import devpanelPoster from "@/assets/media/devpanel-demo.jpg";
+import taskproMp4 from "@/assets/media/taskpro-demo.mp4";
+import taskproWebm from "@/assets/media/taskpro-demo.webm";
+import taskproPoster from "@/assets/media/taskpro-demo.jpg";
 
 /**
  * Videos reales de producto, por slug. Son grabaciones de la demo funcionando (design/scripts/
- * grabar-demo-devpanel.mjs), no animaciones hechas aparte. Viven en la capa de UI y no en src/data
+ * grabar-demo-taskpro.mjs), no animaciones hechas aparte. Viven en la capa de UI y no en src/data
  * porque son archivos que Vite empaqueta.
  */
 export interface ProductClip {
@@ -17,13 +17,13 @@ export interface ProductClip {
 }
 
 const clips: Partial<Record<string, ProductClip>> = {
-  devpanel: {
-    webm: devpanelWebm,
-    mp4: devpanelMp4,
-    poster: devpanelPoster,
-    width: 1248,
-    height: 520,
-    caption: "Grabación real de la demo: crear una tarea, avanzarla y filtrar por proyecto.",
+  taskpro: {
+    webm: taskproWebm,
+    mp4: taskproMp4,
+    poster: taskproPoster,
+    width: 1280,
+    height: 720,
+    caption: "Grabación real de la demo: crear una tarea, medir su tiempo y convertir las horas en una cuenta de cobro.",
   },
 };
 
