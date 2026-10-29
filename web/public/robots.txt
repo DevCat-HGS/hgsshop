@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /demos/
+
+Sitemap: https://products.hgsportafolio.site/sitemap.xml

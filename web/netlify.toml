@@ -1,11 +1,45 @@
-# Sitio de Netlify para shop.hgsportafolio.site (Base directory: web).
+# Sitio de Netlify para products.hgsportafolio.site (Base directory: web).
 [build]
   command = "npm run build"
   publish = "dist"
 
-# Una sola página: cualquier ruta sirve la app.
+# Solo las rutas que existen en la app (src/router.tsx) se sirven con 200. Cualquier otra URL no
+# coincide con ninguna regla y Netlify responde con dist/404.html y estado 404 real: es una copia de
+# index.html (scripts/copy-404.mjs), así que la app arranca igual y muestra su página de error.
+# Limitación conocida: un slug inexistente bajo /productos/* o /demos/* responde 200 (el servidor
+# no conoce el catálogo); la app muestra la página 404 y marca noindex. Ver ARCHITECTURE.md.
 [[redirects]]
-  from = "/*"
+  from = "/productos"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/productos/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/demos/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/desarrollo-a-medida"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/contacto"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacidad"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/terminos"
   to = "/index.html"
   status = 200
 
@@ -19,7 +53,14 @@
     Cross-Origin-Opener-Policy = "same-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     # Se amplía cuando entren pagos, analítica o un backend en otro dominio, nunca con 'unsafe-inline' en scripts.
+    # form-action/connect-src 'self' cubren el envío de Netlify Forms, que va al mismo origen.
     Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+
+# Las demos son entornos de prueba con datos ficticios: no deben indexarse.
+[[headers]]
+  for = "/demos/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
   for = "/index.html"
