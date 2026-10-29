@@ -172,13 +172,15 @@
     transform: scale(0.97);
   }
 
-  /* Rejilla técnica de fondo: se desvanece hacia los bordes para no competir con el contenido. */
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, #6ea8ff0d 1px, transparent 1px), /* taste-skill-ignore: retícula del fondo atmosférico pedido por la marca */
-      linear-gradient(to bottom, #6ea8ff0d 1px, transparent 1px); /* taste-skill-ignore: retícula del fondo atmosférico */
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%); /* taste-skill-ignore: retícula del fondo atmosférico */
+  /*
+   * Grano fino tipo película sobre la aurora: ruido SVG (feTurbulence) incrustado, sin descargas. Se
+   * rasteriza una vez y se repite, así que no cuesta nada al hacer scroll. Le quita a los degradados de
+   * la aurora el aspecto "digital" sin dibujar ningún patrón geométrico.
+   */
+  .bg-grain {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%27180%27 height=%27180%27><filter id=%27n%27><feTurbulence type=%27fractalNoise%27 baseFrequency=%270.85%27 numOctaves=%273%27 stitchTiles=%27stitch%27/><feColorMatrix values=%270 0 0 0 0.85  0 0 0 0 0.9  0 0 0 0 1  0 0 0 0.55 0%27/></filter><rect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/></svg>");
+    background-size: 180px 180px;
+    opacity: 0.07;
   }
 
 
