@@ -64,20 +64,50 @@ relacionados válidos, ninguna demo interna anunciada sin implementar.
 
 ## Sistema visual
 
-- **Paleta** (`docs/marca/paleta.md` en el repositorio privado): Midnight Navy `#080D18` de fondo, Deep Navy `#101B30` en
-  superficies, Ocean Blue `#1D3B68` para profundidad, Ice Blue `#6EA8FF` para acciones, Emerald Mint
-  `#48D6B0` solo como detalle, Cloud White `#F3F7FF` y Steel Blue `#A9B6CB` para texto. Proporción
-  orientativa 75 / 20 / 5.
-- **Accesibilidad del color:** el texto sobre Ice Blue es navy (`--color-brand-contrast`), no blanco: el
-  blanco da ~2.4:1 y falla WCAG AA; el navy da ~8.7:1.
-- **Lenguaje propio:** la honestidad sobre el estado es el diferencial, así que es el elemento visual
-  central: tablero de estado en la portada, línea de vida en tarjetas y fichas, insignias con punto de
-  estado. Cada categoría tiene color y motivo SVG (`categoryVisuals.tsx`).
-- **Ilustraciones, no capturas falsas:** sin UI real que mostrar, se usan motivos abstractos rotulados
-  "Ilustración · sin capturas reales aún". Cuando haya capturas, se cargan en `screenshots` y sustituyen
-  la ilustración automáticamente.
-- **Movimiento:** aurora en CSS (solo `transform`), partículas en un canvas que se pausa con la pestaña
-  oculta. Con `prefers-reduced-motion` todo queda estático y el loader no se muestra.
+Dirección de arte tomada con taste-skill (`.claude/skills/design-taste-frontend`): **"product-performs"**, el
+producto actúa en la página en lugar de describirse. Hoja guardada en `.taste-skill/direction.json` (local).
+
+- **La idea:** el isotipo de HGS es un hexágono de seis facetas; cada producto muestra cuántas tiene
+  ensambladas según su etapa (`FacetStage`: prototipo 2, en desarrollo 4, disponible 6; los servicios a
+  medida, contorno vacío). Hace visible el diferencial de la marca: ningún producto aparenta más de lo que es.
+- **Paleta** (`docs/marca/paleta.md` en el repositorio privado): Midnight Navy de fondo, Deep Navy y Ocean
+  Blue como campos, Ice Blue para las acciones, Emerald Mint solo como detalle. El texto de los botones
+  primarios va en navy: el blanco sobre Ice Blue da 2.25:1 y falla WCAG AA.
+- **Tipografía:** League Spartan 700 en titulares y Figtree en texto (OFL, autoalojadas por `@fontsource`,
+  solo el subconjunto latino). Clash Grotesk, la que proponía la dirección, se descartó: su licencia no deja
+  claro que se pueda redistribuir en el espejo público y su CDN rompería la CSP.
+- **Reglas de la casa:** un solo radio casi recto, superficies separadas por tono en lugar de bordes, sin
+  etiquetas en mayúsculas espaciadas, sin monoespaciado, sin vidrio ni sombras en reposo, texto corrido a
+  16 px o más en la tinta principal. `node .claude/skills/design-taste-frontend/scripts/lint.mjs web/src` lo
+  comprueba; las excepciones intencionales llevan `taste-skill-ignore` con su motivo.
+- **Fragmentos de interfaz (`data-ui`):** la portada muestra piezas reales de la plataforma (tablero de
+  estado, buscador, DevPanel) con sus propias convenciones de interfaz.
+- **Fotografías de archivo:** una por categoría, de colecciones abiertas (dominio público, CC0 o sin
+  restricciones conocidas), con un único tratamiento monocromo en la paleta (`ArchivePhoto`), pie de foto y
+  crédito en el footer. Muestran el oficio, nunca el producto. Fuentes en `src/assets/photos/credits.json`;
+  se buscaron y descargaron con `scripts/assets.mjs` de la skill.
+- **Fondo:** aurora en CSS (solo `transform`), partículas en canvas que se pausan con la pestaña oculta y
+  grano fino de película (ruido SVG incrustado). Todo quieto con `prefers-reduced-motion`.
+
+### Portada en diapositivas
+
+Diez secciones de pantalla completa (`components/home/`, componente `Slide`), nombradas para poder
+referirse a ellas: S1 Portada, S2 Buscador, S3 Categorías, S4 Productos, S5 Demo, S6 Proceso, S7 A medida,
+S8 Preguntas, S9 Cierre y S10 Footer.
+
+- `useSlideDeck` activa `scroll-snap` nativo en escritorio: cada gesto encaja en la siguiente sección, S9 se
+  detiene y el footer (`snap-end`) pide un scroll más. No se intercepta la rueda ni el teclado.
+- Si en la pantalla actual alguna sección no cabe entera, el encaje pasa de obligatorio a proximidad para no
+  dejar contenido inalcanzable (en 1440×900 caben todas).
+- S9 Cierre existe solo en la portada. Las páginas interiores tienen un botón Volver (`BackButton`): un paso
+  atrás en el historial, o la página padre si se entró directo.
+
+### Movimiento
+
+Criterios de la skill de Emil Kowalski: curvas `ease-out` fuertes, solo `transform` y `opacity`,
+respuesta de 0.97 al pulsar (`.press`). Las partes de cada sección entran escalonadas (`useReveal`,
+`data-reveal`); la clase que las oculta la pone el propio script, así que sin JavaScript nada queda
+oculto, y con movimiento reducido solo hay fundido.
 
 ## Loader de arranque
 
@@ -161,6 +191,10 @@ solo escribe en consola en desarrollo. Para activarla: elegir un proveedor sin c
 implementarlo en `src/lib/analytics.ts` y ampliar `script-src`/`connect-src` en la CSP solo para su dominio.
 
 ## Pruebas
+
+- `node .claude/skills/design-taste-frontend/scripts/inspect.mjs <url>`: inspector de la skill en navegador real
+  (1440, 768 y 390 px). Ejecutarlo sobre el build (`npm run build && npm run preview`), no sobre el servidor de
+  desarrollo.
 
 - `npm test`: Vitest, unitarias de validación, catálogo y formato (`src/**/*.test.ts`).
 - `npm run test:e2e`: Playwright en escritorio y móvil (`e2e/`): búsqueda, filtros en la URL, estado
