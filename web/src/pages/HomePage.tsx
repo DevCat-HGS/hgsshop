@@ -12,6 +12,7 @@ import { Demo } from "@/components/home/Demo";
 import { Proceso } from "@/components/home/Proceso";
 import { AMedida } from "@/components/home/AMedida";
 import { Preguntas } from "@/components/home/Preguntas";
+import { ScrollLine } from "@/components/layout/ScrollLine";
 
 export function HomePage() {
   useDocumentHead({
@@ -41,6 +42,7 @@ export function HomePage() {
       <Proceso />
       <AMedida />
       <Preguntas />
+      <ScrollLine />
     </>
   );
 }

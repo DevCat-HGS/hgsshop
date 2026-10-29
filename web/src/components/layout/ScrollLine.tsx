@@ -13,11 +13,11 @@ const MAX_PROGRESS = 0.9995;
 
 /**
  * S9 · Cierre. Sección de pantalla completa antes del footer: el trazo se dibuja mientras la sección
- * entra y termina cuando se acomoda bajo la barra; en la portada es la última diapositiva y el footer
- * pide un scroll más. El progreso se escribe como variable CSS en el elemento (sin re-renderizar React)
+ * entra y termina cuando se acomoda bajo la barra. Es la última diapositiva de la portada (solo aparece
+ * ahí) y el footer pide un scroll más. El progreso se escribe como variable CSS en el elemento (sin re-renderizar React)
  * y el scroll solo se escucha con la sección en pantalla. Con movimiento reducido, trazo completo y quieto.
  */
-export function ScrollLine({ fullScreen = false }: { fullScreen?: boolean }) {
+export function ScrollLine() {
   const ref = useRef<HTMLElement>(null);
   const filterId = `${useId().replace(/:/g, "")}-glow`;
 
@@ -68,7 +68,7 @@ export function ScrollLine({ fullScreen = false }: { fullScreen?: boolean }) {
       id="cierre"
       aria-labelledby="cierre-titulo"
       data-slide
-      className={`relative flex snap-start flex-col justify-center py-20 ${fullScreen ? "min-h-[calc(100svh-4rem)]" : "min-h-[70svh]"}`}
+      className="relative flex min-h-[calc(100svh-4rem)] snap-start flex-col justify-center py-20"
       style={{ "--trace": 0 } as CSSProperties}
     >
       <Container>

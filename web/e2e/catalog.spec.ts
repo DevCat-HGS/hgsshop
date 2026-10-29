@@ -73,6 +73,33 @@ test.describe("demo de DevPanel", () => {
   });
 });
 
+test.describe("navegación", () => {
+  test("Volver regresa a la página anterior", async ({ page }) => {
+    await page.goto("/productos");
+    await page.getByRole("link", { name: "DevPanel: ver detalle" }).click();
+    await expect(page).toHaveURL(/\/productos\/devpanel$/);
+
+    await page.getByRole("button", { name: "Volver" }).click();
+    await expect(page).toHaveURL(/\/productos$/);
+  });
+
+  test("sin historial, Volver lleva a la página padre", async ({ page }) => {
+    await page.goto("/demos/devpanel");
+    await page.getByRole("button", { name: "Volver" }).click();
+    await expect(page).toHaveURL(/\/productos\/devpanel$/);
+  });
+
+  test("el cierre solo aparece en la portada, que no tiene botón Volver", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "De tu problema al software que lo resuelve" })).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "Volver" })).toHaveCount(0);
+
+    await page.goto("/contacto");
+    await expect(page.getByRole("heading", { level: 1, name: "Hablemos" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "De tu problema al software que lo resuelve" })).toHaveCount(0);
+  });
+});
+
 test.describe("accesibilidad básica", () => {
   test("el primer Tab enfoca el enlace para saltar al contenido", async ({ page }) => {
     await page.goto("/");

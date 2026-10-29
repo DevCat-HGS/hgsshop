@@ -1,12 +1,14 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { BackButton } from "@/components/layout/BackButton";
+import { Container } from "@/components/ui/Container";
 import { SiteBackground } from "@/components/background/SiteBackground";
-import { ScrollLine } from "@/components/layout/ScrollLine";
 import { useReveal } from "@/hooks/useReveal";
 
 export function Layout() {
   const { pathname } = useLocation();
+  const isHome = pathname === "/";
   useReveal();
 
   return (
@@ -17,9 +19,13 @@ export function Layout() {
       </a>
       <Header />
       <main id="main-content" className="flex-1">
+        {!isHome && (
+          <Container className="pt-6">
+            <BackButton />
+          </Container>
+        )}
         <Outlet />
       </main>
-      <ScrollLine fullScreen={pathname === "/"} />
       <Footer />
     </div>
   );
