@@ -10,6 +10,7 @@ import { SpinnerIcon } from "@/components/icons";
 // La portada va en el bundle inicial; el resto de páginas se descargan al visitarlas.
 const CatalogPage = lazy(() => import("@/pages/CatalogPage"));
 const ProductDetailPage = lazy(() => import("@/pages/ProductDetailPage"));
+const DemoPage = lazy(() => import("@/pages/DemoPage"));
 
 function PageFallback() {
   return (
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
           { path: "/", element: <HomePage /> },
           { path: "/productos", element: withSuspense(<CatalogPage />) },
           { path: "/productos/:slug", element: withSuspense(<ProductDetailPage />) },
+          { path: "/demos/:slug", element: withSuspense(<DemoPage />) },
           { path: "*", element: <NotFoundPage /> },
         ],
       },
