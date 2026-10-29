@@ -4,11 +4,56 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Servicios y soluciones de software de Harol Guerrero Salgado." />
-    <title>HGS Shop</title>
+    <meta name="theme-color" content="#080d18" />
+    <title>HGS Digital · Software a medida para negocios</title>
+    <meta
+      name="description"
+      content="Catálogo de aplicaciones y herramientas de software con su estado real, demos y desarrollo a medida."
+    />
+    <link rel="canonical" href="https://products.hgsportafolio.site/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="HGS Digital" />
+    <meta property="og:title" content="HGS Digital · Software a medida para negocios" />
+    <meta
+      property="og:description"
+      content="Catálogo de aplicaciones y herramientas de software con su estado real, demos y desarrollo a medida."
+    />
+    <meta property="og:url" content="https://products.hgsportafolio.site/" />
+    <meta property="og:locale" content="es_ES" />
+    <meta name="twitter:card" content="summary" />
   </head>
   <body>
+    <noscript>
+      Esta plataforma necesita JavaScript para mostrar el catálogo. También puedes escribir a hdevelopergs@gmail.com.
+    </noscript>
     <div id="root"></div>
+
+    <!--
+      Netlify Forms detecta formularios leyendo este HTML en el build, no el DOM de React. Estas copias
+      ocultas declaran los nombres y campos; los formularios reales (src/components/forms) envían por
+      fetch con los mismos nombres. Si cambias un campo allí, cámbialo aquí.
+    -->
+    <form name="cotizacion" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" />
+      <input name="name" />
+      <input name="email" />
+      <input name="company" />
+      <input name="product" />
+      <input name="projectType" />
+      <textarea name="problem"></textarea>
+      <input name="budget" />
+      <input name="timeline" />
+      <input name="consent" />
+    </form>
+    <form name="contacto" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" />
+      <input name="name" />
+      <input name="email" />
+      <input name="subject" />
+      <textarea name="message"></textarea>
+      <input name="consent" />
+    </form>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
