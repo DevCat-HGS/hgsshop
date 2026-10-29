@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { downloadCsv } from "@/demos/kit/csv";
 import { formatMoney, matches } from "@/demos/kit/format";
 import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, inputClass, Pill, SearchField, Table } from "@/demos/kit/ui";
-import { CATEGORIES, stockStatus, UNITS, type Product, type StockStatus } from "./data";
+import { CATEGORIES, STOCK_LABELS, stockStatus, UNITS, type Product, type StockStatus } from "./data";
 import { PermBtn, RoleNote, StockPill, Toolbar, type MovementPreset } from "./common";
 import type { ProductDraft, StockFlow } from "./store";
 
@@ -10,22 +11,31 @@ type StatusFilter = "all" | StockStatus | "archived";
 /** null = cerrado; "new" = crear; un producto = editar. */
 export type Editing = null | "new" | Product;
 
+/** Filtro con el que se abre la pantalla desde la búsqueda global (rol sin permiso de edición o producto archivado). */
+export interface ProductFocus {
+  sku: string;
+  archived: boolean;
+}
+
 export function Products({
   store,
   notify,
   onMove,
   editing,
   setEditing,
+  focus = null,
 }: {
   store: StockFlow;
   notify: (message: string) => void;
   onMove: (preset: MovementPreset) => void;
   editing: Editing;
   setEditing: (editing: Editing) => void;
+  /** Solo se lee al montar: la raíz cambia la `key` para aplicarlo. */
+  focus?: ProductFocus | null;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(focus?.sku ?? "");
   const [category, setCategory] = useState("");
-  const [status, setStatus] = useState<StatusFilter>("all");
+  const [status, setStatus] = useState<StatusFilter>(focus?.archived ? "archived" : "all");
 
   const rows = store.products
     .filter((p) => (status === "archived" ? p.archived : !p.archived && (status === "all" || stockStatus(p) === status)))
@@ -34,6 +44,14 @@ export function Products({
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
 
   const canMove = store.can("move.in") || store.can("move.out") || store.can("move.adjust");
+
+  function exportCsv() {
+    downloadCsv(
+      "stockflow-productos",
+      ["Producto", "SKU", "Categoría", "Unidad", "Stock", "Mínimo", "Costo (COP)", "Precio (COP)", "Estado"],
+      rows.map((p) => [p.name, p.sku, p.category, p.unit, p.stock, p.min, p.cost, p.price, p.archived ? "Archivado" : STOCK_LABELS[stockStatus(p)]]),
+    );
+  }
 
   return (
     <div>
@@ -56,6 +74,9 @@ export function Products({
         <p className="text-[13px] text-text-subtle sm:ml-auto sm:self-center">
           {rows.length} producto{rows.length === 1 ? "" : "s"}
         </p>
+        <Btn size="sm" className="sm:self-center" aria-label="Exportar productos a CSV" disabled={rows.length === 0} onClick={exportCsv}>
+          Exportar CSV
+        </Btn>
       </Toolbar>
 
       {rows.length === 0 ? (

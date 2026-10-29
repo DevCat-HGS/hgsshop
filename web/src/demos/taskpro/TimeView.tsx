@@ -1,5 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { DAY_MS, formatDate, formatTime, fromDateInput, startOfDay, toDateInput } from "@/demos/kit/format";
+import { downloadCsv } from "@/demos/kit/csv";
 import { uid } from "@/demos/kit/storage";
 import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, Panel, Table, inputClass } from "@/demos/kit/ui";
 import { colorHex, formatClock, formatDuration, startOfWeek, type Project, type RunningTimer, type Task, type TimeEntry } from "./data";
@@ -55,6 +56,22 @@ export function TimeView({
     .filter((e) => e.start >= rangeStart && (projectFilter === "all" || e.projectId === projectFilter))
     .sort((a, b) => b.start - a.start);
   const listedTotal = listed.reduce((sum, e) => sum + (e.end - e.start), 0);
+
+  function exportCsv() {
+    const rows = listed.map((e) => {
+      const task = e.taskId ? byTask.get(e.taskId) : undefined;
+      return [
+        formatDate(e.start),
+        formatTime(e.start),
+        formatTime(e.end),
+        Math.round((e.end - e.start) / 36_000) / 100,
+        byProject.get(e.projectId)?.name ?? "Proyecto eliminado",
+        task?.title ?? (e.taskId ? "Tarea eliminada" : "Sin tarea"),
+        e.note,
+      ];
+    });
+    downloadCsv("taskpro-tiempo", ["Fecha", "Inicio", "Fin", "Duración (horas)", "Proyecto", "Tarea", "Nota"], rows);
+  }
 
   function save(entry: TimeEntry) {
     const exists = entries.some((e) => e.id === entry.id);
@@ -187,9 +204,14 @@ export function TimeView({
           <p className="text-sm text-text-muted sm:pb-2">
             {listed.length} entradas · <span className="font-semibold text-text tabular-nums">{formatDuration(listedTotal)}</span>
           </p>
-          <Btn variant="primary" className="sm:ml-auto" onClick={() => setEditing("new")}>
-            Entrada manual
-          </Btn>
+          <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+            <Btn size="sm" onClick={exportCsv} disabled={listed.length === 0} aria-label="Exportar entradas de tiempo a CSV">
+              Exportar CSV
+            </Btn>
+            <Btn variant="primary" onClick={() => setEditing("new")}>
+              Entrada manual
+            </Btn>
+          </div>
         </div>
 
         {listed.length === 0 ? (

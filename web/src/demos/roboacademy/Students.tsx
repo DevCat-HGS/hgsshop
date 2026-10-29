@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { DAY_MS, fromDateInput, matches, toDateInput } from "@/demos/kit/format";
+import { DAY_MS, formatDate, fromDateInput, matches, toDateInput } from "@/demos/kit/format";
+import { downloadCsv } from "@/demos/kit/csv";
 import { uid } from "@/demos/kit/storage";
 import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, Pill, SearchField, Table, inputClass } from "@/demos/kit/ui";
 import { RISK_WINDOW_DAYS, activeIn, digitsOnly, formatPhone, summarize, type Student, type StudentStatus, todayStart, nowMs, formatDateYear } from "./data";
@@ -7,13 +8,13 @@ import { GroupSelect, RatePill } from "./shared";
 import { StudentProfile } from "./StudentProfile";
 import type { Academy, ScreenProps } from "./store";
 
-export function Students({ academy, notify }: ScreenProps) {
+export function Students({ academy, notify, initialProfileId = null }: ScreenProps & { initialProfileId?: string | null }) {
   const { groups, students, sessions } = academy;
   const [query, setQuery] = useState("");
   const [groupId, setGroupId] = useState("");
   const [status, setStatus] = useState<"" | StudentStatus>("activo");
   const [editing, setEditing] = useState<Student | "nuevo" | null>(null);
-  const [profileId, setProfileId] = useState<string | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(initialProfileId);
 
   const since = todayStart() - RISK_WINDOW_DAYS * DAY_MS;
   const groupName = (id: string) => groups.find((g) => g.id === id)?.name ?? "Sin grupo";
@@ -21,6 +22,28 @@ export function Students({ academy, notify }: ScreenProps) {
     .filter((s) => (!groupId || s.groupId === groupId) && (!status || s.status === status))
     .filter((s) => !query || matches(`${s.name} ${s.guardian} ${s.guardianPhone}`, query))
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
+
+  function exportCsv() {
+    downloadCsv(
+      "roboacademy-estudiantes",
+      ["Estudiante", "Edad", "Grupo", "Acudiente", "Teléfono del acudiente", "Módulo actual", "Asistencia 8 semanas (%)", "Ingreso", "Estado"],
+      visible.map((s) => {
+        const group = groups.find((g) => g.id === s.groupId);
+        const module = !group ? "" : s.moduleIndex >= group.modules.length ? "Ruta completada" : `${s.moduleIndex + 1}. ${group.modules[s.moduleIndex].name}`;
+        return [
+          s.name,
+          s.age,
+          groupName(s.groupId),
+          s.guardian,
+          formatPhone(s.guardianPhone),
+          module,
+          summarize(sessions, s.id, since).rate ?? "Sin registro",
+          formatDate(s.joinedAt),
+          s.status === "activo" ? "Activo" : "Retirado",
+        ];
+      }),
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -38,7 +61,10 @@ export function Students({ academy, notify }: ScreenProps) {
             )}
           </Field>
         </div>
-        <Btn variant="primary" className="sm:ml-auto" onClick={() => setEditing("nuevo")} disabled={groups.length === 0}>
+        <Btn size="sm" className="sm:ml-auto sm:mb-1" aria-label="Exportar estudiantes a CSV" onClick={exportCsv} disabled={visible.length === 0}>
+          Exportar CSV
+        </Btn>
+        <Btn variant="primary" onClick={() => setEditing("nuevo")} disabled={groups.length === 0}>
           Nuevo estudiante
         </Btn>
       </div>

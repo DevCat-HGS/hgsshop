@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { downloadCsv } from "@/demos/kit/csv";
 import { formatDate, formatDateTime, formatMoney, matches } from "@/demos/kit/format";
 import { Btn, Dialog, Empty, Field, FormError, inputClass, Pill, SearchField, Table } from "@/demos/kit/ui";
 import { ORDER_LABELS, ORDER_TONES, orderTotal, type Order, type OrderStatus } from "./data";
@@ -13,21 +14,43 @@ export function Orders({
   notify,
   editing,
   setEditing,
+  viewingId,
+  setViewingId,
 }: {
   store: StockFlow;
   notify: (m: string) => void;
   editing: OrderEditing;
   setEditing: (e: OrderEditing) => void;
+  /** Pedido cuyo detalle está abierto. Vive en la raíz para que la búsqueda global pueda abrirlo. */
+  viewingId: string | null;
+  setViewingId: (id: string | null) => void;
 }) {
   const [status, setStatus] = useState<"" | OrderStatus>("");
   const [query, setQuery] = useState("");
-  const [viewingId, setViewingId] = useState<string | null>(null);
 
   const rows = store.orders
     .filter((o) => (!status || o.status === status) && (!query || matches(`${o.number} ${o.customer}`, query)))
     .sort((a, b) => b.createdAt - a.createdAt);
   const viewing = store.orders.find((o) => o.id === viewingId) ?? null;
   const counts = (s: OrderStatus) => store.orders.filter((o) => o.status === s).length;
+
+  function exportCsv() {
+    downloadCsv(
+      "stockflow-pedidos",
+      ["Pedido", "Cliente", "Estado", "Líneas", "Total (COP)", "Creado", "Creado por", "Cerrado", "Nota"],
+      rows.map((o) => [
+        o.number,
+        o.customer,
+        ORDER_LABELS[o.status],
+        o.lines.length,
+        orderTotal(o),
+        formatDateTime(o.createdAt),
+        store.userById.get(o.createdBy)?.name ?? "",
+        o.closedAt ? formatDateTime(o.closedAt) : "",
+        o.note,
+      ]),
+    );
+  }
 
   return (
     <div>
@@ -47,6 +70,9 @@ export function Orders({
             </option>
           ))}
         </select>
+        <Btn size="sm" className="sm:ml-auto sm:self-center" aria-label="Exportar pedidos a CSV" disabled={rows.length === 0} onClick={exportCsv}>
+          Exportar CSV
+        </Btn>
       </Toolbar>
 
       {rows.length === 0 ? (

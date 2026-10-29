@@ -12,14 +12,23 @@ export function Services({
   notify,
   creating,
   onCreatingChange,
+  focus,
 }: {
   store: ClientiaStore;
   notify: (msg: string) => void;
   creating: boolean;
   onCreatingChange: (open: boolean) => void;
+  /** Servicio a abrir en edición, pedido desde la búsqueda global (objeto nuevo en cada petición). */
+  focus: { id: string } | null;
 }) {
   const { services, appointments, now } = store;
   const [editing, setEditing] = useState<Service | null>(null);
+
+  const [handledFocus, setHandledFocus] = useState<{ id: string } | null>(null);
+  if (focus && focus !== handledFocus) {
+    setHandledFocus(focus);
+    setEditing(services.find((s) => s.id === focus.id) ?? null);
+  }
 
   function remove(service: Service) {
     store.setServices((list) => list.filter((s) => s.id !== service.id));

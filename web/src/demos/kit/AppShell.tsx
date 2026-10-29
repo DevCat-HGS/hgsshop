@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CommandPalette, type Command } from "@/demos/kit/CommandPalette";
 
 /** Props que reciben todas las demos. `embedded`: incrustada en la portada (S5), sin tocar la URL. */
 export interface DemoAppProps {
@@ -25,6 +26,8 @@ export function AppShell<V extends string>({
   title,
   actions,
   sidebarFooter,
+  commands,
+  embedded = false,
   children,
 }: {
   appName: string;
@@ -35,6 +38,10 @@ export function AppShell<V extends string>({
   title: string;
   actions?: ReactNode;
   sidebarFooter?: ReactNode;
+  /** Búsqueda global (Ctrl+K): pantallas y registros de la demo. */
+  commands?: Command[];
+  /** Incrustada en la portada: sin atajo de teclado, que chocaría con el del navegador en esa página. */
+  embedded?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -72,7 +79,14 @@ export function AppShell<V extends string>({
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-6">
           <h2 className="font-display text-2xl text-text">{title}</h2>
-          {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 sm:flex-none">
+            {commands && (
+              <div className="min-w-0 flex-1 sm:w-56 sm:flex-none">
+                <CommandPalette commands={commands} enableShortcut={!embedded} />
+              </div>
+            )}
+            {actions}
+          </div>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">{children}</div>
         {sidebarFooter && <div className="border-t border-border px-4 py-3 lg:hidden">{sidebarFooter}</div>}

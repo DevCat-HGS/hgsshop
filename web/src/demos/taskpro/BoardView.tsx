@@ -1,8 +1,9 @@
 import { useState, type DragEvent } from "react";
 import { formatDate, matches, startOfDay } from "@/demos/kit/format";
-import { Field, Pill, SearchField, inputClass } from "@/demos/kit/ui";
+import { downloadCsv } from "@/demos/kit/csv";
+import { Btn, Field, Pill, SearchField, inputClass } from "@/demos/kit/ui";
 import { ArrowRightIcon } from "@/components/icons";
-import { COLUMNS, PRIORITIES, isOverdue, priorityInfo, type Priority, type Project, type Task, type TaskStatus } from "./data";
+import { COLUMNS, PRIORITIES, isOverdue, priorityInfo, statusLabel, type Priority, type Project, type Task, type TaskStatus } from "./data";
 import type { TaskDraftDefaults } from "./TaskDialog";
 import { ProjectDot } from "./TaskDialog";
 
@@ -48,6 +49,22 @@ export function BoardView({
   );
   const filtering = filters.priority !== "all" || filters.tag !== "all" || filters.query.trim() !== "";
   const set = (change: Partial<BoardFilters>) => onFiltersChange({ ...filters, projectId, ...change });
+
+  function exportCsv() {
+    const order = new Map(COLUMNS.map((c, i) => [c.id, i]));
+    const rows = [...visible]
+      .sort((a, b) => (order.get(a.status) ?? 0) - (order.get(b.status) ?? 0) || PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
+      .map((t) => [
+        t.title,
+        byId.get(t.projectId)?.name ?? "Proyecto eliminado",
+        statusLabel(t.status),
+        priorityInfo(t.priority).label,
+        t.tags.join(", "),
+        t.dueDate != null ? formatDate(t.dueDate) : "",
+        t.subtasks.length ? `${t.subtasks.filter((s) => s.done).length} de ${t.subtasks.length}` : "",
+      ]);
+    downloadCsv("taskpro-tareas", ["Tarea", "Proyecto", "Estado", "Prioridad", "Etiquetas", "Fecha límite", "Subtareas hechas"], rows);
+  }
 
   function onDrop(event: DragEvent, status: TaskStatus) {
     event.preventDefault();
@@ -105,9 +122,14 @@ export function BoardView({
         )}
       </div>
 
-      <p className="text-[13px] text-text-subtle">
-        {visible.length} de {scope.length} tareas. Usa las flechas de cada tarjeta, o arrástrala, para moverla de columna.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[13px] text-text-subtle">
+          {visible.length} de {scope.length} tareas. Usa las flechas de cada tarjeta, o arrástrala, para moverla de columna.
+        </p>
+        <Btn size="sm" onClick={exportCsv} disabled={visible.length === 0} aria-label="Exportar tareas a CSV">
+          Exportar CSV
+        </Btn>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map((column, colIndex) => {

@@ -53,10 +53,10 @@ const PRINT_CSS = `
 }
 `;
 
-export function Reports({ academy }: Omit<ScreenProps, "notify">) {
+export function Reports({ academy, initialStudentId = null }: Omit<ScreenProps, "notify"> & { initialStudentId?: string | null }) {
   const { groups, students, sessions, notes, payments, comments } = academy;
   const sorted = [...students].sort((a, b) => a.name.localeCompare(b.name, "es"));
-  const [studentId, setStudentId] = useState(sorted[0]?.id ?? "");
+  const [studentId, setStudentId] = useState(initialStudentId ?? sorted[0]?.id ?? "");
   const [period, setPeriod] = useState<Period>("mes-actual");
 
   const student = students.find((s) => s.id === studentId) ?? sorted[0];

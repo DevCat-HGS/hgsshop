@@ -10,6 +10,10 @@
 export type AnalyticsEvent =
   | "product_viewed"
   | "demo_opened"
+  | "demo_action"
+  | "demo_tour_finished"
+  | "demo_cta_shown"
+  | "demo_cta_clicked"
   | "form_submitted"
   | "catalog_filtered"
   | "quote_cta_clicked";

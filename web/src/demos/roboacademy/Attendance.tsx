@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { downloadCsv } from "@/demos/kit/csv";
 import { DAY_MS, formatDate, formatDateLong, startOfDay } from "@/demos/kit/format";
 import { Btn, Empty, Field, Panel, Table, inputClass } from "@/demos/kit/ui";
 import { MARK_LABEL, sessionDates, sessionId, timeLabel, type Group, type Mark, type Session, type Student, todayStart, plural } from "./data";
@@ -43,6 +44,16 @@ export function Attendance({ academy, notify }: ScreenProps) {
     academy.setMarks(group!.id, date, Object.fromEntries(roster.map((s) => [s.id, "presente" as Mark])));
     notify("Todos marcados como presentes");
   }
+
+  function exportCsv() {
+    const g = group!;
+    const rows = dates.flatMap((d) => {
+      const s = sessions.find((x) => x.id === sessionId(g.id, d));
+      return rosterFor(students, g, d, s).map((st) => [g.name, formatDate(d), timeLabel(g.time), st.name, s?.marks[st.id] ? MARK_LABEL[s.marks[st.id]] : "Sin registrar"]);
+    });
+    downloadCsv("roboacademy-asistencia", ["Grupo", "Fecha", "Hora", "Estudiante", "Asistencia"], rows);
+  }
+  const historyRows = dates.reduce((n, d) => n + rosterFor(students, group, d, sessions.find((x) => x.id === sessionId(group.id, d))).length, 0);
 
   return (
     <div className="space-y-5">
@@ -116,7 +127,12 @@ export function Attendance({ academy, notify }: ScreenProps) {
       </Panel>
 
       <section aria-label="Historial de sesiones" className="space-y-2">
-        <h3 className="text-sm font-semibold text-text">Historial de {group.name}</h3>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-text">Historial de {group.name}</h3>
+          <Btn size="sm" aria-label={`Exportar asistencia de ${group.name} a CSV`} onClick={exportCsv} disabled={historyRows === 0}>
+            Exportar CSV
+          </Btn>
+        </div>
         <Table label={`Historial de sesiones de ${group.name}`} head={["Fecha", "Presentes", "Ausentes", "Excusas", "Sin registrar", ""]} minWidth="36rem">
           {dates.map((d) => {
             const s = sessions.find((x) => x.id === sessionId(group.id, d));

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { downloadCsv } from "@/demos/kit/csv";
 import { formatDate, formatDateLong, formatTime, startOfDay } from "@/demos/kit/format";
 import { Btn, Empty, Field, inputClass } from "@/demos/kit/ui";
 import {
@@ -9,6 +10,7 @@ import {
   minutesLabel,
   minutesOfDay,
   SLOT,
+  STATUS_LABEL,
   startOfWeek,
   TONE_BLOCK,
   WEEKDAYS,
@@ -23,11 +25,21 @@ const ROW_REM = 2.75;
 
 type Mode = "week" | "day";
 
-export function Agenda({ store, onEdit }: { store: ClientiaStore; onEdit: (editor: Editor) => void }) {
-  const { now, schedule, professionals } = store;
+export function Agenda({
+  store,
+  onEdit,
+  proFilter,
+  onProFilterChange,
+}: {
+  store: ClientiaStore;
+  onEdit: (editor: Editor) => void;
+  /** "all" o el id de una profesional; vive en la raíz para que la búsqueda global pueda filtrar. */
+  proFilter: string;
+  onProFilterChange: (id: string) => void;
+}) {
+  const { now, schedule, professionals, appointments, clients } = store;
   const [mode, setMode] = useState<Mode>(() => (typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches ? "day" : "week"));
   const [anchor, setAnchor] = useState(() => startOfDay(now));
-  const [proFilter, setProFilter] = useState("all");
 
   const shownPros = proFilter === "all" ? professionals : professionals.filter((p) => p.id === proFilter);
   const weekStart = startOfWeek(anchor);
@@ -53,6 +65,30 @@ export function Agenda({ store, onEdit }: { store: ClientiaStore; onEdit: (edito
       ? `${formatDate(days[0])} – ${formatDate(days[5])} de ${new Date(days[5]).getFullYear()}`
       : capitalize(formatDateLong(anchor));
   const isCurrent = mode === "week" ? weekStart === startOfWeek(now) : anchor === startOfDay(now);
+
+  // Citas visibles: las mismas que pinta la grilla (sin canceladas, días abiertos, profesionales mostradas).
+  const shownIds = shownPros.map((p) => p.id);
+  const visibleAppts = appointments
+    .filter((a) => a.status !== "cancelled" && shownIds.includes(a.professionalId) && days.includes(startOfDay(a.start)) && schedule[new Date(a.start).getDay()].open)
+    .sort((a, b) => a.start - b.start);
+
+  function exportCsv() {
+    const proName = (id: string) => professionals.find((p) => p.id === id)?.name ?? "Profesional eliminada";
+    downloadCsv(
+      "clientia-citas",
+      ["Fecha", "Hora", "Duración", "Cliente", "Servicio", "Profesional", "Estado", "Precio (COP)"],
+      visibleAppts.map((a) => [
+        formatDate(a.start),
+        formatTime(a.start),
+        durationLabel(a.duration),
+        clients.find((c) => c.id === a.clientId)?.name ?? "Cliente eliminado",
+        a.serviceName,
+        proName(a.professionalId),
+        a.status === "scheduled" && a.start <= now ? "Por marcar" : STATUS_LABEL[a.status],
+        Math.round(a.price),
+      ]),
+    );
+  }
 
   const columns =
     mode === "week"
@@ -91,7 +127,7 @@ export function Agenda({ store, onEdit }: { store: ClientiaStore; onEdit: (edito
         </div>
         <Field label="Profesional" className="w-full sm:w-64">
           {(id) => (
-            <select id={id} className={inputClass} value={proFilter} onChange={(e) => setProFilter(e.target.value)}>
+            <select id={id} className={inputClass} value={proFilter} onChange={(e) => onProFilterChange(e.target.value)}>
               <option value="all">Agenda compartida (todas)</option>
               {professionals.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -101,6 +137,9 @@ export function Agenda({ store, onEdit }: { store: ClientiaStore; onEdit: (edito
             </select>
           )}
         </Field>
+        <Btn size="sm" onClick={exportCsv} disabled={visibleAppts.length === 0} aria-label={`Exportar citas ${mode === "week" ? "de la semana" : "del día"} a CSV`}>
+          Exportar CSV
+        </Btn>
       </div>
 
       {mode === "week" && proFilter === "all" && professionals.length > 1 && (

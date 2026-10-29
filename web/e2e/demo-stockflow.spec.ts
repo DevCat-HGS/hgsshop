@@ -1,4 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import fs from "node:fs";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 async function open(page: Page) {
   await page.goto("/demos/stockflow");
@@ -162,4 +164,49 @@ test("un producto con historial se archiva en lugar de borrarse y se puede resta
   await expect(page.getByText("No hay productos archivados.")).toBeVisible();
   await page.getByLabel("Filtrar por estado").selectOption("all");
   await expect(table.getByText('Llave inglesa 10"')).toBeVisible();
+});
+
+test("exporta a CSV solo los productos filtrados", async ({ page }) => {
+  await open(page);
+  await go(page, /^Productos/);
+  await page.getByLabel("Filtrar por categoría").selectOption("Pinturas");
+  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Exportar productos a CSV" }).click()]);
+  expect(download.suggestedFilename()).toMatch(/^stockflow-productos.*\.csv$/);
+  const csv = fs.readFileSync(await download.path(), "utf8");
+  expect(csv).toContain("Producto;SKU;Categoría;Unidad;Stock;Mínimo;Costo (COP);Precio (COP);Estado");
+  expect(csv).toContain("PIN-BR03;Pinturas");
+  expect(csv).not.toContain("CON-CE50");
+});
+
+async function searchAll(page: Page, text: string) {
+  if (test.info().project.name === "mobile") await page.getByRole("button", { name: "Buscar en todo" }).click();
+  else await page.keyboard.press("Control+k");
+  const palette = page.getByRole("dialog", { name: "Buscar en la demo" });
+  await palette.getByRole("combobox", { name: "Buscar registros o pantallas" }).fill(text);
+  await expect(palette.getByRole("option").first()).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(palette).toBeHidden();
+}
+
+test("la búsqueda global abre productos y pedidos según el rol", async ({ page }) => {
+  await open(page);
+  await searchAll(page, "Brocha 3");
+  await expect(page.getByRole("heading", { name: "Productos", level: 2 })).toBeVisible();
+  const edit = page.getByRole("dialog", { name: 'Editar "Brocha 3" cerda natural"' });
+  await expect(edit.getByLabel("SKU")).toHaveValue("PIN-BR03");
+  await edit.getByRole("button", { name: "Cancelar" }).click();
+
+  await searchAll(page, "Altavista");
+  await expect(page.getByRole("heading", { name: "Pedidos", level: 2 })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Pedido P-1039" })).toContainText("Edificio Altavista P.H.");
+  await page.getByRole("dialog", { name: "Pedido P-1039" }).getByRole("button", { name: "Cerrar" }).click();
+
+  await useAs(page, "Marta Ospina");
+  await searchAll(page, "Cemento gris");
+  await expect(page.getByRole("heading", { name: "Productos", level: 2 })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("searchbox", { name: "Buscar productos" })).toHaveValue("CON-CE50");
+  const rows = page.getByRole("table", { name: "Productos" }).getByRole("row");
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(1)).toContainText("Cemento gris uso general 50 kg");
 });

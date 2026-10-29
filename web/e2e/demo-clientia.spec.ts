@@ -1,4 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import fs from "node:fs";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Fecha futura sin citas de ejemplo: el martes de dentro de tres semanas (la semilla llega hasta +13 días).
 function futureTuesday() {
@@ -160,4 +162,53 @@ test("recordatorios: plantilla validada, bandeja simulada y desactivación", asy
   await settings.getByLabel("Enviar recordatorios automáticos").uncheck();
   await settings.getByRole("button", { name: "Guardar configuración" }).click();
   await expect(page.getByText("Los recordatorios están desactivados.")).toBeVisible();
+});
+
+test("exporta a CSV los clientes filtrados y las citas visibles de la agenda", async ({ page }) => {
+  await openDemo(page, "clientes");
+  await page.getByLabel("Canal de recordatorio").selectOption({ label: "Correo" });
+  const button = page.getByRole("button", { name: "Exportar clientes a CSV" });
+  await expect(button).toHaveText("Exportar CSV");
+  let [download] = await Promise.all([page.waitForEvent("download"), button.click()]);
+  expect(download.suggestedFilename()).toMatch(/^clientia-clientes-.*\.csv$/);
+  let csv = fs.readFileSync(await download.path(), "utf8");
+  expect(csv.split("\r\n")[0]).toContain("Cliente;Teléfono;Correo;Recordatorio;Próxima cita;Visitas;Gasto total (COP);Inasistencias");
+  expect(csv).toContain("Camila Torres;310 555 0103;camila.torres@ejemplo.com;Correo");
+  expect(csv).not.toContain("Laura Gómez Pardo");
+
+  await nav(page, "Agenda").click();
+  await page.getByRole("group", { name: "Vista de la agenda" }).getByRole("button", { name: "Semana" }).click();
+  await page.getByLabel("Profesional", { exact: true }).selectOption({ label: "Daniela Ortiz" });
+  [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Exportar citas de la semana a CSV" }).click()]);
+  expect(download.suggestedFilename()).toMatch(/^clientia-citas-.*\.csv$/);
+  csv = fs.readFileSync(await download.path(), "utf8");
+  expect(csv.split("\r\n")[0]).toContain("Fecha;Hora;Duración;Cliente;Servicio;Profesional;Estado;Precio (COP)");
+  expect(csv).toContain("Daniela Ortiz");
+  expect(csv).not.toContain("Valentina Ríos");
+});
+
+test("búsqueda global: abre la ficha de un cliente, edita un servicio y filtra la agenda por profesional", async ({ page }) => {
+  await openDemo(page);
+  const palette = page.getByRole("dialog", { name: "Buscar en la demo" });
+  async function search(text: string) {
+    if (test.info().project.name.includes("mobile")) await page.getByRole("button", { name: "Buscar en todo" }).click();
+    else await page.keyboard.press("Control+k");
+    await palette.getByRole("combobox", { name: "Buscar registros o pantallas" }).fill(text);
+    await expect(palette.getByRole("option").first()).toContainText(text);
+    await page.keyboard.press("Enter");
+    await expect(palette).toBeHidden();
+  }
+
+  await search("Natalia");
+  await expect(page.getByRole("region", { name: "Ficha de Natalia Herrera" })).toBeVisible();
+  await expect(page).toHaveURL(/vista=clientes/);
+
+  await search("Masaje rel");
+  const edit = page.getByRole("dialog", { name: "Editar servicio" });
+  await expect(edit.getByLabel("Nombre")).toHaveValue("Masaje relajante");
+  await edit.getByRole("button", { name: "Cancelar" }).click();
+
+  await search("Daniela");
+  await expect(page).toHaveURL(/vista=agenda/);
+  await expect(page.getByLabel("Profesional", { exact: true })).toHaveValue("p-2");
 });

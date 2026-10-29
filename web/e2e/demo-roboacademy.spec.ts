@@ -1,4 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import fs from "node:fs";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 async function open(page: Page, section: RegExp) {
   await page.goto("/demos/roboacademy");
@@ -119,4 +121,44 @@ test("avanzar de módulo se refleja en el reporte para acudientes", async ({ pag
   await page.getByLabel("Estudiante").selectOption({ label: "Jerónimo Vélez" });
   await expect(page.getByRole("textbox", { name: "Comentario para el acudiente" })).toHaveValue("Jerónimo avanzó muy bien este mes.");
   await expect(page.getByRole("button", { name: "Imprimir" })).toBeVisible();
+});
+
+test("exporta a CSV los estudiantes visibles según el filtro de estado", async ({ page }) => {
+  await open(page, /^Estudiantes$/);
+  const button = page.getByRole("button", { name: "Exportar estudiantes a CSV" });
+
+  const [first] = await Promise.all([page.waitForEvent("download"), button.click()]);
+  expect(first.suggestedFilename()).toMatch(/^roboacademy-estudiantes-.*\.csv$/);
+  const active = fs.readFileSync((await first.path())!, "utf8");
+  expect(active).toContain("Estudiante;Edad;Grupo;Acudiente;Teléfono del acudiente;Módulo actual;Asistencia 8 semanas (%);Ingreso;Estado");
+  expect(active).toContain("Jerónimo Vélez");
+  expect(active).not.toContain("Felipe Duque");
+
+  await page.getByLabel("Estado").selectOption("");
+  const [second] = await Promise.all([page.waitForEvent("download"), button.click()]);
+  const all = fs.readFileSync((await second.path())!, "utf8");
+  expect(all).toMatch(/Felipe Duque;.*;Retirado/);
+});
+
+test("la búsqueda global abre la ficha de un estudiante y su reporte", async ({ page }) => {
+  await page.goto("/demos/roboacademy");
+  await expect(page.getByRole("button", { name: "Buscar en todo" })).toBeVisible();
+  const openPalette = async () => {
+    if (test.info().project.name.includes("mobile")) await page.getByRole("button", { name: "Buscar en todo" }).click();
+    else await page.keyboard.press("Control+k");
+    return page.getByRole("dialog", { name: "Buscar en la demo" });
+  };
+
+  let palette = await openPalette();
+  await palette.getByRole("combobox", { name: "Buscar registros o pantallas" }).fill("jerónimo vél");
+  await expect(palette.getByRole("option").first()).toContainText("Jerónimo Vélez");
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("dialog", { name: "Ficha de Jerónimo Vélez" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Estudiantes", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  palette = await openPalette();
+  await palette.getByRole("combobox", { name: "Buscar registros o pantallas" }).fill("reporte de jerónimo");
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("article", { name: "Reporte de Jerónimo Vélez" })).toBeVisible();
 });

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { downloadCsv } from "@/demos/kit/csv";
 import { formatDate, formatMoney, fromDateInput, matches, toDateInput } from "@/demos/kit/format";
 import { Btn, Dialog, Empty, Field, FormError, Pill, SearchField, Stat, Table, inputClass } from "@/demos/kit/ui";
 import { PAY_METHODS, billedStudents, monthKey, monthLabel, monthStart, shiftMonth, type PayMethod, type Student, todayStart, nowMs } from "./data";
@@ -27,6 +28,22 @@ export function Payments({ academy, notify }: ScreenProps) {
     .filter((r) => (!onlyPending || !r.payment) && (!groupId || r.student.groupId === groupId))
     .filter((r) => !query || matches(`${r.student.name} ${r.student.guardian}`, query))
     .sort((a, b) => Number(Boolean(a.payment)) - Number(Boolean(b.payment)) || a.student.name.localeCompare(b.student.name, "es"));
+
+  function exportCsv() {
+    downloadCsv(
+      "roboacademy-pagos",
+      ["Estudiante", "Grupo", "Mes", "Valor (COP)", "Estado", "Fecha de pago", "Método"],
+      visible.map(({ student, payment, fee }) => [
+        student.status === "retirado" ? `${student.name} (retirado)` : student.name,
+        groups.find((g) => g.id === student.groupId)?.name ?? "Sin grupo",
+        monthLabel(month),
+        Math.round(fee),
+        payment ? "Pagado" : "Pendiente",
+        payment ? formatDate(payment.paidAt) : "",
+        payment ? (PAY_METHODS.find((m) => m.id === payment.method)?.label ?? "") : "",
+      ]),
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -57,6 +74,9 @@ export function Payments({ academy, notify }: ScreenProps) {
           <input type="checkbox" checked={onlyPending} onChange={(e) => setOnlyPending(e.target.checked)} className="size-4 accent-[var(--color-brand)]" />
           Solo pendientes
         </label>
+        <Btn size="sm" className="sm:ml-auto sm:mb-1" aria-label="Exportar pagos a CSV" onClick={exportCsv} disabled={visible.length === 0}>
+          Exportar CSV
+        </Btn>
       </div>
 
       {visible.length === 0 ? (

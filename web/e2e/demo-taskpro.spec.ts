@@ -1,4 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import fs from "node:fs";
+import type { Download, Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 async function open(page: Page, vista?: string) {
   await page.goto(`/demos/taskpro${vista ? `?vista=${vista}` : ""}`);
@@ -124,4 +126,64 @@ test("el temporizador sobrevive a la recarga y las entradas manuales se validan"
   await dialog.getByRole("button", { name: "Guardar" }).click();
   await expect(dialog).toBeHidden();
   await expect(page.getByRole("table", { name: "Entradas de tiempo" }).getByText("Revisión de código del cliente")).toBeVisible();
+});
+
+async function readCsv(download: Download, prefix: string) {
+  expect(download.suggestedFilename()).toMatch(new RegExp(`^${prefix}-.*\\.csv$`));
+  return fs.readFileSync((await download.path())!, "utf8");
+}
+
+test("exporta a CSV las tareas filtradas del tablero y las entradas de tiempo", async ({ page }) => {
+  await open(page, "tablero");
+  await page.getByLabel("Prioridad").selectOption({ label: "Urgente" });
+  const boardBtn = page.getByRole("button", { name: "Exportar tareas a CSV" });
+  const [download] = await Promise.all([page.waitForEvent("download"), boardBtn.click()]);
+  const csv = await readCsv(download, "taskpro-tareas");
+  expect(csv).toContain("Tarea;Proyecto;Estado;Prioridad;Etiquetas;Fecha límite;Subtareas hechas");
+  expect(csv).toContain("Corregir total con envío gratis;Tienda Café Altamira;Pendiente;Urgente;bug, pagos;");
+  expect(csv).toContain("Idempotencia en POST /cobros;API de pagos Recaudo+;En revisión;Urgente;backend, pagos;");
+  expect(csv).toContain(";2 de 2");
+  expect(csv).not.toContain("Cupones de descuento por porcentaje");
+
+  await nav(page).getByRole("button", { name: "Tiempo" }).click();
+  // Esperar a la pantalla de Tiempo: mientras cambia, el filtro "Proyecto" del tablero sigue en pantalla.
+  const timeBtn = page.getByRole("button", { name: "Exportar entradas de tiempo a CSV" });
+  await expect(timeBtn).toBeVisible();
+  await page.getByLabel("Proyecto", { exact: true }).selectOption({ label: "App de citas Bienestar" });
+  const [timeDownload] = await Promise.all([page.waitForEvent("download"), timeBtn.click()]);
+  const timeCsv = await readCsv(timeDownload, "taskpro-tiempo");
+  expect(timeCsv).toContain("Fecha;Inicio;Fin;Duración (horas);Proyecto;Tarea;Nota");
+  expect(timeCsv).toMatch(/;0,75;App de citas Bienestar;Sin tarea;Llamada con la clínica/);
+  expect(timeCsv).not.toContain("Tienda Café Altamira");
+});
+
+test("la búsqueda global abre una tarea, un proyecto y una nota", async ({ page }) => {
+  const mobile = test.info().project.name.includes("mobile");
+  async function search(text: string) {
+    if (mobile) await page.getByRole("button", { name: "Buscar en todo" }).click();
+    else await page.keyboard.press("Control+k");
+    const palette = page.getByRole("dialog", { name: "Buscar en la demo" });
+    await expect(palette).toBeVisible();
+    await palette.getByRole("combobox", { name: "Buscar registros o pantallas" }).fill(text);
+    await expect(palette.getByRole("option").first()).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(palette).toBeHidden();
+  }
+
+  await open(page);
+  await search("recordatorio de cita");
+  await expect(page.getByRole("heading", { level: 2, name: "Tablero" })).toBeVisible();
+  const taskDialog = page.getByRole("dialog", { name: "Editar tarea" });
+  await expect(taskDialog.getByLabel("Título")).toHaveValue("Recordatorio de cita por SMS");
+  await taskDialog.getByRole("button", { name: "Cancelar" }).click();
+  await expect(taskDialog).toBeHidden();
+
+  await search("Inmobiliaria Habitar");
+  await expect(page.getByRole("heading", { level: 2, name: "Proyectos" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Editar proyecto" }).getByLabel("Nombre")).toHaveValue("Portal Habitar");
+  await page.getByRole("dialog", { name: "Editar proyecto" }).getByRole("button", { name: "Cancelar" }).click();
+
+  await search("variables de entorno");
+  await expect(page.getByRole("heading", { level: 2, name: "Notas" })).toBeVisible();
+  await expect(page.getByRole("form", { name: 'Editar nota "Variables de entorno de la tienda"' })).toBeVisible();
 });

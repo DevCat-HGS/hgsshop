@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test.describe("descubrimiento de productos", () => {
   test("la portada busca en el catálogo mientras se escribe", async ({ page }) => {

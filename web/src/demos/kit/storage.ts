@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 
 /**
  * Las demos guardan sus datos solo en el navegador de quien las usa (localStorage), bajo el prefijo
@@ -6,6 +6,29 @@ import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } 
  * cuota llena), la demo sigue funcionando en memoria y se reinicia al recargar.
  */
 const PREFIX = "hgs-demo:";
+
+/** Evento de ventana que se emite cada vez que una demo guarda un cambio hecho por quien la usa. */
+export const DEMO_CHANGE_EVENT = "hgs-demo:change";
+
+/**
+ * Preferencias de la página de demo (recorrido visto, aviso cerrado). Prefijo aparte para que "Reiniciar
+ * datos" no las borre: reiniciar no debe volver a mostrar el recorrido.
+ */
+export function readUiFlag(name: string) {
+  try {
+    return window.localStorage.getItem(`hgs-demo-ui:${name}`) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setUiFlag(name: string) {
+  try {
+    window.localStorage.setItem(`hgs-demo-ui:${name}`, "1");
+  } catch {
+    // Sin almacenamiento: se volverá a mostrar en la próxima visita.
+  }
+}
 
 export function storageKey(slug: string, name: string) {
   return `${PREFIX}${slug}:${name}`;
@@ -20,9 +43,9 @@ function read<T>(key: string): T | undefined {
   }
 }
 
-function write(key: string, value: unknown) {
+function write(key: string, json: string) {
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    window.localStorage.setItem(key, json);
   } catch {
     // Sin almacenamiento: el estado sigue vivo en memoria.
   }
@@ -49,10 +72,17 @@ export function clearDemoData(slug: string) {
 export function usePersistentState<T>(slug: string, name: string, seed: () => T): [T, Dispatch<SetStateAction<T>>] {
   const key = storageKey(slug, name);
   const [state, setState] = useState<T>(() => read<T>(key) ?? seed());
+  const lastWritten = useRef<string | null>(null);
   // También en el primer render: así los datos de ejemplo quedan fijados y sus fechas no se mueven.
   useEffect(() => {
-    write(key, state);
-  }, [key, state]);
+    const json = JSON.stringify(state);
+    // Se compara el contenido, no la referencia: StrictMode repite efectos y algunas apps normalizan su estado
+    // al montar sin cambiar nada. Ninguna de esas escrituras es una acción de quien prueba la demo.
+    if (json === lastWritten.current) return;
+    write(key, json);
+    if (lastWritten.current !== null) window.dispatchEvent(new CustomEvent(DEMO_CHANGE_EVENT, { detail: { slug } }));
+    lastWritten.current = json;
+  }, [key, slug, state]);
 
   return [state, setState];
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { formatDate, formatTime, fromDateInput } from "@/demos/kit/format";
+import { downloadCsv } from "@/demos/kit/csv";
+import { formatDate, formatDateTime, formatTime, fromDateInput } from "@/demos/kit/format";
 import { Btn, Empty, inputClass, Pill, Table } from "@/demos/kit/ui";
 import { MOVEMENT_LABELS, MOVEMENT_TONES, type MovementType } from "./data";
 import { RoleNote, Signed, Toolbar } from "./common";
@@ -20,6 +21,27 @@ export function Movements({ store }: { store: StockFlow }) {
   );
   const products = [...store.products].sort((a, b) => a.name.localeCompare(b.name, "es"));
   const filtered = Boolean(type || productId || userId || from);
+
+  function exportCsv() {
+    downloadCsv(
+      "stockflow-movimientos",
+      ["Fecha", "Producto", "SKU", "Tipo", "Cambio", "Cantidad contada", "Saldo", "Responsable", "Nota"],
+      rows.map((m) => {
+        const product = store.productById.get(m.productId);
+        return [
+          formatDateTime(m.at),
+          product?.name ?? "Producto eliminado",
+          product?.sku ?? "",
+          MOVEMENT_LABELS[m.type],
+          m.delta,
+          m.type === "adjust" ? m.quantity : "",
+          m.balance,
+          store.userById.get(m.userId)?.name ?? "",
+          m.note,
+        ];
+      }),
+    );
+  }
 
   return (
     <div>
@@ -65,6 +87,9 @@ export function Movements({ store }: { store: StockFlow }) {
         <p className="text-[13px] text-text-subtle sm:ml-auto sm:self-center">
           {rows.length} movimiento{rows.length === 1 ? "" : "s"}
         </p>
+        <Btn size="sm" className="sm:self-center" aria-label="Exportar movimientos a CSV" disabled={rows.length === 0} onClick={exportCsv}>
+          Exportar CSV
+        </Btn>
       </Toolbar>
 
       {rows.length === 0 ? (

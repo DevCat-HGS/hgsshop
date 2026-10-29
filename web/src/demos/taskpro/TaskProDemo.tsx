@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppShell, type DemoAppProps } from "@/demos/kit/AppShell";
+import type { Command } from "@/demos/kit/CommandPalette";
 import { usePersistentState, uid } from "@/demos/kit/storage";
 import { useToast } from "@/demos/kit/useToast";
 import { useView } from "@/demos/kit/useView";
@@ -52,6 +53,9 @@ export function TaskProDemo({ embedded }: DemoAppProps) {
   const [taskDialog, setTaskDialog] = useState<{ open: boolean; taskId: string | null; defaults: TaskDraftDefaults }>({ open: false, taskId: null, defaults: {} });
   const [boardFilters, setBoardFilters] = useState<BoardFilters>({ projectId: "all", priority: "all", tag: "all", query: "" });
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+
+  const [projectFocus, setProjectFocus] = useState<{ id: string } | null>(null);
+  const clearProjectFocus = useCallback(() => setProjectFocus(null), []);
 
   const visibleProjectIds = useMemo(() => new Set(projects.filter((p) => p.status !== "archived").map((p) => p.id)), [projects]);
   const urgentCount = tasks.filter((t) => visibleProjectIds.has(t.projectId) && (isOverdue(t) || isDueToday(t))).length;
@@ -107,6 +111,44 @@ export function TaskProDemo({ embedded }: DemoAppProps) {
     notify("Tarea eliminada");
   }
 
+  const commands = useMemo<Command[]>(() => {
+    const byId = new Map(projects.map((p) => [p.id, p]));
+    const screens: Command[] = VIEWS.map((v) => ({ id: `view-${v}`, group: "Pantallas", label: TITLES[v], run: () => setView(v) }));
+    const taskCommands: Command[] = tasks.map((t) => ({
+      id: `task-${t.id}`,
+      group: "Tareas",
+      label: t.title,
+      hint: `${byId.get(t.projectId)?.name ?? "Sin proyecto"} · ${statusLabel(t.status)}`,
+      keywords: t.tags.join(" "),
+      run: () => {
+        setView("tablero");
+        setTaskDialog({ open: true, taskId: t.id, defaults: {} });
+      },
+    }));
+    const projectCommands: Command[] = projects.map((p) => ({
+      id: `project-${p.id}`,
+      group: "Proyectos",
+      label: p.name,
+      hint: p.client,
+      keywords: p.repo,
+      run: () => {
+        setView("proyectos");
+        setProjectFocus({ id: p.id });
+      },
+    }));
+    const noteCommands: Command[] = notes.map((n) => ({
+      id: `note-${n.id}`,
+      group: "Notas",
+      label: n.title,
+      hint: byId.get(n.projectId)?.name ?? "Sin proyecto",
+      run: () => {
+        setView("notas");
+        setSelectedNoteId(n.id);
+      },
+    }));
+    return [...screens, ...taskCommands, ...projectCommands, ...noteCommands];
+  }, [projects, tasks, notes, setView]);
+
   const editingTask = taskDialog.taskId ? (tasks.find((t) => t.id === taskDialog.taskId) ?? null) : null;
 
   const actions: Record<View, ReactNode> = {
@@ -157,6 +199,8 @@ export function TaskProDemo({ embedded }: DemoAppProps) {
         title={TITLES[view]}
         actions={actions[view]}
         sidebarFooter={timerFooter}
+        commands={commands}
+        embedded={embedded}
       >
         {view === "hoy" && (
           <TodayView
@@ -183,6 +227,8 @@ export function TaskProDemo({ embedded }: DemoAppProps) {
             {...common}
             setProjects={setProjects}
             notify={notify}
+            focus={projectFocus}
+            onFocusHandled={clearProjectFocus}
             onShowBoard={(projectId) => {
               setBoardFilters({ projectId, priority: "all", tag: "all", query: "" });
               setView("tablero");

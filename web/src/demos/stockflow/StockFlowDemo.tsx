@@ -1,13 +1,14 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AppShell, type DemoAppProps, type NavItem } from "@/demos/kit/AppShell";
+import type { Command } from "@/demos/kit/CommandPalette";
 import { useToast } from "@/demos/kit/useToast";
 import { useView } from "@/demos/kit/useView";
 import { Btn, Field, inputClass } from "@/demos/kit/ui";
-import { ROLE_LABELS, stockStatus } from "./data";
+import { can, ORDER_LABELS, ROLE_LABELS, stockStatus } from "./data";
 import { MovementDialog, PermBtn, type MovementPreset } from "./common";
 import { useStockFlow } from "./store";
 import { Dashboard } from "./Dashboard";
-import { NewProductButton, Products, type Editing } from "./Products";
+import { NewProductButton, Products, type Editing, type ProductFocus } from "./Products";
 import { Movements } from "./Movements";
 import { Orders, type OrderEditing } from "./Orders";
 import { Reports } from "./Reports";
@@ -37,6 +38,19 @@ export function StockFlowDemo({ embedded }: DemoAppProps) {
   const [productEditing, setProductEditing] = useState<Editing>(null);
   const [orderEditing, setOrderEditing] = useState<OrderEditing>(null);
   const [creatingUser, setCreatingUser] = useState(false);
+  const [viewingOrderId, setViewingOrderId] = useState<string | null>(null);
+  // Filtro que la búsqueda global aplica a Productos cuando el rol no puede editar: se aplica al montar (cambia la key).
+  const [productFocus, setProductFocus] = useState<{ focus: ProductFocus; key: number } | null>(null);
+
+  // setView cambia en cada render (depende de la URL); la ref deja estable la lista de comandos.
+  const setViewRef = useRef(setView);
+  useEffect(() => {
+    setViewRef.current = setView;
+  });
+  const navigate = useCallback((next: View) => {
+    setProductFocus(null);
+    setViewRef.current(next);
+  }, []);
 
   const active = store.products.filter((p) => !p.archived);
   const alerts = active.filter((p) => stockStatus(p) !== "ok").length;
@@ -75,6 +89,48 @@ export function StockFlowDemo({ embedded }: DemoAppProps) {
     ),
   };
 
+  const { products, orders, role } = store;
+  const commands = useMemo<Command[]>(() => {
+    const screens: Command[] = VIEWS.map((v) => ({
+      id: `view-${v}`,
+      label: TITLES[v],
+      group: "Pantallas",
+      run: () => navigate(v),
+    }));
+    const productCommands: Command[] = [...products]
+      .sort((a, b) => a.name.localeCompare(b.name, "es"))
+      .map((p) => ({
+        id: `product-${p.id}`,
+        label: p.name,
+        hint: p.archived ? `${p.sku} · archivado` : p.sku,
+        keywords: `${p.sku} ${p.category}`,
+        group: "Productos",
+        run: () => {
+          if (can(role, "product.edit") && !p.archived) {
+            navigate("productos");
+            setProductEditing(p);
+          } else {
+            setProductFocus((prev) => ({ focus: { sku: p.sku, archived: p.archived }, key: (prev?.key ?? 0) + 1 }));
+            setViewRef.current("productos");
+          }
+        },
+      }));
+    const orderCommands: Command[] = [...orders]
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map((o) => ({
+        id: `order-${o.id}`,
+        label: `Pedido de ${o.customer}`,
+        hint: ORDER_LABELS[o.status],
+        keywords: o.number,
+        group: "Pedidos",
+        run: () => {
+          navigate("pedidos");
+          setViewingOrderId(o.id);
+        },
+      }));
+    return [...screens, ...productCommands, ...orderCommands];
+  }, [products, orders, role, navigate]);
+
   const userSelector = (
     <Field label="Usar la demo como" hint={`Rol: ${ROLE_LABELS[store.role]}`}>
       {(id) => (
@@ -105,15 +161,36 @@ export function StockFlowDemo({ embedded }: DemoAppProps) {
         tagline="Ferretería El Tornillo · Medellín"
         nav={nav}
         view={view}
-        onNavigate={setView}
+        onNavigate={navigate}
         title={TITLES[view]}
         actions={actions[view]}
         sidebarFooter={userSelector}
+        commands={commands}
+        embedded={embedded}
       >
-        {view === "panel" && <Dashboard store={store} onMove={setMovePreset} onOpen={setView} />}
-        {view === "productos" && <Products store={store} notify={notify} onMove={setMovePreset} editing={productEditing} setEditing={setProductEditing} />}
+        {view === "panel" && <Dashboard store={store} onMove={setMovePreset} onOpen={navigate} />}
+        {view === "productos" && (
+          <Products
+            key={productFocus?.key ?? 0}
+            store={store}
+            notify={notify}
+            onMove={setMovePreset}
+            editing={productEditing}
+            setEditing={setProductEditing}
+            focus={productFocus?.focus}
+          />
+        )}
         {view === "movimientos" && <Movements store={store} />}
-        {view === "pedidos" && <Orders store={store} notify={notify} editing={orderEditing} setEditing={setOrderEditing} />}
+        {view === "pedidos" && (
+          <Orders
+            store={store}
+            notify={notify}
+            editing={orderEditing}
+            setEditing={setOrderEditing}
+            viewingId={viewingOrderId}
+            setViewingId={setViewingOrderId}
+          />
+        )}
         {view === "reportes" && <Reports store={store} />}
         {view === "usuarios" && <Users store={store} notify={notify} creating={creatingUser} setCreating={setCreatingUser} />}
       </AppShell>

@@ -155,6 +155,19 @@ a pantalla completa en `/demos/<slug>` (fuera del `Layout`, con una barra de ent
 (localStorage con el prefijo `hgs-demo:<slug>:`, con respaldo en memoria si no hay almacenamiento) y piezas
 de interfaz. Sin red: nada sale del navegador, y "Reiniciar datos" borra el prefijo y vuelve a montar la
 app. Lo que la demo simula (los envíos de recordatorios de Clientia) lo dice en pantalla y en la ficha.
+Encima de las apps, la página de demo agrega:
+
+- **Recorrido** de 4 pasos en la primera visita (`kit/tours.ts`), que se puede volver a abrir desde "Acerca
+  de la demo". Que ya se vio se guarda con el prefijo `hgs-demo-ui:`, que "Reiniciar datos" no borra. Las
+  e2e lo marcan como visto con `e2e/fixtures.ts`; `e2e/demo-shell.spec.ts` prueba la primera visita.
+- **Invitación a cotizar** tras 5 cambios guardados (evento `hgs-demo:change` que emite
+  `usePersistentState` solo cuando el contenido cambia de verdad), una sola vez por demo. Eventos de
+  analítica sin datos personales: `demo_action`, `demo_cta_shown`, `demo_cta_clicked`, `demo_tour_finished`.
+- **Exportar CSV** (`kit/csv.ts`): `;` como separador, BOM UTF-8 y CRLF, para que Excel en es-CO lo abra
+  bien; se genera en el navegador.
+- **Búsqueda global** Ctrl+K o Cmd+K (`kit/CommandPalette.tsx`): pantallas y registros de cada app. Es un
+  combobox accesible. Incrustada en la portada no registra el atajo, que chocaría con el del navegador.
+
 FlowAuto no tiene demo a propósito: es un servicio a medida sin un flujo genérico que mostrar. La sección S5
 de la portada incrusta TaskPro con `embedded` (pantalla en estado local, sin tocar la URL). Las
 páginas `/demos/*` llevan `noindex` (meta y cabecera `X-Robots-Tag`) y están fuera del sitemap.

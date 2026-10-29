@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { matches } from "@/demos/kit/format";
 import { uid } from "@/demos/kit/storage";
 import { Btn, Dialog, Empty, Field, FormError, Pill, SearchField, inputClass } from "@/demos/kit/ui";
@@ -12,6 +12,8 @@ export function ProjectsView({
   setProjects,
   notify,
   onShowBoard,
+  focus,
+  onFocusHandled,
 }: {
   projects: Project[];
   tasks: Task[];
@@ -19,10 +21,29 @@ export function ProjectsView({
   setProjects: Dispatch<SetStateAction<Project[]>>;
   notify: (message: string) => void;
   onShowBoard: (projectId: string) => void;
+  /** Proyecto que se pidió abrir desde fuera (búsqueda global): se abre su diálogo de edición. */
+  focus?: { id: string } | null;
+  onFocusHandled?: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("current");
   const [editing, setEditing] = useState<Project | null | "new">(null);
+
+  // Cada petición es un objeto nuevo: se atiende una sola vez, aunque se pida el mismo proyecto de nuevo.
+  const [handledFocus, setHandledFocus] = useState<{ id: string } | null>(null);
+  if (focus && focus !== handledFocus) {
+    setHandledFocus(focus);
+    const project = projects.find((p) => p.id === focus.id);
+    if (project) {
+      setQuery("");
+      setStatusFilter(project.status === "archived" ? "archived" : "current");
+      setEditing(project);
+    }
+  }
+  // Ya atendida: se limpia en la raíz para que volver a esta pantalla no reabra el diálogo.
+  useEffect(() => {
+    if (focus) onFocusHandled?.();
+  }, [focus, onFocusHandled]);
 
   const visible = projects
     .filter((p) => (statusFilter === "all" ? true : statusFilter === "archived" ? p.status === "archived" : p.status !== "archived"))

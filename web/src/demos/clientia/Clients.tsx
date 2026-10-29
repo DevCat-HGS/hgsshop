@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { formatDate, formatDateLong, formatMoney, formatTime, matches, relativeDays } from "@/demos/kit/format";
+import { downloadCsv } from "@/demos/kit/csv";
+import { formatDate, formatDateLong, formatDateTime, formatMoney, formatTime, matches, relativeDays } from "@/demos/kit/format";
 import { uid } from "@/demos/kit/storage";
 import { Btn, ConfirmButton, Dialog, Empty, Field, FormError, inputClass, Panel, Pill, SearchField, Stat, Table } from "@/demos/kit/ui";
 import { CHANNEL_LABEL, clientStats, percent, STATUS_LABEL, STATUS_TONE, type Appointment, type Channel, type Client, type Editor } from "./data";
@@ -60,6 +61,18 @@ export function Clients({ store, selectedId, onSelect, onEdit, notify, creating,
     .filter((c) => (channel === "all" || c.channel === channel) && (!query || matches(`${c.name} ${c.phone} ${c.email}`, query)))
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
 
+  function exportCsv() {
+    downloadCsv(
+      "clientia-clientes",
+      ["Cliente", "Teléfono", "Correo", "Recordatorio", "Próxima cita", "Visitas", "Gasto total (COP)", "Inasistencias"],
+      visible.map((c) => {
+        const s = clientStats(c.id, appointments, now);
+        const next = s.upcoming[0];
+        return [c.name, c.phone, c.email, CHANNEL_LABEL[c.channel], next ? formatDateTime(next.start) : "", s.attended, Math.round(s.spent), s.noShows];
+      }),
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-3">
@@ -79,6 +92,9 @@ export function Clients({ store, selectedId, onSelect, onEdit, notify, creating,
         <p className="text-[13px] text-text-muted sm:ml-auto">
           {visible.length} de {clients.length} clientes
         </p>
+        <Btn size="sm" onClick={exportCsv} disabled={visible.length === 0} aria-label="Exportar clientes a CSV">
+          Exportar CSV
+        </Btn>
       </div>
 
       {visible.length === 0 ? (

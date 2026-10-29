@@ -19,9 +19,14 @@ interface Draft {
 
 const emptyDraft = (): Draft => ({ id: null, name: "", day: 6, time: "09:00", teacher: "", capacity: "8", fee: "180000", modules: [] });
 
-export function Groups({ academy, notify }: ScreenProps) {
+const draftOf = (g: Group): Draft => ({ ...g, capacity: String(g.capacity), fee: String(g.fee), modules: g.modules.map((m) => ({ ...m })) });
+
+export function Groups({ academy, notify, initialEditId = null }: ScreenProps & { initialEditId?: string | null }) {
   const { groups, students } = academy;
-  const [draft, setDraft] = useState<Draft | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(() => {
+    const g = groups.find((x) => x.id === initialEditId);
+    return g ? draftOf(g) : null;
+  });
   const [blocked, setBlocked] = useState<Group | null>(null);
   const open = draft;
   const close = () => setDraft(null);
@@ -70,7 +75,7 @@ export function Groups({ academy, notify }: ScreenProps) {
                     size="sm"
                     variant="ghost"
                     aria-label={`Editar "${g.name}"`}
-                    onClick={() => setDraft({ ...g, capacity: String(g.capacity), fee: String(g.fee), modules: g.modules.map((m) => ({ ...m })) })}
+                    onClick={() => setDraft(draftOf(g))}
                   >
                     Editar
                   </Btn>
