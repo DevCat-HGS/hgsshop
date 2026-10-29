@@ -9,6 +9,7 @@ import { Container } from "@/components/ui/Container";
 import { SearchBar } from "@/components/product/SearchBar";
 import { ProductFilters, type SortOption } from "@/components/product/ProductFilters";
 import { ProductGrid } from "@/components/product/ProductGrid";
+import { IdeaList } from "@/components/product/IdeaList";
 import { Pagination } from "@/components/product/Pagination";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SearchIcon } from "@/components/icons";
@@ -103,6 +104,10 @@ export function CatalogPage() {
     setSearchParams(next);
   }
 
+  // Lo que ya existe va en tarjetas con foto; las ideas, aparte y en filas, para no venderlas como producto.
+  const built = paginated.filter((product) => product.status !== "idea");
+  const ideas = paginated.filter((product) => product.status === "idea");
+
   return (
     <Container className="pb-12 pt-14 sm:pt-20">
       <div className="max-w-2xl">
@@ -139,7 +144,10 @@ export function CatalogPage() {
             ))}
           </div>
         ) : paginated.length > 0 ? (
-          <ProductGrid products={paginated} />
+          <div className="flex flex-col gap-20">
+            {built.length > 0 && <ProductGrid products={built} />}
+            {ideas.length > 0 && <IdeaList products={ideas} />}
+          </div>
         ) : (
           <EmptyState
             icon={<SearchIcon className="size-8" aria-hidden="true" />}

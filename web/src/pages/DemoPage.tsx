@@ -90,7 +90,7 @@ function DemoView({ product }: { product: Product }) {
 
   return (
     <div className="flex h-dvh flex-col bg-bg">
-      <div role="note" aria-label="Entorno de demostración" className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-surface px-3 py-2 sm:px-4">
+      <div data-ui role="note" aria-label="Entorno de demostración" className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-surface px-3 py-2 sm:px-4">
         <Link to={`/productos/${product.slug}`} className="flex items-center gap-2 rounded-sm text-sm font-semibold text-text-muted hover:text-text">
           <LogoMark className="size-5" />
           <span>
@@ -123,7 +123,7 @@ function DemoView({ product }: { product: Product }) {
       </div>
 
       {cta.visible && (
-        <div role="region" aria-label="Invitación a cotizar" className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-brand-muted px-3 py-2 sm:px-4">
+        <div data-ui role="region" aria-label="Invitación a cotizar" className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-brand-muted px-3 py-2 sm:px-4">
           <p className="min-w-0 flex-1 text-[13px] text-text">
             <span className="font-semibold">¿Te sirve para tu negocio?</span> Lo adaptamos a tus datos y a tu forma de trabajar.
           </p>

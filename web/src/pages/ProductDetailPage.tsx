@@ -87,74 +87,91 @@ function ProductDetail({ product, category, related }: { product: Product; categ
   const photo = photoFor(product.categorySlug);
   const clip = clipFor(product.slug);
 
+  const media =
+    product.screenshots.length > 0 ? (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {product.screenshots.map((shot) => (
+          <img key={shot.src} src={shot.src} alt={shot.alt} loading="lazy" className="rounded-lg border border-border" />
+        ))}
+      </div>
+    ) : clip ? (
+      <ProductVideo clip={clip} />
+    ) : photo ? (
+      <ArchivePhoto photo={photo} caption eager className="aspect-[4/3] rounded-sm" />
+    ) : (
+      <ProductCoverArt categorySlug={product.categorySlug} aspect="aspect-[4/3]" className="rounded-sm" />
+    );
+
   return (
     <>
-      <Container className="py-12">
-        <Breadcrumbs
-          items={[
-            { label: "Inicio", to: "/" },
-            { label: "Productos", to: "/productos" },
-            ...(category ? [{ label: category.name, to: `/productos?categoria=${category.slug}` }] : []),
-            { label: product.name },
-          ]}
-        />
-
-        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_20rem]">
-          <div>
-            <div className="flex flex-wrap items-center gap-4">
-              <h1 className="font-display text-[clamp(3rem,6vw,5.5rem)] text-text">{product.name}</h1>
-              <StatusBadge status={product.status} />
-            </div>
-            <p className="mt-5 max-w-2xl text-xl text-pretty text-text">{product.shortDescription}</p>
-
-            <div className="mt-8 max-w-2xl rounded-sm bg-surface p-6">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-[15px] font-semibold text-text-muted">Etapa actual</p>
+      {/* Portada del producto: ocupa la pantalla como una diapositiva de la portada del sitio. */}
+      <section aria-labelledby="producto-titulo" className="flex min-h-[calc(100svh-8rem)] flex-col justify-center py-12">
+        <Container>
+          <Breadcrumbs
+            items={[
+              { label: "Inicio", to: "/" },
+              { label: "Productos", to: "/productos" },
+              ...(category ? [{ label: category.name, to: `/productos?categoria=${category.slug}` }] : []),
+              { label: product.name },
+            ]}
+          />
+          <div className="mt-8 grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
+            <div>
+              <div className="flex flex-wrap items-center gap-4">
+                <h1 id="producto-titulo" className="font-display text-[clamp(3rem,7vw,6.5rem)] leading-[0.95] text-text">
+                  {product.name}
+                </h1>
+                <StatusBadge status={product.status} />
               </div>
-              <div className="mt-4">
+              <p className="mt-6 max-w-xl text-xl text-pretty text-text">{product.shortDescription}</p>
+              <div className="mt-8 max-w-xl">
                 <Lifecycle status={product.status} />
               </div>
             </div>
+            <div>{media}</div>
+          </div>
+        </Container>
+      </section>
 
-            <div className="mt-8">
-              {product.screenshots.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {product.screenshots.map((shot) => (
-                    <img key={shot.src} src={shot.src} alt={shot.alt} loading="lazy" className="rounded-lg border border-border" />
-                  ))}
-                </div>
-              ) : clip ? (
-                <ProductVideo clip={clip} />
-              ) : photo ? (
-                <ArchivePhoto photo={photo} caption eager className="aspect-[16/9] rounded-sm sm:aspect-[21/9]" />
-              ) : (
-                <ProductCoverArt categorySlug={product.categorySlug} aspect="aspect-[16/9] sm:aspect-[21/9]" className="rounded-sm" />
-              )}
-            </div>
+      {/* El problema, dicho en grande: es lo que el visitante viene a reconocer. */}
+      <section aria-labelledby="problema-titulo" className="bg-depth py-20 lg:py-28">
+        <Container>
+          <h2 id="problema-titulo" className="text-[15px] font-semibold text-text-muted">
+            El problema
+          </h2>
+          <p className="font-display mt-4 max-w-5xl text-[clamp(1.75rem,3.4vw,3rem)] leading-tight text-balance text-text">
+            {product.problem}
+          </p>
+          <p className="mt-8 max-w-2xl text-lg text-pretty text-text">
+            <span className="font-semibold">Para quién es: </span>
+            {product.audience}
+          </p>
+        </Container>
+      </section>
 
-            <div className="mt-12">
-              <DetailSection title="Qué es">
-                <div className="flex flex-col gap-3 text-base leading-relaxed text-text">
-                  {product.description.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-              </DetailSection>
+      <Container className="py-8 lg:py-12">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_20rem]">
+          <div>
+            <DetailSection title="Qué es">
+              <div className="flex max-w-3xl flex-col gap-3 text-lg leading-relaxed text-text">
+                {product.description.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </DetailSection>
 
-              <DetailSection title="Problema que resuelve">
-                <p className="text-base leading-relaxed text-text">{product.problem}</p>
-              </DetailSection>
-
-              <DetailSection title="Para quién es">
-                <p className="text-base leading-relaxed text-text">{product.audience}</p>
-              </DetailSection>
-
+            <div className="grid grid-cols-1 gap-x-12 md:grid-cols-2">
               <DetailSection title="Beneficios">
                 <CheckList items={product.benefits} />
               </DetailSection>
-
               <DetailSection title="Características principales">
                 <CheckList items={product.features} />
+              </DetailSection>
+            </div>
+
+            <div className="grid grid-cols-1 gap-x-12 md:grid-cols-2">
+              <DetailSection title="Estado actual y limitaciones conocidas">
+                <LimitationsList items={product.limitations} />
               </DetailSection>
 
               {Boolean(product.technologies?.length || product.requirements?.length) && (
@@ -167,7 +184,7 @@ function ProductDetail({ product, category, related }: { product: Product; categ
                     </div>
                   )}
                   {product.requirements && product.requirements.length > 0 && (
-                    <ul className="mt-4 list-disc pl-5 text-sm text-text-muted">
+                    <ul className="mt-4 list-disc pl-5 text-[15px] text-text-muted">
                       {product.requirements.map((req) => (
                         <li key={req}>{req}</li>
                       ))}
@@ -175,17 +192,13 @@ function ProductDetail({ product, category, related }: { product: Product; categ
                   )}
                 </DetailSection>
               )}
-
-              <DetailSection title="Estado actual y limitaciones conocidas">
-                <LimitationsList items={product.limitations} />
-              </DetailSection>
-
-              {product.faqs.length > 0 && (
-                <DetailSection title="Preguntas frecuentes">
-                  <Accordion items={product.faqs} />
-                </DetailSection>
-              )}
             </div>
+
+            {product.faqs.length > 0 && (
+              <DetailSection title="Preguntas frecuentes">
+                <Accordion items={product.faqs} />
+              </DetailSection>
+            )}
           </div>
 
           <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
@@ -222,10 +235,12 @@ function ProductDetail({ product, category, related }: { product: Product; categ
       </Container>
 
       {related.length > 0 && (
-        <section className="bg-surface py-16">
+        <section aria-labelledby="relacionados-titulo" className="bg-surface py-20">
           <Container>
-            <h2 className="text-xl font-semibold text-text">Productos relacionados</h2>
-            <div className="mt-6">
+            <h2 id="relacionados-titulo" className="font-display text-[length:var(--text-step-lead)] text-text">
+              Productos relacionados
+            </h2>
+            <div className="mt-8">
               <ProductGrid products={related} />
             </div>
           </Container>

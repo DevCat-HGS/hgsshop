@@ -30,7 +30,7 @@ export function LimitationsList({ items }: { items: string[] }) {
 
 export function DetailSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="py-8 first:pt-0">
+    <section className="py-8">
       <h2 className="font-display text-[length:var(--text-step-lead)] text-text">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
