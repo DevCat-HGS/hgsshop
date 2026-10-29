@@ -51,8 +51,9 @@ export function PrivacyPage() {
       <section>
         <h2>Dónde se almacenan</h2>
         <p>
-          Los envíos se reciben a través de Netlify Forms (Netlify, Inc.), el proveedor que aloja esta web, y se
-          conservan mientras dure la conversación comercial o hasta que pidas su eliminación.
+          Los envíos llegan al panel de administración de hgsportafolio.site, alojado en Netlify (Netlify, Inc.), y
+          se avisan por correo a través de Resend (Resend, Inc.), que también envía la confirmación a la dirección que
+          escribiste. Se conservan mientras dure la conversación comercial o hasta que pidas su eliminación.
         </p>
         <p>
           Lo que hagas dentro de una demo se guarda solo en el almacenamiento local de tu navegador, para que no se

@@ -20,7 +20,7 @@ export function ContactForm() {
   const [values, setValues] = useState<ContactMessage>({ name: "", email: "", subject: "", message: "", consent: false });
   const [botField, setBotField] = useState("");
   const [errors, setErrors] = useState<FieldErrors<ContactMessage>>({});
-  const { status, submit, reset } = useFormSubmission(CONTACT_FORM_NAME);
+  const { status, limited, submit, reset } = useFormSubmission(CONTACT_FORM_NAME);
 
   function update<K extends keyof ContactMessage>(key: K, value: ContactMessage[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -36,10 +36,9 @@ export function ContactForm() {
     await submit({
       name: values.name.trim(),
       email: values.email.trim(),
-      subject: values.subject,
       message: values.message.trim(),
-      consent: "si",
-      "bot-field": botField,
+      fields: [["Asunto", contactSubjectOptions.find((option) => option.value === values.subject)?.label ?? values.subject]],
+      botField,
     });
   }
 
@@ -129,7 +128,9 @@ export function ContactForm() {
 
       {status === "error" && (
         <Alert variant="error">
-          No se pudo enviar el mensaje. Inténtalo de nuevo o escribe directamente a{" "}
+          {limited
+            ? "Llegaron varios envíos seguidos desde tu conexión. Espera unos minutos e inténtalo de nuevo, o escribe directamente a "
+            : "No se pudo enviar el mensaje. Inténtalo de nuevo o escribe directamente a "}
           <a href={`mailto:${site.contact.email}`} className="underline">
             {site.contact.email}
           </a>

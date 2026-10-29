@@ -12,7 +12,7 @@ coinciden, el documento está desactualizado: corrígelo en el mismo cambio.
 | Estilos | Tailwind CSS 4, tokens en `src/index.css` | — |
 | Rutas | `react-router-dom` 7, una ruta = un chunk | — |
 | Catálogo | Datos tipados en `src/data/`, leídos solo vía `src/lib/catalog.ts` | Fase 2: base de datos + panel |
-| Formularios | Netlify Forms (envío real, sin backend propio) | Fase 2: backend propio con la misma validación |
+| Formularios | Admin del portafolio (`admin.hgsportafolio.site/api/shop-form`): guarda y envía correos | Fase 2: backend propio con la misma validación |
 | Demos | Registro en `src/demos/registry.ts`; StockFlow, Clientia, RoboAcademy y TaskPro corren en la app | Demos pesadas: subdominio propio |
 | Analítica | Capa sin proveedor (`src/lib/analytics.ts`), no envía nada | Al elegir proveedor respetuoso con la privacidad |
 | Pagos | **No existen** | Fase 4, con demanda validada |
@@ -31,7 +31,7 @@ data/                   contenido del catálogo (productos, categorías, FAQ gen
 lib/catalog.ts          única puerta de entrada al catálogo (async a propósito)
 lib/validation.ts       reglas de formularios, puras: reutilizables en un backend
 lib/format.ts           etiquetas de estado, línea de vida, formato de precio
-lib/netlifyForm.ts      envío a Netlify Forms
+lib/formEndpoint.ts     envío de formularios al admin del portafolio
 lib/analytics.ts        eventos comerciales, sin proveedor
 hooks/                  useDocumentHead (SEO por ruta), useFormSubmission, useSlideDeck, useReveal
 components/ui/          sistema de diseño: Button, StatusBadge, FormField, Accordion…
@@ -131,16 +131,19 @@ Cotización (`/desarrollo-a-medida`) y contacto (`/contacto`). Flujo:
 
 1. Validación en cliente con `src/lib/validation.ts` (longitudes, correo, valores de lista cerrada,
    consentimiento). Un valor de `<select>` manipulado se rechaza.
-2. Envío por `fetch` a Netlify Forms. Netlify detecta los formularios en el HTML del build, por eso
-   `index.html` contiene copias ocultas con los mismos nombres de campo. **Si cambias un campo en React,
-   cámbialo también en `index.html`.**
-3. Antispam: campo trampa `bot-field` (`netlify-honeypot`) y el filtro de spam propio de Netlify.
+2. Envío por `fetch` (JSON) al admin del portafolio, `https://admin.hgsportafolio.site/api/shop-form` (repo
+   DevCat-HGS, `admin/netlify/lib/shopForm.ts`). El admin valida otra vez lo esencial, guarda el envío en su
+   bandeja "Mensajes" (filtrable por origen) y manda dos correos con Resend: el aviso para Harol, con todos los
+   campos, y la confirmación para quien escribe, que no repite lo escrito. Los campos extra viajan ya con su
+   etiqueta legible (`[etiqueta, valor]`), así el admin no necesita conocer cada formulario.
+3. Antispam: campo trampa `bot-field`, tiempo mínimo de llenado (`elapsed`) y límites por dirección (3 cada 10
+   minutos) y por día (40), compartidos con el formulario del portafolio. Un 429 se le explica a la persona.
 4. Estados: validación por campo, envío con botón bloqueado (sin dobles envíos), éxito con el siguiente
    paso explicado, error sin perder lo escrito y con el correo como alternativa.
 
-**Limitación:** Netlify Forms no valida campos en el servidor. Hasta que exista un backend, la validación
-es solo de cliente; las reglas ya son funciones puras para importarlas allí. Tampoco hay rate limiting
-propio más allá del de Netlify.
+**Limitación:** el admin valida correo, nombre, mensaje y el tamaño de cada campo, no las listas cerradas de
+cada formulario; esas siguen en `src/lib/validation.ts`, que son funciones puras para un backend propio. La CSP
+permite `connect-src` hacia el admin y nada más.
 
 ## Demos
 
@@ -235,8 +238,8 @@ implementarlo en `src/lib/analytics.ts` y ampliar `script-src`/`connect-src` en 
 - `npm test`: Vitest, unitarias de validación, catálogo y formato (`src/**/*.test.ts`).
 - `npm run test:e2e`: Playwright en escritorio y móvil (`e2e/`): búsqueda, filtros en la URL, estado
   vacío, ficha de servicio sin demo fingida, 404 con `noindex`, las cuatro demos (`e2e/demo-*.spec.ts`), salto de contenido con
-  teclado, y los dos formularios (validación, envío, error del servidor). El POST de Netlify Forms se
-  intercepta: el envío real solo se puede comprobar en un deploy preview de Netlify.
+  teclado, y los dos formularios (validación, envío con etiquetas legibles, error del servidor y límite). El
+  POST al admin se intercepta: el envío real se comprueba en producción.
 
 ## Fases
 
@@ -247,8 +250,8 @@ implementarlo en `src/lib/analytics.ts` y ampliar `script-src`/`connect-src` en 
    `/admin` debe autorizar en el servidor (RLS + rol de administrador), no ocultando botones. Al migrar,
    solo cambian `src/lib/catalog.ts` y el destino de los formularios. No se construyó un panel en el MVP
    porque sin backend sería un panel ficticio.
-3. **Validación y lanzamiento — parcial.** Pendiente: deploy preview para verificar Netlify Forms de
-   extremo a extremo, revisión legal, medición de Core Web Vitals en producción, capturas reales.
+3. **Validación y lanzamiento — parcial.** Pendiente: enviar un formulario real desde producción y verlo
+   llegar al admin y al correo, revisión legal, medición de Core Web Vitals en producción, capturas reales.
 4. **Monetización — no iniciada.** Requiere elegir proveedor de pago. Regla: ninguna compra o suscripción
    se marca como pagada sin confirmación verificable del proveedor (webhook firmado procesado en el
    servidor). El modelo `commercialModels` + `pricing` ya admite licencia, suscripción y a medida.

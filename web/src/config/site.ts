@@ -22,6 +22,11 @@ export const site = {
     portfolioUrl: "https://hgsportafolio.site",
   },
 
+  /** Los formularios se envían al admin del portafolio, que los guarda y manda los correos (ver lib/formEndpoint.ts). */
+  forms: {
+    endpoint: "https://admin.hgsportafolio.site/api/shop-form",
+  },
+
   contact: {
     email: "hdevelopergs@gmail.com",
   },

@@ -53,8 +53,8 @@
     Cross-Origin-Opener-Policy = "same-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     # Se amplía cuando entren pagos, analítica o un backend en otro dominio, nunca con 'unsafe-inline' en scripts.
-    # form-action/connect-src 'self' cubren el envío de Netlify Forms, que va al mismo origen.
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    # connect-src permite además el admin del portafolio, que recibe los formularios (/api/shop-form).
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://admin.hgsportafolio.site; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
 # Las demos son entornos de prueba con datos ficticios: no deben indexarse.
 [[headers]]

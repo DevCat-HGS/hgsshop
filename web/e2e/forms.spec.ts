@@ -1,13 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// En desarrollo no existe el endpoint de Netlify Forms: se intercepta el POST a "/" para comprobar
-// qué envía la app y cómo reacciona al éxito y al error. El envío real se verifica en un deploy preview.
+// Los formularios envían al admin del portafolio (/api/shop-form). Aquí se intercepta ese POST para comprobar qué
+// envía la app y cómo reacciona al éxito, al error y al límite; el envío real se verifica en producción.
+type Sent = { kind: string; name: string; email: string; message: string; fields: [string, string][]; elapsed: number };
+
 async function interceptFormPost(page: Page, status: number) {
-  const bodies: string[] = [];
-  await page.route("/", async (route) => {
+  const bodies: Sent[] = [];
+  await page.route("https://admin.hgsportafolio.site/api/shop-form", async (route) => {
     if (route.request().method() !== "POST") return route.fallback();
-    bodies.push(route.request().postData() ?? "");
-    await route.fulfill({ status, body: "" });
+    bodies.push(JSON.parse(route.request().postData() ?? "{}") as Sent);
+    await route.fulfill({ status, contentType: "application/json", body: JSON.stringify(status === 200 ? { ok: true } : { error: "x" }) });
   });
   return bodies;
 }
@@ -42,10 +44,27 @@ test("la cotización se envía con el producto preseleccionado desde su página"
   await page.getByRole("button", { name: "Enviar solicitud" }).click();
 
   await expect(page.getByText("Recibí tu solicitud.")).toBeVisible();
-  const sent = new URLSearchParams(bodies[0]);
-  expect(sent.get("form-name")).toBe("cotizacion");
-  expect(sent.get("product")).toBe("clientia");
-  expect(sent.get("email")).toBe("ana@empresa.com");
+  const sent = bodies[0];
+  expect(sent.kind).toBe("cotizacion");
+  expect(sent.email).toBe("ana@empresa.com");
+  expect(sent.message).toBe("Necesitamos un panel para gestionar pedidos de clientes.");
+  // Llegan las etiquetas que la persona vio, no los códigos de cada opción; los campos vacíos no viajan.
+  expect(sent.fields).toEqual([
+    ["Tipo de proyecto", "Aplicación web"],
+    ["Producto de referencia", "Clientia"],
+    ["Presupuesto orientativo", "Entre 500 y 2.000 USD"],
+    ["Plazo deseado", "Entre 1 y 3 meses"],
+  ]);
+  expect(sent.elapsed).toBeGreaterThan(0);
+});
+
+test("si llegan demasiados envíos seguidos, lo dice y sugiere esperar", async ({ page }) => {
+  await interceptFormPost(page, 429);
+  await page.goto("/desarrollo-a-medida");
+  await fillQuoteForm(page);
+  await page.getByRole("button", { name: "Enviar solicitud" }).click();
+
+  await expect(page.getByText(/Llegaron varios envíos seguidos/)).toBeVisible();
 });
 
 test("un fallo del servidor se informa sin perder lo escrito", async ({ page }) => {
@@ -69,5 +88,10 @@ test("el formulario de contacto se envía", async ({ page }) => {
   await page.getByRole("button", { name: "Enviar mensaje" }).click();
 
   await expect(page.getByText("Mensaje enviado.")).toBeVisible();
-  expect(new URLSearchParams(bodies[0]).get("form-name")).toBe("contacto");
+  expect(bodies[0]).toMatchObject({
+    kind: "contacto",
+    name: "Luis",
+    message: "¿TaskPro tendrá versión para equipos?",
+    fields: [["Asunto", "Sobre un producto del catálogo"]],
+  });
 });

@@ -1,7 +1,7 @@
 /**
  * Reglas de validación de los formularios comerciales. Son funciones puras, sin dependencias del DOM
  * ni de React, para que el futuro backend (ver ARCHITECTURE.md, fase 2) pueda importarlas y validar
- * lo mismo del lado del servidor. Hoy Netlify Forms no valida campos: esta es la única validación.
+ * lo mismo del lado del servidor. El admin que recibe los formularios valida otra vez lo esencial (correo, campos).
  */
 
 export type FieldErrors<T> = Partial<Record<keyof T, string>>;

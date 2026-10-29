@@ -148,32 +148,6 @@
     </noscript>
     <div id="root"></div>
 
-    <!--
-      Netlify Forms detecta formularios leyendo este HTML en el build, no el DOM de React. Estas copias
-      ocultas declaran los nombres y campos; los formularios reales (src/components/forms) envían por
-      fetch con los mismos nombres. Si cambias un campo allí, cámbialo aquí.
-    -->
-    <form name="cotizacion" data-netlify="true" netlify-honeypot="bot-field" hidden>
-      <input name="bot-field" />
-      <input name="name" />
-      <input name="email" />
-      <input name="company" />
-      <input name="product" />
-      <input name="projectType" />
-      <textarea name="problem"></textarea>
-      <input name="budget" />
-      <input name="timeline" />
-      <input name="consent" />
-    </form>
-    <form name="contacto" data-netlify="true" netlify-honeypot="bot-field" hidden>
-      <input name="bot-field" />
-      <input name="name" />
-      <input name="email" />
-      <input name="subject" />
-      <textarea name="message"></textarea>
-      <input name="consent" />
-    </form>
-
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

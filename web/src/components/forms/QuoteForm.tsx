@@ -35,7 +35,7 @@ export function QuoteForm({ products, initialProductSlug = "" }: { products: Pro
   });
   const [botField, setBotField] = useState("");
   const [errors, setErrors] = useState<FieldErrors<QuoteRequest>>({});
-  const { status, submit, reset } = useFormSubmission(QUOTE_FORM_NAME);
+  const { status, limited, submit, reset } = useFormSubmission(QUOTE_FORM_NAME);
 
   function update<K extends keyof QuoteRequest>(key: K, value: QuoteRequest[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -51,17 +51,21 @@ export function QuoteForm({ products, initialProductSlug = "" }: { products: Pro
     setErrors(validationErrors);
     if (hasErrors(validationErrors)) return;
 
+    // Al admin le llegan las etiquetas que la persona vio, no los códigos internos de cada opción.
+    const label = (options: readonly { value: string; label: string }[], value: string) =>
+      options.find((option) => option.value === value)?.label ?? value;
     await submit({
       name: values.name.trim(),
       email: values.email.trim(),
-      company: values.company.trim(),
-      product: values.product,
-      projectType: values.projectType,
-      problem: values.problem.trim(),
-      budget: values.budget,
-      timeline: values.timeline,
-      consent: "si",
-      "bot-field": botField,
+      message: values.problem.trim(),
+      fields: [
+        ["Empresa o proyecto", values.company.trim()],
+        ["Tipo de proyecto", label(projectTypeOptions, values.projectType)],
+        ["Producto de referencia", products.find((p) => p.slug === values.product)?.name ?? ""],
+        ["Presupuesto orientativo", label(budgetOptions, values.budget)],
+        ["Plazo deseado", label(timelineOptions, values.timeline)],
+      ],
+      botField,
     });
   }
 
@@ -215,7 +219,9 @@ export function QuoteForm({ products, initialProductSlug = "" }: { products: Pro
 
       {status === "error" && (
         <Alert variant="error">
-          No se pudo enviar la solicitud. Revisa tu conexión e inténtalo de nuevo, o escribe directamente a{" "}
+          {limited
+            ? "Llegaron varios envíos seguidos desde tu conexión. Espera unos minutos e inténtalo de nuevo, o escribe directamente a "
+            : "No se pudo enviar la solicitud. Revisa tu conexión e inténtalo de nuevo, o escribe directamente a "}
           <a href={`mailto:${site.contact.email}`} className="underline">
             {site.contact.email}
           </a>
