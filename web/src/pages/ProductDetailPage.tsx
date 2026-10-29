@@ -15,6 +15,8 @@ import { Accordion } from "@/components/ui/Accordion";
 import { ProductCoverArt } from "@/components/product/ProductCoverArt";
 import { ArchivePhoto } from "@/components/ui/ArchivePhoto";
 import { photoFor } from "@/components/product/categoryPhotos";
+import { ProductVideo } from "@/components/product/ProductVideo";
+import { clipFor } from "@/components/product/productClips";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { DemoCallout } from "@/components/product/DemoCallout";
 import { CheckList, DetailSection, LimitationsList } from "@/components/product/InfoList";
@@ -83,6 +85,7 @@ function ProductDetail({ product, category, related }: { product: Product; categ
   const isReadyToSell = product.status === "available";
   const isIdea = product.status === "idea";
   const photo = photoFor(product.categorySlug);
+  const clip = clipFor(product.slug);
 
   return (
     <>
@@ -120,6 +123,8 @@ function ProductDetail({ product, category, related }: { product: Product; categ
                     <img key={shot.src} src={shot.src} alt={shot.alt} loading="lazy" className="rounded-lg border border-border" />
                   ))}
                 </div>
+              ) : clip ? (
+                <ProductVideo clip={clip} />
               ) : photo ? (
                 <ArchivePhoto photo={photo} caption eager className="aspect-[16/9] rounded-sm sm:aspect-[21/9]" />
               ) : (

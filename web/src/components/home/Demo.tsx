@@ -5,6 +5,8 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Slide } from "@/components/home/Slide";
 import { SpinnerIcon } from "@/components/icons";
+import { ProductVideo } from "@/components/product/ProductVideo";
+import { clipFor } from "@/components/product/productClips";
 
 /**
  * S5 · Demo. La demo real de DevPanel, incrustada a tamaño de interfaz sobre un campo Ocean Blue: se
@@ -14,6 +16,7 @@ export function Demo({ products }: { products: Product[] }) {
   const product = products.find((p) => p.demo && inAppDemos[p.slug]);
   const Board = product ? inAppDemos[product.slug] : undefined;
   if (!product?.demo || !Board) return null;
+  const clip = clipFor(product.slug);
 
   return (
     <Slide id="demo" tone="depth" labelledBy="demo-titulo">
@@ -36,7 +39,10 @@ export function Demo({ products }: { products: Product[] }) {
           </div>
         </div>
 
-        <div data-ui data-reveal className="rounded-[6px] border border-border-strong bg-bg p-4 sm:p-6">
+        {clip && <ProductVideo clip={clip} className="lg:hidden" />}
+
+        {/* En pantallas pequeñas el tablero en vivo queda apretado: se muestra la grabación y, en escritorio, la demo. */}
+        <div data-ui data-reveal className={`rounded-[6px] border border-border-strong bg-bg p-4 sm:p-6 ${clip ? "hidden lg:block" : ""}`}>
           <Suspense
             fallback={
               <div className="flex items-center justify-center gap-2 py-24 text-[15px] text-text-muted">
