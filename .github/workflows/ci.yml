@@ -20,7 +20,7 @@ jobs:
   check:
     name: Lint and build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -35,6 +35,24 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      # tsc -b typechecks before Vite builds.
+      - name: Unit tests
+        run: npm test
+
+      # tsc -b typechecks before Vite builds; the build also writes 404.html and sitemap.xml.
       - name: Typecheck and build
         run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      # Desktop and mobile viewports; Playwright starts the dev server itself (playwright.config.ts).
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Keep the Playwright report when e2e fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: web/playwright-report
+          retention-days: 7
