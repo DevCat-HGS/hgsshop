@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type SlideTone = "ground" | "surface" | "depth" | "accent";
+export type SlideTone = "ground" | "surface" | "depth" | "accent" | "paper";
 
 // Cada diapositiva es un campo de color completo, de borde a borde: las secciones se distinguen por un
 // escalón de tono, no por cajas ni líneas. "ground" deja ver el fondo atmosférico del sitio.
@@ -9,6 +9,8 @@ const tones: Record<SlideTone, string> = {
   surface: "bg-surface text-text",
   depth: "bg-depth text-text",
   accent: "bg-brand text-brand-contrast",
+  // Papel: la franja clara que corta el azul (tokens en index.css, `.tone-paper`).
+  paper: "tone-paper",
 };
 
 /**

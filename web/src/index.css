@@ -39,6 +39,7 @@
   /* Texto sobre Ice Blue: el blanco no alcanza 4.5:1, el navy sí (~8.7:1). */
   --color-brand-contrast: #080d18;
   --color-accent: #48d6b0; /* Emerald Mint: detalles distintivos, nunca protagonista */
+  --color-paper: #f3f1eb; /* Papel: blanco pastel para las franjas claras (.tone-paper) */
 
   --color-success: #48d6b0;
   --color-success-muted: #48d6b01a;
@@ -70,6 +71,32 @@
     }
   }
 
+}
+
+/*
+ * Franja de papel: blanco pastel cálido para cortar el azul. Redefine los tokens dentro de la franja, así
+ * cualquier componente (tarjetas, botones, acordeones) se lee en claro sin variantes propias. Contrastes
+ * medidos sobre #f3f1eb: texto 16.8:1, secundario 7.2:1, Ice Blue oscuro 6.6:1.
+ */
+.tone-paper {
+  --color-bg: #ffffff;
+  --color-depth: #d9dfea;
+  --color-text: #0b1220;
+  --color-text-muted: #47506a;
+  --color-text-subtle: #5e6780;
+  --color-surface: #e8e5dc;
+  --color-surface-hover: #dfdbd0;
+  --color-border: #d6d2c6;
+  --color-border-strong: #bfb9aa;
+  --color-brand: #2456b8;
+  --color-brand-hover: #1d4799;
+  --color-brand-soft: #3a6bc9;
+  --color-brand-muted: #2456b81a;
+  --color-brand-contrast: #ffffff;
+  --color-success: #157a5f;
+  --color-warning: #8a5a00;
+  background-color: var(--color-paper);
+  color: var(--color-text);
 }
 
 @layer base {

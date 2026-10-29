@@ -269,7 +269,8 @@ test("migra los proyectos guardados por la versión anterior (cliente como texto
     );
   });
   await open(page, "proyectos");
-  await expect(page.getByRole("status")).toContainText("Actualizamos tus datos");
+  // Acotado al aviso: mientras el loader de arranque sigue en pantalla también es un "status".
+  await expect(page.getByRole("status").filter({ hasText: "Actualizamos tus datos" })).toBeVisible();
   const card = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: "Sitio Viejo" }) });
   await expect(card).toContainText("Cliente Antiguo");
   await expect(card).toContainText("Sin tarifa por hora");

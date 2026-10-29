@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import type { Product } from "@/types/product";
-import { FacetStage } from "@/components/product/FacetStage";
+import { ProductMark } from "@/components/product/ProductIcon";
 import { ArrowRightIcon } from "@/components/icons";
 
 /**
@@ -23,7 +23,7 @@ export function IdeaList({ products, headingLevel = "h2" }: { products: Product[
         {products.map((product) => (
           <li key={product.id}>
             <article className="press group relative flex items-start gap-5 rounded-sm bg-surface p-5 transition-colors duration-200 hover:bg-surface-hover">
-              <FacetStage status={product.status} label={false} className="mt-1 size-9" />
+              <ProductMark slug={product.slug} size={44} />
               <div className="min-w-0 flex-1">
                 <h3 className="font-display text-2xl text-text">
                   <Link

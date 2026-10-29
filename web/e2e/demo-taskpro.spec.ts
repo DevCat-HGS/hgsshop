@@ -125,6 +125,12 @@ test("el temporizador sobrevive a la recarga y las entradas manuales se validan"
   await dialog.getByRole("button", { name: "Guardar" }).click();
   await expect(dialog.getByRole("alert")).toHaveText("La duración debe ser de al menos un minuto.");
   await dialog.getByLabel("Minutos").fill("25");
+  // Ayer a las 5: con la hora actual por defecto, la entrada podría terminar en el futuro según cuándo corra, y a
+  // esa hora no se cruza con las entradas de ejemplo.
+  const yesterday = new Date(Date.now() - 86_400_000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  await dialog.getByLabel("Fecha").fill(`${yesterday.getFullYear()}-${pad(yesterday.getMonth() + 1)}-${pad(yesterday.getDate())}`);
+  await dialog.getByLabel("Hora de inicio").fill("05:00");
   await dialog.getByLabel("Nota").fill("Revisión de código del cliente");
   await dialog.getByRole("button", { name: "Guardar" }).click();
   await expect(dialog).toBeHidden();

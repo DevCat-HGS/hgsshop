@@ -4,26 +4,42 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { FacetStage } from "@/components/product/FacetStage";
 import { DemoButton } from "@/components/product/DemoButton";
+import { ProductMark } from "@/components/product/ProductIcon";
 import { Slide } from "@/components/home/Slide";
 import { ArrowRightIcon } from "@/components/icons";
 
 /**
- * S4 · Productos. Índice tipográfico del catálogo: cada producto es una fila con su nombre a tamaño de
- * titular y su hexágono de etapa. Nada de rejilla de tarjetas: la escala hace el trabajo. La fila entera
+ * S4 · Productos. Índice tipográfico del catálogo sobre papel: cada producto es una fila con su isotipo, su
+ * nombre a tamaño de titular y su hexágono de etapa. Nada de rejilla de tarjetas: la escala hace el trabajo. La fila entera
  * lleva al detalle (enlace estirado con `after:inset-0`); el botón de demo queda encima con `relative`.
  */
-export function Productos({ products, ideaCount }: { products: Product[]; ideaCount: number }) {
+export function Productos({
+  products,
+  ideaCount,
+}: {
+  products: Product[];
+  ideaCount: number;
+}) {
   return (
-    <Slide id="productos" tone="surface" labelledBy="productos-titulo" className="lg:!py-14">
+    <Slide
+      id="productos"
+      tone="paper"
+      labelledBy="productos-titulo"
+      className="lg:!py-14"
+    >
       <Container className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <div data-reveal className="flex flex-col gap-6 lg:self-start">
-          <h2 id="productos-titulo" className="font-display text-[length:var(--text-step-head)] text-text">
+          <h2
+            id="productos-titulo"
+            className="font-display text-[length:var(--text-step-head)] text-text"
+          >
             Lo que hay en el taller
           </h2>
           <p className="max-w-sm text-lg text-pretty text-text">
-            El hexágono dice la etapa: un prototipo tiene dos facetas en su sitio; un producto disponible, las seis.
+            El hexágono dice la etapa: un prototipo tiene dos facetas en su
+            sitio; un producto disponible, las seis.
           </p>
-          <Button to="/productos" variant="secondary" className="self-start">
+          <Button to="/productos" className="self-start">
             Abrir el catálogo
           </Button>
         </div>
@@ -35,18 +51,29 @@ export function Productos({ products, ideaCount }: { products: Product[]; ideaCo
               data-reveal
               className="press group relative grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-3 rounded-sm bg-bg/40 px-6 py-5 transition-colors duration-200 hover:bg-bg sm:grid-cols-[minmax(0,1fr)_14rem_auto]"
             >
-              <span className="min-w-0">
-                <Link
-                  to={`/productos/${product.slug}`}
-                  className="font-display block text-[clamp(1.75rem,min(3.4vw,5.6vh),3.25rem)] text-text after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-brand"
-                >
-                  {product.name}
-                </Link>
-                <span className="mt-2 block text-base text-pretty text-text-muted">{product.shortDescription}</span>
+              <span className="flex min-w-0 items-start gap-5">
+                <span className="mt-1 hidden sm:block">
+                  <ProductMark slug={product.slug} size={52} />
+                </span>
+                <span className="min-w-0">
+                  <Link
+                    to={`/productos/${product.slug}`}
+                    className="font-display block text-[clamp(1.75rem,min(3.4vw,5.6vh),3.25rem)] text-text after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-brand"
+                  >
+                    {product.name}
+                  </Link>
+                  <span className="mt-2 block text-base text-pretty text-text-muted">
+                    {product.shortDescription}
+                  </span>
+                </span>
               </span>
               <span className="col-span-2 row-start-2 flex flex-wrap items-center gap-4 sm:col-span-1 sm:row-start-auto">
                 <FacetStage status={product.status} className="size-10" />
-                <DemoButton product={product} variant="secondary" className="relative z-10" />
+                <DemoButton
+                  product={product}
+                  variant="secondary"
+                  className="relative z-10"
+                />
               </span>
               <ArrowRightIcon
                 className="col-start-2 row-start-1 size-6 text-text-subtle transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand sm:col-start-auto sm:row-start-auto"
@@ -61,7 +88,10 @@ export function Productos({ products, ideaCount }: { products: Product[]; ideaCo
                 className="press group flex items-center justify-between gap-6 rounded-sm px-6 py-5 text-lg font-semibold text-brand transition-colors duration-200 hover:bg-bg/40"
               >
                 Y {ideaCount} ideas en exploración: dime cuál te serviría
-                <ArrowRightIcon className="size-6 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+                <ArrowRightIcon
+                  className="size-6 transition-transform duration-200 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
               </Link>
             </li>
           )}

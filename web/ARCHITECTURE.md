@@ -84,10 +84,11 @@ producto actúa en la página en lugar de describirse. Hoja guardada en `.taste-
   comprueba; las excepciones intencionales llevan `taste-skill-ignore` con su motivo.
 - **Fragmentos de interfaz (`data-ui`):** la portada muestra piezas reales de la plataforma (tablero de
   estado, buscador, TaskPro) con sus propias convenciones de interfaz.
-- **Fotografías de archivo:** una por categoría, de colecciones abiertas (dominio público, CC0 o sin
-  restricciones conocidas), con un único tratamiento monocromo en la paleta (`ArchivePhoto`), pie de foto y
-  crédito en el footer. Muestran el oficio, nunca el producto. Fuentes en `src/assets/photos/credits.json`;
-  se buscaron y descargaron con `scripts/assets.mjs` de la skill.
+- **Isotipos en lugar de fotos:** cada producto tiene su isotipo y su acento (`ProductIcon`): los de las
+  cuatro apps son los mismos de sus demos; FlowAuto y las ideas tienen el suyo en el mismo idioma. Tarjetas,
+  fichas, categorías y S7 los usan; el sitio no lleva fotografías.
+- **Franjas de papel (`.tone-paper`):** blanco pastel cálido (`--color-paper`) que redefine los tokens dentro
+  de la franja, para cortar el azul. Lo usan S4 Productos, S8 Preguntas y el problema de cada ficha.
 - **Fondo:** aurora en CSS (solo `transform`) y grano fino de película (ruido SVG incrustado). Las
   partículas del diseño original se retiraron a pedido. Todo quieto con `prefers-reduced-motion`.
 

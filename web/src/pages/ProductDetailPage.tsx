@@ -13,8 +13,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Accordion } from "@/components/ui/Accordion";
 import { ProductCoverArt } from "@/components/product/ProductCoverArt";
-import { ArchivePhoto } from "@/components/ui/ArchivePhoto";
-import { photoFor } from "@/components/product/categoryPhotos";
 import { ProductIcon, hasProductIcon } from "@/components/product/ProductIcon";
 import { ProductVideo } from "@/components/product/ProductVideo";
 import { clipFor } from "@/components/product/productClips";
@@ -85,7 +83,6 @@ function ProductDetail({ product, category, related }: { product: Product; categ
 
   const isReadyToSell = product.status === "available";
   const isIdea = product.status === "idea";
-  const photo = photoFor(product.categorySlug);
   const clip = clipFor(product.slug);
 
   const media =
@@ -95,12 +92,8 @@ function ProductDetail({ product, category, related }: { product: Product; categ
           <img key={shot.src} src={shot.src} alt={shot.alt} loading="lazy" className="rounded-lg border border-border" />
         ))}
       </div>
-    ) : clip ? (
-      <ProductVideo clip={clip} />
     ) : hasProductIcon(product.slug) ? (
       <ProductIcon slug={product.slug} size={176} className="aspect-[4/3] overflow-hidden rounded-sm" />
-    ) : photo ? (
-      <ArchivePhoto photo={photo} caption eager className="aspect-[4/3] rounded-sm" />
     ) : (
       <ProductCoverArt categorySlug={product.categorySlug} aspect="aspect-[4/3]" className="rounded-sm" />
     );
@@ -136,8 +129,8 @@ function ProductDetail({ product, category, related }: { product: Product; categ
         </Container>
       </section>
 
-      {/* El problema, dicho en grande: es lo que el visitante viene a reconocer. */}
-      <section aria-labelledby="problema-titulo" className="bg-depth py-20 lg:py-28">
+      {/* El problema, dicho en grande sobre papel: es lo que el visitante viene a reconocer. */}
+      <section aria-labelledby="problema-titulo" className="tone-paper py-20 lg:py-28">
         <Container>
           <h2 id="problema-titulo" className="text-[15px] font-semibold text-text-muted">
             El problema
@@ -151,6 +144,17 @@ function ProductDetail({ product, category, related }: { product: Product; categ
           </p>
         </Container>
       </section>
+
+      {clip && (
+        <section aria-labelledby="video-titulo" className="py-16 lg:py-20">
+          <Container>
+            <h2 id="video-titulo" className="font-display text-[length:var(--text-step-lead)] text-text">
+              Así se usa
+            </h2>
+            <ProductVideo clip={clip} className="mt-8 max-w-5xl" />
+          </Container>
+        </section>
+      )}
 
       <Container className="py-8 lg:py-12">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_20rem]">

@@ -14,7 +14,7 @@ export function Preguntas() {
   const answerId = `${baseId}-respuesta`;
 
   return (
-    <Slide id="preguntas" tone="surface" labelledBy="preguntas-titulo">
+    <Slide id="preguntas" tone="paper" labelledBy="preguntas-titulo">
       <Container className="grid gap-12 lg:grid-cols-12">
         <div data-reveal className="lg:col-span-5">
           <h2 id="preguntas-titulo" className="font-display text-[length:var(--text-step-head)] text-text">

@@ -2,14 +2,12 @@ import { Link } from "react-router-dom";
 import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
 import { Container } from "@/components/ui/Container";
-import { ArchivePhoto } from "@/components/ui/ArchivePhoto";
-import { photoFor } from "@/components/product/categoryPhotos";
+import { ProductIcon } from "@/components/product/ProductIcon";
 import { Slide } from "@/components/home/Slide";
 
 /**
- * S3 · Categorías. Una franja de fotografías de archivo de borde a borde, una por oficio: la tienda, la
- * central telefónica, el taller, el ENIAC, el telar. El panel enfocado o bajo el puntero se ensancha.
- * Cada foto muestra el mundo que el software ordena, no el producto; el pie lo dice.
+ * S3 · Categorías. Una franja de paneles de borde a borde, uno por oficio, cada uno con el isotipo y el
+ * color de su producto principal. El panel enfocado o bajo el puntero se ensancha.
  */
 export function Categorias({ categories, products }: { categories: Category[]; products: Product[] }) {
   return (
@@ -25,8 +23,10 @@ export function Categorias({ categories, products }: { categories: Category[]; p
 
       <ul className="mt-12 flex flex-1 flex-col gap-1 lg:min-h-[58svh] lg:flex-row">
         {categories.map((category) => {
-          const photo = photoFor(category.slug);
-          const count = products.filter((p) => p.categorySlug === category.slug).length;
+          const own = products.filter((p) => p.categorySlug === category.slug);
+          const count = own.length;
+          // El producto que da la cara por la categoría: el más avanzado que ya existe, si no, la primera idea.
+          const lead = own.find((p) => p.status !== "idea") ?? own[0];
           return (
             <li
               key={category.slug}
@@ -35,20 +35,16 @@ export function Categorias({ categories, products }: { categories: Category[]; p
               {/* La entrada va en un envoltorio: el li ya anima su ensanchado (flex-grow). */}
               <div data-reveal className="flex flex-1">
                 <Link to={`/productos?categoria=${category.slug}`} className="press relative flex flex-1 overflow-hidden focus-visible:outline-offset-[-3px]">
-                  {photo && (
-                    <span className="absolute inset-0">
-                      <ArchivePhoto
-                        photo={photo}
-                        className="size-full"
-                        imgClassName="transition-[opacity,transform] duration-700 group-hover/panel:scale-105 group-hover/panel:opacity-100"
-                      />
+                  {lead && (
+                    <span className="absolute inset-0 pb-16">
+                      <ProductIcon slug={lead.slug} size={88} className="size-full" />
                     </span>
                   )}
                   <span className="relative mt-auto flex w-full flex-col gap-1 bg-bg/85 px-5 py-4">
                     <span className="text-lg font-semibold leading-tight text-text">{category.name}</span>
                     <span className="text-[15px] text-text-muted">
                       {count} {count === 1 ? "producto" : "productos"}
-                      {photo && <span className="hidden xl:inline"> · {photo.caption}</span>}
+                      {lead && <span className="hidden xl:inline"> · {lead.name}</span>}
                     </span>
                   </span>
                 </Link>

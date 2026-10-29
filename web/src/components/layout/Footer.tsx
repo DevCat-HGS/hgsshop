@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Container } from "@/components/ui/Container";
 import { Logo } from "@/components/layout/Logo";
-import { allPhotos } from "@/components/product/categoryPhotos";
 import { site } from "@/config/site";
 
 const columns = [
@@ -75,25 +74,6 @@ export function Footer() {
         <p className="flex items-center gap-2">
           <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
           Catálogo en desarrollo activo
-        </p>
-      </Container>
-
-      {/* Créditos de las fotografías de archivo, como piden sus licencias. */}
-      <Container className="pb-8">
-        <p className="max-w-5xl text-[13px] leading-relaxed text-text-subtle">
-          Fotografías de archivo:{" "}
-          {allPhotos.map((photo, index) => (
-            <span key={photo.credit.page}>
-              <a href={photo.credit.page} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-text">
-                {photo.credit.title}
-              </a>
-              {photo.credit.author ? `, ${photo.credit.author}` : ""},{" "}
-              <a href={photo.credit.licenseUrl} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-text">
-                {photo.credit.license.toLowerCase()}
-              </a>
-              , vía Wikimedia Commons{index < allPhotos.length - 1 ? "; " : "."}
-            </span>
-          ))}
         </p>
       </Container>
     </footer>

@@ -1,17 +1,14 @@
 import { Button } from "@/components/ui/Button";
-import { ArchivePhoto } from "@/components/ui/ArchivePhoto";
-import { photoFor } from "@/components/product/categoryPhotos";
+import { ProductIcon } from "@/components/product/ProductIcon";
 import { Slide } from "@/components/home/Slide";
 import { ArrowRightIcon } from "@/components/icons";
 
 /**
  * S7 · A medida. "La placa de acción": una fila de tres placas como recortada de un tablero más largo.
- * La central, en Ice Blue, lleva la única acción; las de los lados se salen de la pantalla: una foto
- * de archivo (el telar de tarjetas perforadas, la primera automatización) y un campo plano.
+ * La central, en Ice Blue, lleva la única acción; las de los lados se salen de la pantalla: el isotipo
+ * de FlowAuto (las automatizaciones a medida) y un campo plano.
  */
 export function AMedida() {
-  const photo = photoFor("automatizacion");
-
   return (
     <Slide id="a-medida" labelledBy="a-medida-titulo">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-[1fr_4fr_1fr]">
@@ -31,7 +28,7 @@ export function AMedida() {
 
         {/* Placas laterales: sin texto, cortadas por los bordes de la pantalla. */}
         <div aria-hidden="true" data-reveal className="h-32 overflow-hidden rounded-sm lg:order-1 lg:h-auto lg:rounded-l-none">
-          {photo && <ArchivePhoto photo={photo} className="size-full" />}
+          <ProductIcon slug="flowauto" size={72} className="size-full" />
         </div>
         <div aria-hidden="true" data-reveal className="h-32 rounded-sm bg-depth lg:order-3 lg:h-auto lg:rounded-r-none" />
       </div>
