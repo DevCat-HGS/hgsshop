@@ -7,8 +7,8 @@ import { Portada } from "@/components/home/Portada";
 import { Buscador } from "@/components/home/Buscador";
 import { Categorias } from "@/components/home/Categorias";
 import { Productos } from "@/components/home/Productos";
-import { DemoSpotlight } from "@/components/home/DemoSpotlight";
-import { HowItWorks } from "@/components/home/HowItWorks";
+import { Demo } from "@/components/home/Demo";
+import { Proceso } from "@/components/home/Proceso";
 import { CustomDevCta } from "@/components/home/CustomDevCta";
 import { HomeFaq } from "@/components/home/HomeFaq";
 
@@ -34,8 +34,8 @@ export function HomePage() {
       <Buscador />
       <Categorias categories={categories} products={products} />
       <Productos products={products} />
-      <DemoSpotlight products={products} />
-      <HowItWorks />
+      <Demo products={products} />
+      <Proceso />
       <CustomDevCta />
       <HomeFaq />
     </>
