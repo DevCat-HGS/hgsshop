@@ -5,14 +5,12 @@ import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
 import { Portada } from "@/components/home/Portada";
 import { Buscador } from "@/components/home/Buscador";
-import { CategoryGrid } from "@/components/home/CategoryGrid";
-import { FeaturedProducts } from "@/components/home/FeaturedProducts";
+import { Categorias } from "@/components/home/Categorias";
+import { Productos } from "@/components/home/Productos";
 import { DemoSpotlight } from "@/components/home/DemoSpotlight";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { CustomDevCta } from "@/components/home/CustomDevCta";
 import { HomeFaq } from "@/components/home/HomeFaq";
-
-const FEATURED_COUNT = 3;
 
 export function HomePage() {
   useDocumentHead({
@@ -34,8 +32,8 @@ export function HomePage() {
     <>
       <Portada products={products} />
       <Buscador />
-      <CategoryGrid categories={categories} products={products} />
-      <FeaturedProducts products={products.slice(0, FEATURED_COUNT)} />
+      <Categorias categories={categories} products={products} />
+      <Productos products={products} />
       <DemoSpotlight products={products} />
       <HowItWorks />
       <CustomDevCta />
