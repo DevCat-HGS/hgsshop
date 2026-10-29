@@ -37,7 +37,7 @@ export function Categorias({ categories, products }: { categories: Category[]; p
                 <Link to={`/productos?categoria=${category.slug}`} className="press relative flex flex-1 overflow-hidden focus-visible:outline-offset-[-3px]">
                   {lead && (
                     <span className="absolute inset-0 pb-16">
-                      <ProductIcon slug={lead.slug} size={88} className="size-full" />
+                      <ProductIcon slug={lead.slug} status={lead.status} size={88} className="size-full" />
                     </span>
                   )}
                   <span className="relative mt-auto flex w-full flex-col gap-1 bg-bg/85 px-5 py-4">

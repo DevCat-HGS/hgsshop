@@ -1,12 +1,13 @@
-import type { ReactNode } from "react";
-import { productThemes, themeStyle, type ProductTheme } from "@/demos/kit/themes";
+import type { CSSProperties, ReactNode } from "react";
+import type { ProductStatus } from "@/types/product";
+import { themeStyle, type ProductTheme } from "@/demos/kit/themes";
 import { Logo as StockFlowLogo } from "@/demos/stockflow/Logo";
 import { ClientiaLogo } from "@/demos/clientia/Logo";
 import { Logo as RoboAcademyLogo } from "@/demos/roboacademy/Logo";
 import { Logo as TaskProLogo } from "@/demos/taskpro/Logo";
 
-// Los isotipos dibujan con los tokens de color: al envolverlos en el tema de su producto toman su acento, y el
-// trazo interior va en `brand-contrast` (navy), con contraste AA sobre cualquiera de estos acentos claros.
+// Los isotipos dibujan con los tokens de color: toman el tono con que se los envuelve, y el trazo interior va en
+// `brand-contrast` (navy), con contraste AA sobre Ice Blue, Emerald Mint y Steel Blue.
 const C = "var(--color-brand-contrast)";
 const B = "var(--color-brand)";
 
@@ -87,23 +88,32 @@ const glyphs: Record<string, (size: number) => ReactNode> = {
   ),
 };
 
-// Acentos claros, uno por producto y distintos entre sí, para que el navy del trazo se lea encima.
-const ownThemes: Record<string, ProductTheme> = {
-  flowauto: { brand: "#6fd3e8", hover: "#8cdcee", soft: "#b0e8f3" },
-  mostrador: { brand: "#f6a96b", hover: "#f8ba87", soft: "#facca6" },
-  "pedido-directo": { brand: "#b8e070", hover: "#c6e68b", soft: "#d6eeaa" },
-  pase: { brand: "#f2d25c", hover: "#f5dc7f", soft: "#f8e7a5" },
-  cotizador: { brand: "#f59393", hover: "#f7a9a9", soft: "#fac0c0" },
-  cartera: { brand: "#6fe0c4", hover: "#8ce6cf", soft: "#aeeedd" },
-  comanda: { brand: "#e3b0f0", hover: "#e9c1f3", soft: "#f0d3f7" },
+// Fuera de las demos, los isotipos usan solo la paleta de la marca y el color dice qué es cada cosa:
+// Ice Blue para el software que ya existe, Emerald Mint para el servicio a medida y Steel Blue para las
+// ideas que todavía no existen. Dentro de cada demo, la app conserva su acento propio (kit/themes.ts).
+const tones: Record<"software" | "service" | "idea", ProductTheme> = {
+  software: { brand: "#6ea8ff", hover: "#8cbbff", soft: "#a9cbff" },
+  service: { brand: "#48d6b0", hover: "#6ddfc0", soft: "#9be9d4" },
+  idea: { brand: "#a9b6cb", hover: "#bcc6d6", soft: "#cfd6e2" },
 };
 
-const icons: Partial<Record<string, { theme: ProductTheme; draw: (px: number) => ReactNode }>> = {
-  stockflow: { theme: productThemes.stockflow, draw: (px) => <StockFlowLogo size={px} /> },
-  clientia: { theme: productThemes.clientia, draw: (px) => <ClientiaLogo size={px} /> },
-  roboacademy: { theme: productThemes.roboacademy, draw: () => <RoboAcademyLogo className="size-full" /> },
-  taskpro: { theme: productThemes.taskpro, draw: (px) => <TaskProLogo size={px} /> },
-  ...Object.fromEntries(Object.entries(glyphs).map(([slug, draw]) => [slug, { theme: ownThemes[slug], draw }])),
+function toneFor(status: ProductStatus): ProductTheme {
+  if (status === "idea") return tones.idea;
+  if (status === "quote_required") return tones.service;
+  return tones.software;
+}
+
+// El trazo va siempre en Midnight Navy, también dentro de una franja clara, que invierte `brand-contrast`.
+function toneStyle(status: ProductStatus): CSSProperties {
+  return { ...themeStyle(toneFor(status)), "--color-brand-contrast": "#080d18" } as CSSProperties;
+}
+
+const icons: Partial<Record<string, (px: number) => ReactNode>> = {
+  stockflow: (px) => <StockFlowLogo size={px} />,
+  clientia: (px) => <ClientiaLogo size={px} />,
+  roboacademy: () => <RoboAcademyLogo className="size-full" />,
+  taskpro: (px) => <TaskProLogo size={px} />,
+  ...glyphs,
 };
 
 export function hasProductIcon(slug: string): boolean {
@@ -111,25 +121,35 @@ export function hasProductIcon(slug: string): boolean {
 }
 
 /** Solo el isotipo, en su acento. Para listas y filas donde el campo de color sobra. */
-export function ProductMark({ slug, size }: { slug: string; size: number }) {
-  const icon = icons[slug];
-  if (!icon) return null;
+export function ProductMark({ slug, status, size }: { slug: string; status: ProductStatus; size: number }) {
+  const draw = icons[slug];
+  if (!draw) return null;
   return (
-    <span style={{ ...themeStyle(icon.theme), width: size, height: size }} className="block shrink-0">
-      {icon.draw(size)}
+    <span style={{ ...toneStyle(status), width: size, height: size }} className="block shrink-0">
+      {draw(size)}
     </span>
   );
 }
 
-/** Campo teñido con el acento del producto y su isotipo al centro. Sin isotipo propio no dibuja nada. */
-export function ProductIcon({ slug, size, className = "" }: { slug: string; size: number; className?: string }) {
-  const icon = icons[slug];
-  if (!icon) return null;
+/** Campo teñido con el tono del producto y su isotipo al centro. Sin isotipo propio no dibuja nada. */
+export function ProductIcon({
+  slug,
+  status,
+  size,
+  className = "",
+}: {
+  slug: string;
+  status: ProductStatus;
+  size: number;
+  className?: string;
+}) {
+  const draw = icons[slug];
+  if (!draw) return null;
   return (
-    <div style={themeStyle(icon.theme)} className={`flex items-center justify-center bg-surface ${className}`}>
+    <div style={toneStyle(status)} className={`flex items-center justify-center bg-surface ${className}`}>
       <div className="flex size-full items-center justify-center bg-brand-muted">
         <span className="block transition-transform duration-500 group-hover:scale-[1.04]" style={{ width: size, height: size }}>
-          {icon.draw(size)}
+          {draw(size)}
         </span>
       </div>
     </div>

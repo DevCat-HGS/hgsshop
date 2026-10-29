@@ -93,7 +93,7 @@ function ProductDetail({ product, category, related }: { product: Product; categ
         ))}
       </div>
     ) : hasProductIcon(product.slug) ? (
-      <ProductIcon slug={product.slug} size={176} className="aspect-[4/3] overflow-hidden rounded-sm" />
+      <ProductIcon slug={product.slug} status={product.status} size={176} className="aspect-[4/3] overflow-hidden rounded-sm" />
     ) : (
       <ProductCoverArt categorySlug={product.categorySlug} aspect="aspect-[4/3]" className="rounded-sm" />
     );

@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="press group relative flex flex-col overflow-hidden rounded-sm bg-surface transition-colors duration-200 hover:bg-surface-hover">
       {hasProductIcon(product.slug) ? (
-        <ProductIcon slug={product.slug} size={96} className="aspect-[16/10]" />
+        <ProductIcon slug={product.slug} status={product.status} size={96} className="aspect-[16/10]" />
       ) : (
         <ProductCoverArt categorySlug={product.categorySlug} showLabel={false} />
       )}

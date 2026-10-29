@@ -53,7 +53,7 @@ export function Productos({
             >
               <span className="flex min-w-0 items-start gap-5">
                 <span className="mt-1 hidden sm:block">
-                  <ProductMark slug={product.slug} size={52} />
+                  <ProductMark slug={product.slug} status={product.status} size={52} />
                 </span>
                 <span className="min-w-0">
                   <Link

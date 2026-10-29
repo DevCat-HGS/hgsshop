@@ -84,11 +84,12 @@ producto actúa en la página en lugar de describirse. Hoja guardada en `.taste-
   comprueba; las excepciones intencionales llevan `taste-skill-ignore` con su motivo.
 - **Fragmentos de interfaz (`data-ui`):** la portada muestra piezas reales de la plataforma (tablero de
   estado, buscador, TaskPro) con sus propias convenciones de interfaz.
-- **Isotipos en lugar de fotos:** cada producto tiene su isotipo y su acento (`ProductIcon`): los de las
-  cuatro apps son los mismos de sus demos; FlowAuto y las ideas tienen el suyo en el mismo idioma. Tarjetas,
-  fichas, categorías y S7 los usan; el sitio no lleva fotografías.
-- **Franjas de papel (`.tone-paper`):** blanco pastel cálido (`--color-paper`) que redefine los tokens dentro
-  de la franja, para cortar el azul. Lo usan S4 Productos, S8 Preguntas y el problema de cada ficha.
+- **Isotipos en lugar de fotos:** cada producto tiene su isotipo (`ProductIcon`): los de las cuatro apps son
+  los de sus demos; FlowAuto y las ideas tienen el suyo en el mismo idioma. Fuera de las demos solo usan la
+  paleta y el color dice qué es: Ice Blue el software que existe, Emerald Mint el servicio a medida, Steel
+  Blue las ideas. Dentro de su demo cada app conserva su acento. El sitio no lleva fotografías.
+- **Franjas claras (`.tone-paper`):** Cloud White de fondo con la paleta invertida (texto Midnight Navy,
+  acción Ocean Blue). Lo usan S4 Productos, S8 Preguntas y el problema de cada ficha.
 - **Fondo:** aurora en CSS (solo `transform`) y grano fino de película (ruido SVG incrustado). Las
   partículas del diseño original se retiraron a pedido. Todo quieto con `prefers-reduced-motion`.
 

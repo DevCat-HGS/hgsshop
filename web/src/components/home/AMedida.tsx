@@ -28,7 +28,7 @@ export function AMedida() {
 
         {/* Placas laterales: sin texto, cortadas por los bordes de la pantalla. */}
         <div aria-hidden="true" data-reveal className="h-32 overflow-hidden rounded-sm lg:order-1 lg:h-auto lg:rounded-l-none">
-          <ProductIcon slug="flowauto" size={72} className="size-full" />
+          <ProductIcon slug="flowauto" status="quote_required" size={72} className="size-full" />
         </div>
         <div aria-hidden="true" data-reveal className="h-32 rounded-sm bg-depth lg:order-3 lg:h-auto lg:rounded-r-none" />
       </div>
