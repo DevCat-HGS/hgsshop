@@ -11,6 +11,10 @@ import { SpinnerIcon } from "@/components/icons";
 const CatalogPage = lazy(() => import("@/pages/CatalogPage"));
 const ProductDetailPage = lazy(() => import("@/pages/ProductDetailPage"));
 const DemoPage = lazy(() => import("@/pages/DemoPage"));
+const CustomDevelopmentPage = lazy(() => import("@/pages/CustomDevelopmentPage"));
+const ContactPage = lazy(() => import("@/pages/ContactPage"));
+const PrivacyPage = lazy(() => import("@/pages/LegalPages").then((m) => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import("@/pages/LegalPages").then((m) => ({ default: m.TermsPage })));
 
 function PageFallback() {
   return (
@@ -45,6 +49,10 @@ export const router = createBrowserRouter([
           { path: "/productos", element: withSuspense(<CatalogPage />) },
           { path: "/productos/:slug", element: withSuspense(<ProductDetailPage />) },
           { path: "/demos/:slug", element: withSuspense(<DemoPage />) },
+          { path: "/desarrollo-a-medida", element: withSuspense(<CustomDevelopmentPage />) },
+          { path: "/contacto", element: withSuspense(<ContactPage />) },
+          { path: "/privacidad", element: withSuspense(<PrivacyPage />) },
+          { path: "/terminos", element: withSuspense(<TermsPage />) },
           { path: "*", element: <NotFoundPage /> },
         ],
       },
