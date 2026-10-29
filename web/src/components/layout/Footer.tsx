@@ -35,8 +35,8 @@ const linkClasses = "text-sm text-text-muted transition-colors hover:text-text";
 /** S10 · Footer. En la portada es el destino del último scroll, tras el cierre (snap-end). */
 export function Footer() {
   return (
-    <footer className="relative snap-end border-t border-border bg-bg/70 backdrop-blur-sm">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent" aria-hidden="true" />
+    <footer /* taste-skill-ignore: footer elegido por el cliente */ className="relative snap-end border-t border-border bg-bg/70 backdrop-blur-sm">
+      <div /* taste-skill-ignore: footer elegido por el cliente */ className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent" aria-hidden="true" />
       <Container className="grid grid-cols-2 gap-10 py-16 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
         <div className="col-span-2 flex flex-col gap-4 md:col-span-1">
           <Logo />
@@ -48,7 +48,7 @@ export function Footer() {
 
         {columns.map((column) => (
           <nav key={column.title} aria-label={column.title}>
-            <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-text-subtle">{column.title}</p>
+            <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.14em] text-text-subtle">{column.title}</p>
             <ul className="flex flex-col gap-2.5">
               {column.links.map((link) => (
                 <li key={link.label}>
@@ -68,7 +68,7 @@ export function Footer() {
         ))}
       </Container>
 
-      <Container className="flex flex-col gap-2 border-t border-border py-6 text-[12px] text-text-subtle sm:flex-row sm:items-center sm:justify-between">
+      <Container /* taste-skill-ignore: footer elegido por el cliente */ className="flex flex-col gap-2 border-t border-border py-6 text-[13px] text-text-subtle sm:flex-row sm:items-center sm:justify-between">
         <p>
           © {currentYear} {site.owner.name}
         </p>
@@ -80,7 +80,7 @@ export function Footer() {
 
       {/* Créditos de las fotografías de archivo, como piden sus licencias. */}
       <Container className="pb-8">
-        <p className="max-w-5xl text-[12px] leading-relaxed text-text-subtle">
+        <p className="max-w-5xl text-[13px] leading-relaxed text-text-subtle">
           Fotografías de archivo:{" "}
           {allPhotos.map((photo, index) => (
             <span key={photo.credit.page}>

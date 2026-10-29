@@ -30,12 +30,12 @@ function FieldWrapper({ label, error, hint, required, children }: FieldWrapperPr
       </label>
       {children({ id, "aria-invalid": Boolean(error), "aria-describedby": describedBy })}
       {hint && !error && (
-        <p id={hintId} className="text-xs text-text-subtle">
+        <p id={hintId} className="text-[13px] text-text-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" className="text-xs text-danger">
+        <p id={errorId} role="alert" className="text-[13px] text-danger">
           {error}
         </p>
       )}
@@ -104,7 +104,7 @@ export function CheckboxField({
         </label>
       </div>
       {error && (
-        <p id={errorId} role="alert" className="text-xs text-danger">
+        <p id={errorId} role="alert" className="text-[13px] text-danger">
           {error}
         </p>
       )}

@@ -60,13 +60,13 @@ export function DevPanelDemo() {
           </p>
           <div className="mt-2 h-1.5 w-56 overflow-hidden rounded-full bg-surface-hover" aria-hidden="true">
             <div
-              className="h-full bg-brand transition-all duration-300"
+              className="h-full bg-brand transition-[width] duration-300"
               style={{ width: `${visible.length ? (doneCount / visible.length) * 100 : 0}%` }}
             />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="text-xs font-medium text-text-subtle" htmlFor="demo-project-filter">
+          <label className="text-[13px] font-medium text-text-muted" htmlFor="demo-project-filter">
             Proyecto
           </label>
           <select
@@ -128,17 +128,17 @@ export function DevPanelDemo() {
           const columnTasks = visible.filter((t) => t.status === column.status);
           return (
             <section key={column.status} aria-label={column.label} className="rounded-lg border border-border bg-bg p-3">
-              <h3 className="flex items-center justify-between px-1 pb-3 text-xs font-semibold uppercase tracking-wide text-text-subtle">
+              <h3 className="flex items-center justify-between px-1 pb-3 text-[13px] font-semibold text-text-muted">
                 {column.label}
                 <span className="rounded-full bg-surface-hover px-2 py-0.5 text-text-muted">{columnTasks.length}</span>
               </h3>
               <ul className="flex flex-col gap-2">
-                {columnTasks.length === 0 && <li className="px-1 py-4 text-center text-xs text-text-subtle">Sin tareas</li>}
+                {columnTasks.length === 0 && <li className="px-1 py-4 text-center text-[13px] text-text-muted">Sin tareas</li>}
                 {columnTasks.map((task) => (
                   <li key={task.id} className="group rounded-md border border-border bg-surface p-3">
-                    <p className={`text-sm ${task.status === "done" ? "text-text-subtle line-through" : "text-text"}`}>{task.title}</p>
+                    <p className={`text-sm ${task.status === "done" ? "text-text-muted line-through" : "text-text"}`}>{task.title}</p>
                     <div className="mt-2 flex items-center justify-between">
-                      <span className="text-xs text-text-subtle">{task.project}</span>
+                      <span className="text-[13px] text-text-muted">{task.project}</span>
                       <div className="flex gap-1">
                         <button
                           type="button"

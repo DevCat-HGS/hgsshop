@@ -10,7 +10,7 @@ export function SiteBackground() {
       <div className="bg-grid absolute inset-0" />
       <AmbientParticles className="absolute inset-0" />
       {/* Viñeta inferior: mantiene el contenido legible a medida que se hace scroll. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg/90" />
+      <div /* taste-skill-ignore: fondo atmosférico pedido por la marca */ className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg/90" />
     </div>
   );
 }

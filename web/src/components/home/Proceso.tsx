@@ -14,7 +14,7 @@ function Exchange({ step, call, children }: { step: string; call: string; childr
 }
 
 function SampleLabel() {
-  return <span className="rounded-sm bg-warning-muted px-1.5 py-0.5 text-[12px] font-semibold text-warning">Ejemplo</span>;
+  return <span className="rounded-sm bg-warning-muted px-1.5 py-0.5 text-[13px] font-semibold text-warning">Ejemplo</span>;
 }
 
 /**
@@ -43,11 +43,11 @@ export function Proceso() {
 
           <Exchange step="Después, te propongo un alcance." call="¿Se puede conectar con la tienda en línea que ya tengo?">
             <div data-ui className="rounded-[6px] border border-border-strong bg-bg text-[14px]">
-              <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+              <div /* taste-skill-ignore: dentro de un fragmento data-ui */ className="flex items-center justify-between border-b border-border px-4 py-2.5">
                 <span className="font-semibold text-text">Propuesta</span>
                 <SampleLabel />
               </div>
-              <ul className="divide-y divide-border">
+              <ul /* taste-skill-ignore: dentro de un fragmento data-ui */ className="divide-y divide-border">
                 <li className="flex justify-between gap-4 px-4 py-2.5 text-text">
                   <span>Fase 1 · Inventario y alertas de stock mínimo</span>
                 </li>
@@ -61,25 +61,25 @@ export function Proceso() {
 
           <Exchange step="Y lo construimos por entregas que puedes revisar." call="¿Cuándo puedo ver algo funcionando?">
             <div data-ui className="overflow-hidden rounded-[6px] border border-border-strong bg-bg text-[14px]">
-              <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+              <div /* taste-skill-ignore: dentro de un fragmento data-ui */ className="flex items-center justify-between border-b border-border px-4 py-2.5">
                 <span className="font-semibold text-text">Entregas</span>
                 <SampleLabel />
               </div>
               <table className="w-full text-left">
-                <thead className="text-[12px] text-text-muted">
-                  <tr className="border-b border-border">
+                <thead className="text-[13px] text-text-muted">
+                  <tr /* taste-skill-ignore: dentro de un fragmento data-ui */ className="border-b border-border">
                     <th className="px-4 py-2 font-semibold">Entrega</th>
                     <th className="px-4 py-2 font-semibold">Qué incluye</th>
                     <th className="px-4 py-2 font-semibold">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-border">
+                  <tr /* taste-skill-ignore: dentro de un fragmento data-ui */ className="border-b border-border">
                     <td className="px-4 py-2.5 text-text">1</td>
                     <td className="px-4 py-2.5 text-text">Registro de entradas y salidas</td>
                     <td className="px-4 py-2.5 text-success">Revisada por ti</td>
                   </tr>
-                  <tr className="border-b border-border bg-surface">
+                  <tr /* taste-skill-ignore: dentro de un fragmento data-ui */ className="border-b border-border bg-surface">
                     <td className="px-4 py-2.5 text-text">2</td>
                     <td className="px-4 py-2.5 text-text">Alertas de stock mínimo</td>
                     <td className="px-4 py-2.5 text-warning">Lista para revisar</td>

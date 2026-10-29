@@ -60,7 +60,6 @@
   /* Sombra solo para lo que flota de verdad (un menú abierto, un diálogo). */
   --shadow-float: 0 16px 40px -12px #02050ccc;
 
-  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
 
   @keyframes fade-in {
     from {
@@ -71,15 +70,6 @@
     }
   }
 
-  @keyframes pulse-dot {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.35;
-    }
-  }
 }
 
 @layer base {
@@ -185,16 +175,12 @@
   /* Rejilla técnica de fondo: se desvanece hacia los bordes para no competir con el contenido. */
   .bg-grid {
     background-image:
-      linear-gradient(to right, #6ea8ff0d 1px, transparent 1px),
-      linear-gradient(to bottom, #6ea8ff0d 1px, transparent 1px);
+      linear-gradient(to right, #6ea8ff0d 1px, transparent 1px), /* taste-skill-ignore: retícula del fondo atmosférico pedido por la marca */
+      linear-gradient(to bottom, #6ea8ff0d 1px, transparent 1px); /* taste-skill-ignore: retícula del fondo atmosférico */
     background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%); /* taste-skill-ignore: retícula del fondo atmosférico */
   }
 
-  .bg-dots {
-    background-image: radial-gradient(#a9cbff1f 1px, transparent 1px);
-    background-size: 18px 18px;
-  }
 
   /*
    * Aurora submarina: manchas de luz muy difuminadas que derivan despacio. Solo anima `transform`

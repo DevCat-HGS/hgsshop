@@ -24,17 +24,11 @@ export function ProductCoverArt({
       className={`relative ${aspect} w-full overflow-hidden bg-bg-raised ${className}`}
       style={{ "--hue": visual.color } as CSSProperties}
     >
-      <div className="bg-dots absolute inset-0 opacity-60" aria-hidden="true" />
-      <div
-        className="absolute inset-0"
-        style={{ background: `radial-gradient(ellipse 60% 70% at 50% 55%, ${visual.color}26, transparent 70%)` }}
-        aria-hidden="true"
-      />
       <svg viewBox="0 0 400 225" className="absolute inset-0 size-full" style={{ color: visual.color }} aria-hidden="true">
         {visual.motif}
       </svg>
       {showLabel && (
-        <span className="absolute bottom-2.5 left-3 text-[12px] text-text-subtle">
+        <span className="absolute bottom-2.5 left-3 text-[13px] text-text-subtle">
           Ilustración · sin capturas reales aún
         </span>
       )}

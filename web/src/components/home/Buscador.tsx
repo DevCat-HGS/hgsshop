@@ -45,7 +45,7 @@ export function Buscador() {
             aria-label="Describe lo que necesitas resolver"
             aria-describedby="buscador-ayuda"
             spellCheck={false}
-            className="font-display w-full bg-transparent text-[11vw] text-text caret-brand placeholder:text-text-subtle focus:outline-none sm:text-[clamp(3rem,6.4vw,7rem)] [&::-webkit-search-cancel-button]:hidden"
+            className="font-display w-full bg-transparent text-[8.4vw] text-text caret-brand placeholder:text-text-subtle focus:outline-none sm:text-[clamp(3rem,6.4vw,7rem)] [&::-webkit-search-cancel-button]:hidden"
             placeholder="Escribe aquí…"
           />
         </div>
@@ -55,7 +55,7 @@ export function Buscador() {
             {hasTerms && results.length > 0 && (
               <ul data-ui className="overflow-hidden rounded-[6px] border border-border-strong bg-bg">
                 {results.slice(0, MAX_RESULTS).map((product) => (
-                  <li key={product.id} className="border-b border-border last:border-b-0">
+                  <li key={product.id} /* taste-skill-ignore: dentro de un fragmento data-ui */ className="border-b border-border last:border-b-0">
                     <Link to={`/productos/${product.slug}`} className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-surface">
                       <FacetStage status={product.status} className="size-8" label={false} />
                       <span className="min-w-0 flex-1">

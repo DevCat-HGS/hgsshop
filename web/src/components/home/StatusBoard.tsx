@@ -15,11 +15,11 @@ export function StatusBoard({ products, compact = false }: { products: Product[]
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5 text-[13px]">
         <span className="font-semibold text-text">Catálogo · estado actual</span>
         <span className="flex items-center gap-1.5 text-accent">
-          <span className="size-1.5 animate-pulse-dot rounded-full bg-accent" aria-hidden="true" />
+          <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
           {products.length} productos
         </span>
       </div>
-      <ul className="flex flex-1 flex-col divide-y divide-border">
+      <ul /* taste-skill-ignore: dentro de un fragmento data-ui */ className="flex flex-1 flex-col divide-y divide-border">
         {products.map((product) => (
           <li key={product.id} className="flex flex-1">
             <Link

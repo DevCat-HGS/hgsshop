@@ -3,7 +3,7 @@ import { statusLabels, statusTone } from "@/lib/format";
 
 const toneClasses: Record<(typeof statusTone)[ProductStatus], { pill: string; dot: string }> = {
   success: { pill: "bg-success-muted text-success", dot: "bg-success" },
-  warning: { pill: "bg-warning-muted text-warning", dot: "bg-warning animate-pulse-dot" },
+  warning: { pill: "bg-warning-muted text-warning", dot: "bg-warning" },
   info: { pill: "bg-info-muted text-text-muted", dot: "bg-info" },
   brand: { pill: "bg-brand-muted text-brand-soft", dot: "bg-brand-soft" },
 };

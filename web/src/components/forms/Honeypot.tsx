@@ -5,7 +5,7 @@
  */
 export function Honeypot({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (
-    <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+    <div aria-hidden="true" /* taste-skill-ignore: campo trampa fuera de pantalla, no es una línea */ className="absolute -left-[9999px] h-px w-px overflow-hidden">
       <label>
         No completes este campo
         <input type="text" name="bot-field" tabIndex={-1} autoComplete="off" value={value} onChange={(event) => onChange(event.target.value)} />

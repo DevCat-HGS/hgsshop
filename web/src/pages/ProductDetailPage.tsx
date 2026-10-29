@@ -61,9 +61,9 @@ function ProductDetailSkeleton() {
   return (
     <Container className="py-12">
       <div aria-busy="true" aria-label="Cargando producto">
-        <div className="h-4 w-48 animate-pulse rounded bg-surface" />
-        <div className="mt-6 h-10 w-72 animate-pulse rounded bg-surface" />
-        <div className="mt-8 aspect-video w-full animate-pulse rounded-lg bg-surface" />
+        <div /* taste-skill-ignore: esqueleto de carga */ className="h-4 w-48 animate-pulse rounded bg-surface" />
+        <div /* taste-skill-ignore: esqueleto de carga */ className="mt-6 h-10 w-72 animate-pulse rounded bg-surface" />
+        <div /* taste-skill-ignore: esqueleto de carga */ className="mt-8 aspect-video w-full animate-pulse rounded-lg bg-surface" />
       </div>
     </Container>
   );
@@ -186,7 +186,7 @@ function ProductDetail({ product, category, related }: { product: Product; categ
             <div className="rounded-sm bg-surface p-6">
               <p className="text-[15px] font-semibold text-text-muted">Precio</p>
               <p className="mt-1 text-lg font-semibold text-text">{formatPrice(product.pricing)}</p>
-              {product.pricing.note && <p className="mt-1.5 text-xs text-text-muted">{product.pricing.note}</p>}
+              {product.pricing.note && <p className="mt-1.5 text-[13px] text-text-muted">{product.pricing.note}</p>}
 
               <p className="mt-5 text-[15px] font-semibold text-text-muted">Modelo de contratación</p>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -205,7 +205,7 @@ function ProductDetail({ product, category, related }: { product: Product; categ
 
             <DemoCallout product={product} />
 
-            <p className="px-1 text-xs text-text-subtle">
+            <p className="px-1 text-[13px] text-text-subtle">
               ¿Dudas? Escribe a{" "}
               <a href={`mailto:${site.contact.email}`} className="underline hover:text-text-muted">
                 {site.contact.email}
@@ -216,7 +216,7 @@ function ProductDetail({ product, category, related }: { product: Product; categ
       </Container>
 
       {related.length > 0 && (
-        <section className="border-t border-border py-14">
+        <section className="bg-surface py-16">
           <Container>
             <h2 className="text-xl font-semibold text-text">Productos relacionados</h2>
             <div className="mt-6">

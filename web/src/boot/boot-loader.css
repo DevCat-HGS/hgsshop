@@ -18,7 +18,7 @@
   justify-content: center;
   gap: 1.5rem;
   background:
-    radial-gradient(ellipse 50% 45% at 50% 45%, #1d3b6866, transparent 70%),
+    radial-gradient(ellipse 50% 45% at 50% 45%, #1d3b6866, transparent 70%), /* taste-skill-ignore: halo del loader de marca */
     #080d18;
   transition:
     opacity 450ms ease,

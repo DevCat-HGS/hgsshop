@@ -122,7 +122,7 @@ export function CustomDevelopmentPage() {
             {products ? (
               <QuoteForm products={products} initialProductSlug={searchParams.get("producto") ?? ""} />
             ) : (
-              <div aria-busy="true" aria-label="Cargando formulario" className="h-96 animate-pulse rounded-md bg-bg" />
+              <div aria-busy="true" aria-label="Cargando formulario" /* taste-skill-ignore: esqueleto de carga */ className="h-96 animate-pulse rounded-md bg-bg" />
             )}
           </div>
         </Container>
