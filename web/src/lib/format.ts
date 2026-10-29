@@ -28,6 +28,14 @@ export const lifecycleStages: { status: ProductStatus; label: string }[] = [
   { status: "available", label: "Disponible" },
 ];
 
+/** Facetas del hexágono de HGS ensambladas por etapa: el producto se "arma" a medida que avanza. */
+export const assembledFacets: Record<ProductStatus, number> = {
+  prototype: 2,
+  in_development: 4,
+  available: 6,
+  quote_required: 0,
+};
+
 export const commercialModelLabels: Record<CommercialModel, string> = {
   purchase: "Compra o licencia",
   subscription: "Suscripción",

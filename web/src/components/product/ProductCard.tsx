@@ -1,46 +1,34 @@
-import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "@/types/product";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { ArchivePhoto } from "@/components/ui/ArchivePhoto";
+import { FacetStage } from "@/components/product/FacetStage";
 import { ProductCoverArt } from "@/components/product/ProductCoverArt";
-import { Lifecycle } from "@/components/product/Lifecycle";
-import { visualFor } from "@/components/product/categoryVisuals";
+import { photoFor } from "@/components/product/categoryPhotos";
 import { ArrowRightIcon } from "@/components/icons";
 
 export function ProductCard({ product }: { product: Product }) {
-  const visual = visualFor(product.categorySlug);
+  const photo = photoFor(product.categorySlug);
 
   return (
     <Link
       to={`/productos/${product.slug}`}
       aria-label={`${product.name}: ver detalle`}
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-card transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-[color:var(--hue)]/40"
-      style={{ "--hue": visual.color } as CSSProperties}
+      className="press group flex flex-col overflow-hidden rounded-sm bg-surface transition-colors duration-200 hover:bg-surface-hover"
     >
-      <div className="relative border-b border-border">
-        <ProductCoverArt categorySlug={product.categorySlug} showLabel={false} className="transition-transform duration-500 group-hover:scale-[1.03]" />
-        <span
-          className="absolute left-3 top-3 rounded-md border border-white/10 bg-bg/70 px-2 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-sm"
-          style={{ color: visual.color }}
-        >
-          {visual.label}
-        </span>
-      </div>
+      {photo ? (
+        <ArchivePhoto photo={photo} className="aspect-[16/10]" imgClassName="transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100" />
+      ) : (
+        <ProductCoverArt categorySlug={product.categorySlug} showLabel={false} />
+      )}
 
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="text-lg font-semibold tracking-tight text-text">{product.name}</h3>
-          <StatusBadge status={product.status} />
-        </div>
-        <p className="line-clamp-2 flex-1 text-sm text-pretty text-text-muted">{product.shortDescription}</p>
-
-        <Lifecycle status={product.status} compact />
-
-        <div className="flex items-center justify-between border-t border-border pt-4 text-sm">
-          <span className="font-mono text-xs text-text-subtle">{product.demo ? "▸ Demo disponible" : "Sin demo aún"}</span>
-          <span className="inline-flex items-center gap-1 font-medium text-text transition-colors group-hover:text-brand-soft">
-            Ver detalle
-            <ArrowRightIcon className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+      <div className="flex flex-1 flex-col gap-4 p-6">
+        <h3 className="font-display text-3xl text-text">{product.name}</h3>
+        <p className="line-clamp-2 flex-1 text-base text-pretty text-text">{product.shortDescription}</p>
+        <div className="flex items-end justify-between gap-4 pt-2">
+          <FacetStage status={product.status} className="size-9" />
+          <span className="inline-flex items-center gap-1 text-[15px] font-semibold text-brand">
+            Ver
+            <ArrowRightIcon className="size-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
           </span>
         </div>
       </div>

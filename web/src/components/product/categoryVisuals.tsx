@@ -108,8 +108,8 @@ const visuals: Record<string, CategoryVisual> = {
   "inventario-y-operaciones": { color: "#6ea8ff", label: "Inventario", motif: inventoryMotif },
   "agendas-y-clientes": { color: "#4fc3e0", label: "Agendas", motif: scheduleMotif },
   educacion: { color: "#48d6b0", label: "Educación", motif: educationMotif },
-  "herramientas-dev": { color: "#8f9bff", label: "Dev tools", motif: devToolsMotif },
-  automatizacion: { color: "#b4a7ff", label: "Automatización", motif: automationMotif },
+  "herramientas-dev": { color: "#a9cbff", label: "Dev tools", motif: devToolsMotif },
+  automatizacion: { color: "#8fb3d9", label: "Automatización", motif: automationMotif },
 };
 
 const fallbackVisual: CategoryVisual = { color: "#6ea8ff", label: "Software", motif: devToolsMotif };
