@@ -52,6 +52,22 @@ describe("búsqueda y filtros", () => {
     expect(result.length).toBeGreaterThan(0);
   });
 
+  it("entiende frases: ignora palabras vacías, acentos y variaciones", async () => {
+    expect((await getProducts({ query: "inventario para mi tienda" }))[0].slug).toBe("stockflow");
+    expect((await getProducts({ query: "academia de robótica" }))[0].slug).toBe("roboacademy");
+    expect((await getProducts({ query: "agenda de citas" }))[0].slug).toBe("clientia");
+    expect((await getProducts({ query: "automatizar reportes" })).map((p) => p.slug)).toContain("flowauto");
+  });
+
+  it("ordena por relevancia: más términos coincidentes primero", async () => {
+    const result = await getProducts({ query: "inventario pedidos tienda" });
+    expect(result[0].slug).toBe("stockflow");
+  });
+
+  it("una búsqueda solo de palabras vacías no filtra nada", async () => {
+    expect(await getProducts({ query: "para de la" })).toHaveLength(5);
+  });
+
   it("devuelve vacío cuando nada coincide", async () => {
     expect(await getProducts({ query: "zzz-sin-coincidencias" })).toEqual([]);
   });

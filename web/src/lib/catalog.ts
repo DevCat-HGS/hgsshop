@@ -16,9 +16,34 @@ export interface ProductFilters {
   status?: Product["status"];
 }
 
-function matchesQuery(product: Product, query: string): boolean {
-  const haystack = `${product.name} ${product.shortDescription} ${product.features.join(" ")}`.toLowerCase();
-  return haystack.includes(query.trim().toLowerCase());
+// Palabras que no ayudan a encontrar nada: "inventario para mi tienda" busca "inventario" y "tienda".
+const STOPWORDS = new Set(
+  "a al algo como con de del el en es esa ese esta este hay la las lo los mas mi mis muy para pero por que se sin su sus tu tus un una unos unas y ya o necesito quiero busco".split(" "),
+);
+
+function normalize(text: string): string {
+  return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+/** Raíz corta para que "automatizar" encuentre "automatización" y "tiendas" encuentre "tienda". */
+function stem(word: string): string {
+  return word.length > 6 ? word.slice(0, 6) : word.replace(/s$/, "");
+}
+
+export function queryTerms(query: string): string[] {
+  return normalize(query)
+    .split(/[^a-z0-9ñ]+/)
+    .filter((word) => word.length > 1 && !STOPWORDS.has(word))
+    .map(stem);
+}
+
+/** Cuántos términos de la búsqueda aparecen en el producto (0 = no coincide). */
+function relevance(product: Product, terms: string[]): number {
+  const category = categories.find((c) => c.slug === product.categorySlug);
+  const haystack = normalize(
+    [product.name, product.shortDescription, product.problem, product.audience, product.features.join(" "), category?.name ?? "", category?.description ?? ""].join(" "),
+  );
+  return terms.filter((term) => haystack.includes(term)).length;
 }
 
 export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
@@ -32,8 +57,14 @@ export async function getProducts(filters: ProductFilters = {}): Promise<Product
     result = result.filter((p) => p.status === filters.status);
   }
 
-  if (filters.query && filters.query.trim().length > 0) {
-    result = result.filter((p) => matchesQuery(p, filters.query!));
+  const terms = queryTerms(filters.query ?? "");
+  if (terms.length > 0) {
+    // Más términos coincidentes primero; a igual relevancia se respeta el orden del catálogo.
+    result = result
+      .map((product) => ({ product, score: relevance(product, terms) }))
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((entry) => entry.product);
   }
 
   return Promise.resolve(result);

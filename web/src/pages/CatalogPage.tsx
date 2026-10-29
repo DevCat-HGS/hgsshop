@@ -47,17 +47,15 @@ export function CatalogPage() {
 
   // Debounce: espera a que la persona deje de escribir antes de reflejarlo en la URL y disparar la búsqueda.
   useEffect(() => {
+    if (queryInput === urlQuery) return;
     const timeout = setTimeout(() => {
-      setSearchParams(
-        (previous) => {
-          const next = new URLSearchParams(previous);
-          if (queryInput) next.set("q", queryInput);
-          else next.delete("q");
-          next.delete("pagina");
-          return next;
-        },
-        { replace: true },
-      );
+      // Se parte de la URL actual, no de los parámetros de cuando empezó la espera: si entretanto se
+      // eligió un filtro, una copia vieja lo borraría.
+      const next = new URLSearchParams(window.location.search);
+      if (queryInput) next.set("q", queryInput);
+      else next.delete("q");
+      next.delete("pagina");
+      setSearchParams(next, { replace: true });
     }, SEARCH_DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
@@ -86,13 +84,11 @@ export function CatalogPage() {
   const paginated = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   function updateParam(key: string, value: string) {
-    setSearchParams((previous) => {
-      const next = new URLSearchParams(previous);
-      if (value) next.set(key, value);
-      else next.delete(key);
-      next.delete("pagina");
-      return next;
-    });
+    const next = new URLSearchParams(window.location.search);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    next.delete("pagina");
+    setSearchParams(next);
   }
 
   return (
