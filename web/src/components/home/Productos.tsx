@@ -14,7 +14,7 @@ export function Productos({ products }: { products: Product[] }) {
   return (
     <Slide id="productos" tone="surface" labelledBy="productos-titulo" className="lg:!py-14">
       <Container className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <div className="flex flex-col gap-6 lg:sticky lg:top-28 lg:self-start">
+        <div data-reveal className="flex flex-col gap-6 lg:sticky lg:top-28 lg:self-start">
           <h2 id="productos-titulo" className="font-display text-[length:var(--text-step-head)] text-text">
             Lo que hay en el taller
           </h2>
@@ -28,7 +28,7 @@ export function Productos({ products }: { products: Product[] }) {
 
         <ul className="flex flex-col gap-1">
           {products.map((product) => (
-            <li key={product.id}>
+            <li key={product.id} data-reveal>
               <Link
                 to={`/productos/${product.slug}`}
                 className="press group grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-3 rounded-sm bg-bg/40 px-6 py-5 transition-colors duration-200 hover:bg-bg sm:grid-cols-[minmax(0,1fr)_14rem_auto]"

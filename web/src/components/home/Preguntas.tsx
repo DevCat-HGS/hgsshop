@@ -16,7 +16,7 @@ export function Preguntas() {
   return (
     <Slide id="preguntas" tone="surface" labelledBy="preguntas-titulo">
       <Container className="grid gap-12 lg:grid-cols-12">
-        <div className="lg:col-span-5">
+        <div data-reveal className="lg:col-span-5">
           <h2 id="preguntas-titulo" className="font-display text-[length:var(--text-step-head)] text-text">
             Preguntas frecuentes
           </h2>
@@ -49,7 +49,7 @@ export function Preguntas() {
           </ul>
         </div>
 
-        <div className="hidden lg:col-span-6 lg:col-start-7 lg:block">
+        <div data-reveal className="hidden lg:col-span-6 lg:col-start-7 lg:block">
           <p
             id={answerId}
             key={selected}

@@ -15,7 +15,7 @@ export function AMedida() {
   return (
     <Slide id="a-medida" labelledBy="a-medida-titulo">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-[1fr_4fr_1fr]">
-        <div className="col-span-2 flex min-h-[19rem] flex-col justify-center gap-6 rounded-sm bg-brand px-8 py-10 text-brand-contrast sm:px-12 lg:order-2 lg:col-span-1 lg:min-h-[22.5rem]">
+        <div data-reveal className="col-span-2 flex min-h-[19rem] flex-col justify-center gap-6 rounded-sm bg-brand px-8 py-10 text-brand-contrast sm:px-12 lg:order-2 lg:col-span-1 lg:min-h-[22.5rem]">
           <h2 id="a-medida-titulo" className="font-display max-w-2xl text-[clamp(2rem,3.4vw,3.25rem)]">
             ¿Tu caso no está en el catálogo?
           </h2>
@@ -30,10 +30,10 @@ export function AMedida() {
         </div>
 
         {/* Placas laterales: sin texto, cortadas por los bordes de la pantalla. */}
-        <div aria-hidden="true" className="h-32 overflow-hidden rounded-sm lg:order-1 lg:h-auto lg:rounded-l-none">
+        <div aria-hidden="true" data-reveal className="h-32 overflow-hidden rounded-sm lg:order-1 lg:h-auto lg:rounded-l-none">
           {photo && <ArchivePhoto photo={photo} className="size-full" />}
         </div>
-        <div aria-hidden="true" className="h-32 rounded-sm bg-depth lg:order-3 lg:h-auto lg:rounded-r-none" />
+        <div aria-hidden="true" data-reveal className="h-32 rounded-sm bg-depth lg:order-3 lg:h-auto lg:rounded-r-none" />
       </div>
     </Slide>
   );

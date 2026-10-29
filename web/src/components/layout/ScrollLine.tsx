@@ -72,10 +72,10 @@ export function ScrollLine({ fullScreen = false }: { fullScreen?: boolean }) {
       style={{ "--trace": 0 } as CSSProperties}
     >
       <Container>
-        <h2 id="cierre-titulo" className="font-display max-w-4xl text-[length:var(--text-step-head)] text-text">
+        <h2 id="cierre-titulo" data-reveal className="font-display max-w-4xl text-[length:var(--text-step-head)] text-text">
           De tu problema al software que lo resuelve
         </h2>
-        <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3 text-lg">
+        <div data-reveal className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3 text-lg">
           <Link to="/desarrollo-a-medida" className="font-semibold text-brand underline-offset-4 hover:underline">
             Contar mi proyecto
           </Link>

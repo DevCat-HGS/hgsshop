@@ -1,3 +1,5 @@
+import { BOOT_DONE_EVENT } from "@/hooks/useReveal";
+
 /**
  * Retira el loader de arranque (index.html) cuando la app ya pintó y las fuentes están listas.
  *
@@ -21,6 +23,7 @@ export function dismissBootLoader(): void {
 
   Promise.all([fontsReady, minimumElapsed]).then(() => {
     loader.classList.add("boot-loader--done");
+    window.dispatchEvent(new Event(BOOT_DONE_EVENT));
     loader.setAttribute("aria-hidden", "true");
     setTimeout(() => loader.remove(), FADE_MS);
   });

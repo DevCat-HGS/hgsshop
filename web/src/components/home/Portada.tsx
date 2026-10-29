@@ -46,11 +46,13 @@ export function Portada({ products }: { products: Product[] }) {
           id="portada-titulo"
           className="font-display flex flex-col text-[11vw] text-text lg:flex-row lg:items-center lg:justify-between lg:text-[clamp(2.5rem,3.6vw,4rem)]"
         >
-          <span>Software que se</span>
-          <span className="self-end lg:self-auto">puede probar</span>
+          <span data-reveal>Software que se</span>
+          <span data-reveal className="self-end lg:self-auto">
+            puede probar
+          </span>
         </h1>
 
-        <div className="mt-8 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[35vw] lg:-translate-x-1/2 lg:-translate-y-1/2">
+        <div data-reveal className="mt-8 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[35vw] lg:-translate-x-1/2 lg:-translate-y-1/2">
           <div className="hidden lg:block">
             <PreviousSliver />
           </div>
@@ -64,7 +66,7 @@ export function Portada({ products }: { products: Product[] }) {
       </Container>
 
       <Container className="flex flex-col gap-6 pb-12 sm:flex-row sm:items-end sm:justify-between lg:pb-16">
-        <p className="max-w-md text-lg text-pretty text-text">
+        <p data-reveal className="max-w-md text-lg text-pretty text-text">
           Aplicaciones para negocios, cada una con su etapa real. Las que tienen demo se usan aquí mismo; las demás, te
           las muestro o las construimos a tu medida.
         </p>

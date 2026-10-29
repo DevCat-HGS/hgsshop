@@ -18,7 +18,7 @@ export function Demo({ products }: { products: Product[] }) {
   return (
     <Slide id="demo" tone="depth" labelledBy="demo-titulo">
       <Container className="grid items-center gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <div className="flex flex-col gap-6">
+        <div data-reveal className="flex flex-col gap-6">
           <h2 id="demo-titulo" className="font-display text-[length:var(--text-step-head)] text-text">
             {product.name} funciona aquí mismo
           </h2>
@@ -36,7 +36,7 @@ export function Demo({ products }: { products: Product[] }) {
           </div>
         </div>
 
-        <div data-ui className="rounded-[6px] border border-border-strong bg-bg p-4 sm:p-6">
+        <div data-ui data-reveal className="rounded-[6px] border border-border-strong bg-bg p-4 sm:p-6">
           <Suspense
             fallback={
               <div className="flex items-center justify-center gap-2 py-24 text-[15px] text-text-muted">

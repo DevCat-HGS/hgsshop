@@ -149,6 +149,24 @@
     top: 1rem;
   }
 
+  /* Entrada de las partes de cada sección (useReveal). Solo con JavaScript activo. */
+  [data-reveal] {
+    transition:
+      opacity 600ms var(--ease-out) var(--reveal-delay, 0ms),
+      transform 700ms var(--ease-out) var(--reveal-delay, 0ms);
+  }
+
+  html.reveal-ready [data-reveal]:not(.is-revealed) {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.reveal-ready [data-reveal]:not(.is-revealed) {
+      transform: none;
+    }
+  }
+
   .font-display {
     font-family: var(--font-display);
     font-weight: 700;

@@ -5,7 +5,7 @@ import { CheckIcon } from "@/components/icons";
 
 function Exchange({ step, call, children }: { step: string; call: string; children: ReactNode }) {
   return (
-    <li className="flex flex-col gap-4">
+    <li data-reveal className="flex flex-col gap-4">
       <p className="text-xl font-semibold text-pretty text-text">{step}</p>
       <p className="rounded-sm bg-surface px-5 py-4 text-lg text-text">“{call}”</p>
       <div className="pl-6 sm:pl-10 lg:pl-6">{children}</div>
@@ -27,7 +27,7 @@ export function Proceso() {
     <Slide id="proceso" labelledBy="proceso-titulo">
       <Container className="flex flex-col gap-12">
         <div className="grid gap-4 lg:grid-cols-2 lg:items-end">
-          <h2 id="proceso-titulo" className="font-display text-[length:var(--text-step-head)] text-text">
+          <h2 id="proceso-titulo" data-reveal className="font-display text-[length:var(--text-step-head)] text-text">
             Cómo trabajamos
           </h2>
           <p className="max-w-lg text-lg text-pretty text-text lg:justify-self-end">Sin carritos ni pagos sorpresa: todo empieza con tu caso.</p>

@@ -33,11 +33,11 @@ export function Buscador() {
   return (
     <Slide id="buscador" tone="surface" labelledBy="buscador-titulo">
       <Container>
-        <h2 id="buscador-titulo" className="text-[length:var(--text-step-lead)] font-semibold text-text-muted">
+        <h2 id="buscador-titulo" data-reveal className="text-[length:var(--text-step-lead)] font-semibold text-text-muted">
           ¿Qué necesitas resolver?
         </h2>
 
-        <div data-ui className="mt-4">
+        <div data-ui data-reveal className="mt-4">
           <input
             type="search"
             value={query}
@@ -50,7 +50,7 @@ export function Buscador() {
           />
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,35rem)_1fr]" aria-live="polite">
+        <div data-reveal className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,35rem)_1fr]" aria-live="polite">
           <div>
             {hasTerms && results.length > 0 && (
               <ul data-ui className="overflow-hidden rounded-[6px] border border-border-strong bg-bg">

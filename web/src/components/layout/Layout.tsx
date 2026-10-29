@@ -3,9 +3,11 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SiteBackground } from "@/components/background/SiteBackground";
 import { ScrollLine } from "@/components/layout/ScrollLine";
+import { useReveal } from "@/hooks/useReveal";
 
 export function Layout() {
   const { pathname } = useLocation();
+  useReveal();
 
   return (
     <div className="relative isolate flex min-h-dvh flex-col">
