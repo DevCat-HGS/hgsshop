@@ -6,6 +6,7 @@ const toneClasses: Record<(typeof statusTone)[ProductStatus], { pill: string; do
   warning: { pill: "bg-warning-muted text-warning", dot: "bg-warning" },
   info: { pill: "bg-info-muted text-text-muted", dot: "bg-info" },
   brand: { pill: "bg-brand-muted text-brand-soft", dot: "bg-brand-soft" },
+  muted: { pill: "bg-surface-hover text-text-muted", dot: "bg-text-subtle" },
 };
 
 export function StatusBadge({ status, className = "" }: { status: ProductStatus; className?: string }) {

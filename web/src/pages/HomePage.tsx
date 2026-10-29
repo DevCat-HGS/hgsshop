@@ -32,12 +32,16 @@ export function HomePage() {
     getProducts().then(setProducts);
   }, []);
 
+  // Las ideas en exploración no existen todavía: la portada muestra lo construido y las enlaza aparte.
+  const built = products.filter((p) => p.status !== "idea");
+  const ideaCount = products.length - built.length;
+
   return (
     <>
-      <Portada products={products} />
+      <Portada products={built} ideaCount={ideaCount} />
       <Buscador />
       <Categorias categories={categories} products={products} />
-      <Productos products={products} />
+      <Productos products={built} ideaCount={ideaCount} />
       <Demo products={products} />
       <Proceso />
       <AMedida />

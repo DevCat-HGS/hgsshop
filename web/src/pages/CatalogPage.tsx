@@ -12,7 +12,7 @@ import { Pagination } from "@/components/product/Pagination";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SearchIcon } from "@/components/icons";
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 12;
 const SEARCH_DEBOUNCE_MS = 250;
 
 function sortProducts(products: Product[], sort: SortOption): Product[] {

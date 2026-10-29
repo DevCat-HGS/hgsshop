@@ -1,4 +1,4 @@
-export type ProductStatus = "available" | "in_development" | "prototype" | "quote_required";
+export type ProductStatus = "idea" | "prototype" | "in_development" | "available" | "quote_required";
 
 export type CommercialModel = "purchase" | "subscription" | "custom";
 

@@ -10,7 +10,7 @@ import { ArrowRightIcon } from "@/components/icons";
  * S4 · Productos. Índice tipográfico del catálogo: cada producto es una fila con su nombre a tamaño de
  * titular y su hexágono de etapa. Nada de rejilla de tarjetas: la escala hace el trabajo.
  */
-export function Productos({ products }: { products: Product[] }) {
+export function Productos({ products, ideaCount }: { products: Product[]; ideaCount: number }) {
   return (
     <Slide id="productos" tone="surface" labelledBy="productos-titulo" className="lg:!py-14">
       <Container className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
@@ -47,6 +47,17 @@ export function Productos({ products }: { products: Product[] }) {
               </Link>
             </li>
           ))}
+          {ideaCount > 0 && (
+            <li data-reveal>
+              <Link
+                to="/productos?estado=idea"
+                className="press group flex items-center justify-between gap-6 rounded-sm px-6 py-5 text-lg font-semibold text-brand transition-colors duration-200 hover:bg-bg/40"
+              >
+                Y {ideaCount} ideas en exploración: dime cuál te serviría
+                <ArrowRightIcon className="size-6 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+              </Link>
+            </li>
+          )}
         </ul>
       </Container>
     </Slide>

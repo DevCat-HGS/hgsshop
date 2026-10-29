@@ -81,6 +81,7 @@ function ProductDetail({ product, category, related }: { product: Product; categ
   }, [product.slug, product.status]);
 
   const isReadyToSell = product.status === "available";
+  const isIdea = product.status === "idea";
   const photo = photoFor(product.categorySlug);
 
   return (
@@ -185,7 +186,7 @@ function ProductDetail({ product, category, related }: { product: Product; categ
           <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-sm bg-surface p-6">
               <p className="text-[15px] font-semibold text-text-muted">Precio</p>
-              <p className="mt-1 text-lg font-semibold text-text">{formatPrice(product.pricing)}</p>
+              <p className="mt-1 text-lg font-semibold text-text">{isIdea ? "Todavía sin precio" : formatPrice(product.pricing)}</p>
               {product.pricing.note && <p className="mt-1.5 text-[13px] text-text-muted">{product.pricing.note}</p>}
 
               <p className="mt-5 text-[15px] font-semibold text-text-muted">Modelo de contratación</p>
@@ -196,10 +197,10 @@ function ProductDetail({ product, category, related }: { product: Product; categ
               </div>
 
               <Button to={`/desarrollo-a-medida?producto=${product.slug}`} className="mt-6 w-full">
-                {isReadyToSell ? "Contratar" : "Solicitar cotización"}
+                {isReadyToSell ? "Contratar" : isIdea ? "Me interesa" : "Solicitar cotización"}
               </Button>
               <Button to="/contacto" variant="ghost" className="mt-2 w-full">
-                Hablar con ventas
+                {isIdea ? "Proponer cómo lo usarías" : "Hablar con ventas"}
               </Button>
             </div>
 

@@ -38,7 +38,7 @@ function NextSliver() {
  * los dos bordes y en el centro, un fragmento real de la plataforma (el estado del catálogo, con datos
  * reales y navegable) dentro de una tira que asoma el fotograma anterior y el siguiente.
  */
-export function Portada({ products }: { products: Product[] }) {
+export function Portada({ products, ideaCount }: { products: Product[]; ideaCount: number }) {
   return (
     <Slide id="portada" labelledBy="portada-titulo" className="!justify-between !py-0">
       <Container className="relative flex flex-1 flex-col justify-center py-10 lg:py-0">
@@ -57,7 +57,7 @@ export function Portada({ products }: { products: Product[] }) {
             <PreviousSliver />
           </div>
           <div className="aspect-[4/3] lg:my-6 lg:aspect-video">
-            <StatusBoard products={products} compact />
+            <StatusBoard products={products} ideaCount={ideaCount} compact />
           </div>
           <div className="hidden lg:block">
             <NextSliver />
@@ -71,7 +71,7 @@ export function Portada({ products }: { products: Product[] }) {
           las muestro o las construimos a tu medida.
         </p>
         <Button to="/productos" size="lg" className="self-start sm:self-auto">
-          Ver los {products.length || 5} productos
+          Ver el catálogo
           <ArrowRightIcon className="size-4" aria-hidden="true" />
         </Button>
       </Container>

@@ -14,7 +14,7 @@ const FACETS = [
 
 /**
  * Estado de un producto como hexágono a medio ensamblar. Es la idea visual de la marca: un prototipo
- * tiene dos facetas colocadas y el resto sueltas; un producto disponible está completo. Los servicios a
+ * tiene dos facetas colocadas y el resto sueltas; una idea, ninguna; un producto disponible está completo. Los servicios a
  * medida se muestran como contorno vacío: se arman con cada cliente.
  */
 export function FacetStage({ status, className = "size-10", label = true }: { status: ProductStatus; className?: string; label?: boolean }) {
@@ -47,7 +47,7 @@ export function FacetStage({ status, className = "size-10", label = true }: { st
       {label && (
         <span className="text-[15px] leading-tight">
           <span className="block font-semibold text-text">{statusLabels[status]}</span>
-          <span className="block text-text-muted">{isService ? "Se arma con cada cliente" : `${placed} de 6 facetas`}</span>
+          <span className="block text-text-muted">{isService ? "Se arma con cada cliente" : placed === 0 ? "Piezas aún sin ensamblar" : `${placed} de 6 facetas`}</span>
         </span>
       )}
     </span>

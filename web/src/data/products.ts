@@ -2,7 +2,8 @@ import type { Product } from "@/types/product";
 
 /**
  * Catálogo de ejemplo. Cada producto está marcado con `isSampleContent: true`: son ideas de
- * producto reales del dueño de la plataforma, pero ninguno está terminado ni a la venta todavía.
+ * producto reales del dueño de la plataforma, pero ninguno está terminado ni a la venta todavía. Los
+ * de estado "idea" ni siquiera existen: están para medir interés antes de construirlos.
  * Se reemplaza o amplía desde aquí (o, cuando exista, desde el panel administrativo) sin tocar
  * ninguna página — todas leen el catálogo a través de `src/lib/catalog.ts`.
  */
@@ -233,6 +234,215 @@ export const products: Product[] = [
       },
     ],
     relatedSlugs: ["stockflow", "devpanel"],
+    isSampleContent: true,
+  },
+  // --- Ideas en exploración: todavía no existen. Se muestran para validar interés, no como oferta. ---
+  {
+    id: "mostrador",
+    slug: "mostrador",
+    name: "Mostrador",
+    categorySlug: "inventario-y-operaciones",
+    shortDescription: "Punto de venta para tiendas y cafés que descuenta el inventario con cada venta.",
+    description: [
+      "Mostrador es la idea de un punto de venta sencillo para tiendas de barrio, minimercados y cafés: cobrar, emitir el comprobante y que cada venta descuente el inventario sin pasos extra. Nombre provisional.",
+      "Partiría de StockFlow, que ya resuelve el inventario: la venta sería la otra mitad del mismo mostrador.",
+    ],
+    problem:
+      "En muchos negocios la caja y el inventario van por separado: se vende en una libreta o en una caja registradora y el stock se cuadra a mano al final del día, si se cuadra.",
+    audience: "Tiendas de barrio, minimercados, cafeterías y negocios con ventas en mostrador.",
+    status: "idea",
+    commercialModels: ["subscription", "purchase"],
+    pricing: { type: "quote" },
+    coverImage: "",
+    screenshots: [],
+    features: [
+      "Cobro rápido con lector de código de barras o búsqueda",
+      "Descuento automático del inventario de StockFlow",
+      "Cierre de caja diario con faltantes y sobrantes",
+      "Ventas por producto, día y medio de pago",
+    ],
+    benefits: ["Caja e inventario cuadrados sin trabajo extra", "Saber qué se vende y a qué hora"],
+    limitations: [
+      "Es una idea: todavía no hay código ni demo.",
+      "La facturación electrónica depende de la normativa de cada país y se evaluaría caso por caso.",
+    ],
+    faqs: [
+      {
+        question: "¿Puedo ser de los primeros en probarlo?",
+        answer: "Sí. Escríbeme contando tu negocio: los primeros interesados definen qué se construye primero.",
+      },
+    ],
+    relatedSlugs: ["stockflow", "comanda"],
+    isSampleContent: true,
+  },
+  {
+    id: "pedido-directo",
+    slug: "pedido-directo",
+    name: "Pedido Directo",
+    categorySlug: "automatizacion",
+    shortDescription: "Pedidos por WhatsApp ordenados en un tablero, sin perder mensajes ni anotar a mano.",
+    description: [
+      "Pedido Directo es la idea de convertir los pedidos que hoy llegan por WhatsApp en un tablero ordenado: qué se pidió, para cuándo, si ya se pagó y si ya salió. Nombre provisional.",
+      "El cliente sigue pidiendo por WhatsApp como siempre; lo que cambia es lo que pasa del lado del negocio.",
+    ],
+    problem:
+      "Restaurantes, panaderías y negocios por catálogo reciben decenas de pedidos por chat, los copian a mano y se les pierden mensajes en las horas de más trabajo.",
+    audience: "Restaurantes, panaderías, emprendimientos por catálogo y negocios que venden por WhatsApp.",
+    status: "idea",
+    commercialModels: ["subscription", "custom"],
+    pricing: { type: "quote" },
+    coverImage: "",
+    screenshots: [],
+    features: [
+      "Tablero de pedidos por estado: nuevo, en preparación, listo, entregado",
+      "Plantillas de respuesta para confirmar y avisar",
+      "Resumen del día: pedidos, productos más pedidos y pendientes de pago",
+    ],
+    benefits: ["Ningún pedido perdido en el chat", "Menos tiempo copiando mensajes"],
+    limitations: [
+      "Es una idea: todavía no hay código ni demo.",
+      "La integración con WhatsApp depende de las condiciones de la API oficial de WhatsApp Business.",
+    ],
+    faqs: [
+      {
+        question: "¿Mis clientes tendrían que instalar algo?",
+        answer: "La idea es que no: ellos seguirían escribiendo por WhatsApp. Es algo a confirmar al diseñar la integración.",
+      },
+    ],
+    relatedSlugs: ["flowauto", "comanda"],
+    isSampleContent: true,
+  },
+  {
+    id: "pase",
+    slug: "pase",
+    name: "Pase",
+    categorySlug: "agendas-y-clientes",
+    shortDescription: "Membresías, pagos y asistencia para gimnasios, academias y clubes.",
+    description: [
+      "Pase es la idea de un control de membresías: quién está al día, quién vence esta semana y quién vino hoy, sin hojas de cálculo. Nombre provisional.",
+      "Reutilizaría lo aprendido en RoboAcademy (grupos y asistencia) y en Clientia (fichas y recordatorios).",
+    ],
+    problem:
+      "Gimnasios, academias y clubes cobran mensualidades a mano y no saben con certeza quién está al día hasta que revisan el cuaderno.",
+    audience: "Gimnasios, academias de baile, música o idiomas, clubes deportivos.",
+    status: "idea",
+    commercialModels: ["subscription"],
+    pricing: { type: "quote" },
+    coverImage: "",
+    screenshots: [],
+    features: [
+      "Membresías con fecha de vencimiento y estado de pago",
+      "Registro de asistencia por día o por clase",
+      "Avisos de membresías por vencer",
+    ],
+    benefits: ["Saber quién está al día de un vistazo", "Menos cobros olvidados"],
+    limitations: ["Es una idea: todavía no hay código ni demo.", "El cobro en línea se evaluaría después, con un proveedor de pagos definido."],
+    faqs: [
+      {
+        question: "¿Serviría para una academia pequeña?",
+        answer: "Esa es justamente la idea: algo simple para negocios que hoy llevan las mensualidades en papel.",
+      },
+    ],
+    relatedSlugs: ["roboacademy", "clientia"],
+    isSampleContent: true,
+  },
+  {
+    id: "cotizador",
+    slug: "cotizador",
+    name: "Cotizador",
+    categorySlug: "agendas-y-clientes",
+    shortDescription: "Cotizaciones con buena presentación en minutos, a partir de tu lista de precios.",
+    description: [
+      "Cotizador es la idea de armar cotizaciones a partir de una lista de precios propia, con la presentación del negocio y un seguimiento de cuáles se aceptaron. Nombre provisional.",
+    ],
+    problem:
+      "Contratistas, agencias y talleres arman cada cotización a mano en un documento, tardan, cometen errores de suma y no saben cuáles siguen pendientes de respuesta.",
+    audience: "Contratistas, talleres, agencias y profesionales que cotizan a menudo.",
+    status: "idea",
+    commercialModels: ["subscription", "purchase"],
+    pricing: { type: "quote" },
+    coverImage: "",
+    screenshots: [],
+    features: [
+      "Lista de precios y servicios reutilizable",
+      "Cotización en PDF con la presentación del negocio",
+      "Seguimiento: enviada, aceptada o rechazada",
+    ],
+    benefits: ["Cotizar en minutos en lugar de horas", "Saber qué cotizaciones esperan respuesta"],
+    limitations: ["Es una idea: todavía no hay código ni demo."],
+    faqs: [
+      {
+        question: "¿Calcularía impuestos?",
+        answer: "Se configuraría según el país y el tipo de negocio de quien lo use; está por definir.",
+      },
+    ],
+    relatedSlugs: ["cartera", "clientia"],
+    isSampleContent: true,
+  },
+  {
+    id: "cartera",
+    slug: "cartera",
+    name: "Cartera",
+    categorySlug: "agendas-y-clientes",
+    shortDescription: "Cuentas por cobrar y recordatorios de pago para negocios que venden a crédito.",
+    description: [
+      "Cartera es la idea de llevar las cuentas por cobrar de un negocio que vende a crédito o fía: quién debe, cuánto, desde cuándo, con recordatorios amables antes de que la deuda envejezca. Nombre provisional.",
+    ],
+    problem:
+      "Distribuidoras y negocios que venden a crédito llevan las deudas en cuadernos o en la memoria, y cobrar a tiempo depende de acordarse.",
+    audience: "Distribuidoras, tiendas que fían y negocios que venden a crédito a otros negocios.",
+    status: "idea",
+    commercialModels: ["subscription"],
+    pricing: { type: "quote" },
+    coverImage: "",
+    screenshots: [],
+    features: [
+      "Saldo por cliente con antigüedad de la deuda",
+      "Recordatorios de pago programados",
+      "Registro de abonos y pagos parciales",
+    ],
+    benefits: ["Menos dinero detenido en deudas viejas", "Cobrar sin tener que acordarse de todo"],
+    limitations: ["Es una idea: todavía no hay código ni demo."],
+    faqs: [
+      {
+        question: "¿Los recordatorios serían automáticos?",
+        answer: "Esa es la idea, por correo o WhatsApp; el canal se definiría con los primeros negocios interesados.",
+      },
+    ],
+    relatedSlugs: ["cotizador", "stockflow"],
+    isSampleContent: true,
+  },
+  {
+    id: "comanda",
+    slug: "comanda",
+    name: "Comanda",
+    categorySlug: "inventario-y-operaciones",
+    shortDescription: "Mesas, comandas y cocina coordinadas para restaurantes pequeños.",
+    description: [
+      "Comanda es la idea de coordinar sala y cocina en restaurantes pequeños: qué mesa pidió qué, qué está saliendo y qué falta cobrar. Nombre provisional.",
+    ],
+    problem:
+      "En restaurantes pequeños las comandas en papel se pierden, la cocina no sabe el orden de salida y al cobrar hay que reconstruir lo que pidió cada mesa.",
+    audience: "Restaurantes, cafeterías y bares pequeños o medianos.",
+    status: "idea",
+    commercialModels: ["subscription", "custom"],
+    pricing: { type: "quote" },
+    coverImage: "",
+    screenshots: [],
+    features: [
+      "Mapa de mesas con su estado",
+      "Comandas que llegan a cocina en orden",
+      "Cuenta por mesa lista para cobrar",
+    ],
+    benefits: ["Menos platos olvidados o repetidos", "Cobrar sin reconstruir el pedido"],
+    limitations: ["Es una idea: todavía no hay código ni demo."],
+    faqs: [
+      {
+        question: "¿Necesitaría pantallas en la cocina?",
+        answer: "Se pensaría para funcionar con una tableta o incluso un celular; es parte de lo que se validaría.",
+      },
+    ],
+    relatedSlugs: ["mostrador", "pedido-directo"],
     isSampleContent: true,
   },
 ];

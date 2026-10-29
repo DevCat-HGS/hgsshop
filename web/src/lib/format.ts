@@ -1,6 +1,7 @@
 import type { CommercialModel, PricingInfo, ProductStatus } from "@/types/product";
 
 export const statusLabels: Record<ProductStatus, string> = {
+  idea: "Idea en exploración",
   available: "Disponible",
   in_development: "En desarrollo",
   prototype: "Prototipo",
@@ -8,13 +9,15 @@ export const statusLabels: Record<ProductStatus, string> = {
 };
 
 export const statusDescriptions: Record<ProductStatus, string> = {
+  idea: "Todavía no existe: se está validando si vale la pena construirlo y para quién.",
   available: "Listo para contratar.",
   in_development: "Funciona, pero sigue en construcción activa.",
   prototype: "Primera versión funcional, pendiente de validar con uso real.",
   quote_required: "Se construye a medida según cada caso; no es un producto instalable tal cual.",
 };
 
-export const statusTone: Record<ProductStatus, "success" | "warning" | "info" | "brand"> = {
+export const statusTone: Record<ProductStatus, "success" | "warning" | "info" | "brand" | "muted"> = {
+  idea: "muted",
   available: "success",
   in_development: "warning",
   prototype: "info",
@@ -23,6 +26,7 @@ export const statusTone: Record<ProductStatus, "success" | "warning" | "info" | 
 
 /** Etapas de la línea de vida de un producto instalable. "quote_required" es un servicio y no tiene etapas. */
 export const lifecycleStages: { status: ProductStatus; label: string }[] = [
+  { status: "idea", label: "Idea" },
   { status: "prototype", label: "Prototipo" },
   { status: "in_development", label: "En desarrollo" },
   { status: "available", label: "Disponible" },
@@ -30,6 +34,7 @@ export const lifecycleStages: { status: ProductStatus; label: string }[] = [
 
 /** Facetas del hexágono de HGS ensambladas por etapa: el producto se "arma" a medida que avanza. */
 export const assembledFacets: Record<ProductStatus, number> = {
+  idea: 0,
   prototype: 2,
   in_development: 4,
   available: 6,

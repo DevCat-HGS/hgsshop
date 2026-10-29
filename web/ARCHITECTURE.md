@@ -49,7 +49,9 @@ router.tsx              rutas; mantener sincronizado con netlify.toml y el sitem
 
 `Product` (`src/types/product.ts`) está pensado para sobrevivir al paso a base de datos sin cambios de forma:
 
-- `status`: `prototype` → `in_development` → `available`, más `quote_required` para servicios a medida.
+- `status`: `idea` → `prototype` → `in_development` → `available`, más `quote_required` para servicios a
+  medida. Las ideas no existen todavía: su ficha no muestra precio ni demo, solo invita a contar el caso, y
+  la portada las enlaza aparte en lugar de mezclarlas con lo construido.
   La interfaz se adapta al estado (CTA "Contratar" solo si está disponible, aviso de etapa si no).
 - `commercialModels`: `purchase`, `subscription`, `custom`. Un producto puede admitir varios.
 - `pricing`: `quote` (sin precio publicado), `fixed` o `from`, con moneda y periodo. `formatPrice` nunca

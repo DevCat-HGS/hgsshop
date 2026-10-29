@@ -65,7 +65,11 @@ describe("búsqueda y filtros", () => {
   });
 
   it("una búsqueda solo de palabras vacías no filtra nada", async () => {
-    expect(await getProducts({ query: "para de la" })).toHaveLength(5);
+    expect(await getProducts({ query: "para de la" })).toHaveLength(products.length);
+  });
+
+  it("solo coincide al inicio de una palabra", async () => {
+    expect((await getProducts({ query: "nada" })).map((p) => p.slug)).not.toContain("comanda");
   });
 
   it("devuelve vacío cuando nada coincide", async () => {

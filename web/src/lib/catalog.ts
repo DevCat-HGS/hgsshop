@@ -43,7 +43,9 @@ function relevance(product: Product, terms: string[]): number {
   const haystack = normalize(
     [product.name, product.shortDescription, product.problem, product.audience, product.features.join(" "), category?.name ?? "", category?.description ?? ""].join(" "),
   );
-  return terms.filter((term) => haystack.includes(term)).length;
+  // Un término coincide solo al inicio de una palabra: "nada" no debe encontrar "coordinadas".
+  const words = haystack.split(/[^a-z0-9ñ]+/);
+  return terms.filter((term) => words.some((word) => word.startsWith(term))).length;
 }
 
 export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {

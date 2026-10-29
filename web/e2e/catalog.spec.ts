@@ -27,7 +27,7 @@ test.describe("descubrimiento de productos", () => {
 
   test("los filtros cambian los resultados y quedan en la URL", async ({ page }) => {
     await page.goto("/productos");
-    await expect(page.getByRole("link", { name: /ver detalle/i })).toHaveCount(5);
+    await expect(page.getByRole("link", { name: /ver detalle/i })).toHaveCount(11);
 
     await page.getByLabel("Categoría").selectOption("herramientas-dev");
     await expect(page).toHaveURL(/categoria=herramientas-dev/);
@@ -36,7 +36,7 @@ test.describe("descubrimiento de productos", () => {
   });
 
   test("muestra un estado vacío cuando nada coincide", async ({ page }) => {
-    await page.goto("/productos?q=zzz-nada");
+    await page.goto("/productos?q=zzqx-wvkj");
     await expect(page.getByText("No encontramos productos con esos filtros")).toBeVisible();
   });
 
@@ -47,6 +47,14 @@ test.describe("descubrimiento de productos", () => {
     await expect(page.getByText("Demo aún no disponible")).toBeVisible();
     await expect(page.getByRole("link", { name: "Abrir demo" })).toHaveCount(0);
     await expect(page).toHaveTitle("StockFlow · HGS Digital");
+  });
+
+  test("una idea en exploración no aparenta ser un producto", async ({ page }) => {
+    await page.goto("/productos/mostrador");
+    await expect(page.getByText("Idea en exploración").first()).toBeVisible();
+    await expect(page.getByText("Todavía es una idea")).toBeVisible();
+    await expect(page.getByText("Todavía sin precio")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Solicitar sesión guiada" })).toHaveCount(0);
   });
 
   test("una ruta inexistente muestra la página 404 y no se indexa", async ({ page }) => {
