@@ -1,7 +1,7 @@
 /**
- * Trabajos ya entregados a negocios e instituciones. Los textos vienen tal cual del portafolio
+ * Trabajos ya entregados a empresas y negocios. Los textos vienen tal cual del portafolio
  * (hgsportafolio.site, `portfolio/src/content/data/projects.json` del repo DevCat-HGS): si allá cambian,
- * se cambian aquí. Solo entran trabajos para terceros; los proyectos personales viven en el portafolio.
+ * se cambian aquí. Solo entran trabajos para empresas y negocios: ni proyectos personales ni institucionales.
  */
 export interface Delivery {
   name: string;
@@ -28,11 +28,11 @@ export const deliveries: Delivery[] = [
     href: "https://arcoiriszapateria.com",
   },
   {
-    name: "SENA Cloud",
-    tag: "Plataforma",
-    summary: "Operación académica y administrativa para instructores, admins y superadmins.",
-    result: "En vivo, con tres roles de usuario",
-    href: "https://senacloud.netlify.app/",
+    name: "ARIA",
+    tag: "IA generativa, SAP",
+    summary:
+      "Asistente de soporte SAP que responde desde más de 13.000 SAP Notes con Bedrock y RAG sobre AWS serverless. En el equipo hice la interfaz de chat, el panel de fuentes, la capa de API y la documentación.",
+    result: "Respuesta completa en 5,9 s (antes 16,7 s)",
   },
   {
     name: "Farmacia Admin",

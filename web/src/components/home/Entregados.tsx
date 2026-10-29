@@ -18,8 +18,8 @@ export function Entregados() {
             Ya está funcionando para otros
           </h2>
           <p data-reveal className="max-w-lg text-lg text-pretty text-text lg:justify-self-end">
-            Software entregado a comercios, talleres e instituciones antes de este catálogo. Los que son públicos se
-            pueden visitar.
+            Software entregado a comercios, talleres y empresas antes de este catálogo. Los que son públicos se pueden
+            visitar.
           </p>
         </div>
 
@@ -46,7 +46,7 @@ export function Entregados() {
                     <ArrowRightIcon className="size-4 -rotate-45" aria-hidden="true" />
                   </a>
                 ) : (
-                  <p className="text-[15px] text-text-muted">Uso interno del cliente, sin enlace público.</p>
+                  <p className="text-[15px] text-text-muted">Uso privado del cliente, sin enlace público.</p>
                 )}
               </div>
             </li>
