@@ -18,9 +18,9 @@ export function Logo() {
   return (
     <span className="flex items-center gap-2.5">
       <LogoMark />
-      <span className="text-[15px] font-semibold tracking-tight text-text">
+      <span className="font-display text-xl text-text">
         {site.brand.shortName}
-        <span className="font-normal text-text-muted"> Digital</span>
+        <span className="text-text-muted"> Digital</span>
       </span>
     </span>
   );

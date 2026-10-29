@@ -58,10 +58,10 @@
 
 .boot-loader__label {
   display: flex;
-  font-family: "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+  font-family: "Figtree", ui-sans-serif, system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.42em;
+  letter-spacing: 0.3em;
   color: #a9b6cb;
 }
 

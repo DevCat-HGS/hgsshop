@@ -7,16 +7,17 @@ import { MenuIcon, CloseIcon } from "@/components/icons";
 
 const navLinks = [
   { to: "/productos", label: "Productos" },
-  { to: "/desarrollo-a-medida", label: "Desarrollo a medida" },
+  { to: "/desarrollo-a-medida", label: "A medida" },
   { to: "/contacto", label: "Contacto" },
 ];
 
 function navLinkClasses({ isActive }: { isActive: boolean }) {
-  return `relative rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ${
+  return `rounded-sm px-3 py-2 text-[15px] font-semibold transition-colors duration-150 ${
     isActive ? "text-text" : "text-text-muted hover:text-text"
   }`;
 }
 
+/** Barra lisa: marca, tres enlaces y una acción. Fondo sólido al hacer scroll; sin vidrio ni líneas. */
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,38 +38,28 @@ export function Header() {
   }, []);
 
   return (
-    <header
-      className={`sticky top-0 z-40 border-b transition-colors duration-200 ${
-        isScrolled || isMenuOpen ? "border-border bg-bg/75 backdrop-blur-xl" : "border-transparent bg-transparent"
-      }`}
-    >
+    <header className={`sticky top-0 z-40 transition-colors duration-200 ${isScrolled || isMenuOpen ? "bg-bg" : "bg-transparent"}`}>
       <Container className="flex h-16 items-center justify-between gap-6">
-        <NavLink to="/" aria-label="HGS Digital, inicio" className="rounded-md">
+        <NavLink to="/" aria-label="HGS Digital, inicio" className="rounded-sm">
           <Logo />
         </NavLink>
 
-        <nav aria-label="Navegación principal" className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
-            <NavLink key={link.to} to={link.to} className={navLinkClasses}>
-              {({ isActive }) => (
-                <>
-                  {link.label}
-                  {isActive && <span className="absolute inset-x-3 -bottom-[13px] h-px bg-brand" aria-hidden="true" />}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
         <div className="hidden items-center gap-2 md:flex">
-          <Button to="/desarrollo-a-medida" size="sm">
+          <nav aria-label="Navegación principal" className="flex items-center gap-1">
+            {navLinks.map((link) => (
+              <NavLink key={link.to} to={link.to} className={navLinkClasses}>
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+          <Button to="/desarrollo-a-medida" size="sm" className="ml-3">
             Solicitar cotización
           </Button>
         </div>
 
         <button
           type="button"
-          className="-mr-2 rounded-md p-2 text-text md:hidden"
+          className="press -mr-2 rounded-sm p-2 text-text md:hidden"
           aria-expanded={isMenuOpen}
           aria-controls="mobile-nav"
           aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
@@ -79,15 +70,13 @@ export function Header() {
       </Container>
 
       {isMenuOpen && (
-        <nav id="mobile-nav" aria-label="Navegación principal (móvil)" className="border-t border-border md:hidden">
-          <Container className="flex flex-col gap-1 py-4">
+        <nav id="mobile-nav" aria-label="Navegación principal (móvil)" className="bg-bg md:hidden">
+          <Container className="flex flex-col gap-1 pb-6 pt-2">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
-                className={({ isActive }) =>
-                  `rounded-md px-3 py-3 text-base font-medium ${isActive ? "bg-surface text-text" : "text-text-muted"}`
-                }
+                className={({ isActive }) => `rounded-sm px-3 py-3 text-lg font-semibold ${isActive ? "bg-surface text-text" : "text-text-muted"}`}
               >
                 {link.label}
               </NavLink>

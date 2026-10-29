@@ -1,15 +1,23 @@
 @import "tailwindcss";
 
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
-@import "@fontsource/jetbrains-mono/400.css";
-@import "@fontsource/jetbrains-mono/500.css";
+/* Solo el subconjunto latino: cubre el español (á, é, ñ, ¿, ¡) con una fracción del peso. */
+@import "@fontsource/league-spartan/latin-700.css";
+@import "@fontsource/figtree/latin-400.css";
+@import "@fontsource/figtree/latin-600.css";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+  /* Titulares en League Spartan 700; todo lo demás en Figtree. Dos familias, ninguna monoespaciada. */
+  --font-display: "League Spartan", "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Cuatro tamaños hacen el trabajo visible (dirección "product-performs"). */
+  --text-step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --text-step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --text-step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --text-step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   /* Paleta de marca (docs/marca/paleta.md): 75 % oscuros, 20 % blancos y grises azulados, 5 % acentos. */
   --color-bg: #080d18; /* Midnight Navy: fondo principal */
@@ -41,13 +49,16 @@
   --color-info: #a9b6cb;
   --color-info-muted: #a9b6cb1a;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.25rem;
+  /* Un solo radio en toda la página, casi recto. Los fragmentos de interfaz (data-ui) usan el suyo. */
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
 
-  --shadow-card: 0 1px 0 0 #ffffff0a inset, 0 16px 40px -16px #02050cb3;
-  --shadow-glow: 0 0 0 1px #6ea8ff40, 0 8px 40px -8px #6ea8ff59;
+  /* Sombra solo para lo que flota de verdad (un menú abierto, un diálogo). */
+  --shadow-float: 0 16px 40px -12px #02050ccc;
 
   --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
 
@@ -76,7 +87,9 @@
   body {
     background-color: var(--color-bg);
     color: var(--color-text);
-    font-feature-settings: "cv11", "ss01", "ss03";
+    font-family: var(--font-sans);
+    font-size: var(--text-step-body);
+    line-height: 1.5;
   }
 
   ::selection {
@@ -113,6 +126,21 @@
 
   .skip-link:focus {
     top: 1rem;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+  }
+
+  /* Respuesta inmediata al pulsar cualquier control (Emil Kowalski: 0.97, 160 ms, ease-out). */
+  .press {
+    transition: transform 160ms var(--ease-out);
+  }
+  .press:active {
+    transform: scale(0.97);
   }
 
   /* Rejilla técnica de fondo: se desvanece hacia los bordes para no competir con el contenido. */
@@ -179,10 +207,4 @@
     }
   }
 
-  .text-gradient {
-    background: linear-gradient(100deg, var(--color-text) 35%, var(--color-brand-soft) 72%, var(--color-accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
 }
