@@ -1,1 +1,188 @@
 @import "tailwindcss";
+
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+
+  /* Paleta de marca (docs/marca/paleta.md): 75 % oscuros, 20 % blancos y grises azulados, 5 % acentos. */
+  --color-bg: #080d18; /* Midnight Navy: fondo principal */
+  --color-bg-raised: #0b1222;
+  --color-surface: #101b30; /* Deep Navy: secciones y superficies */
+  --color-surface-hover: #15233d;
+  --color-depth: #1d3b68; /* Ocean Blue: capas y profundidad */
+  --color-border: #1a2742;
+  --color-border-strong: #26385a;
+
+  --color-text: #f3f7ff; /* Cloud White: títulos y texto principal */
+  --color-text-muted: #a9b6cb; /* Steel Blue: descripciones y texto secundario */
+  --color-text-subtle: #6f7f9a;
+
+  --color-brand: #6ea8ff; /* Ice Blue: botones, enlaces y énfasis */
+  --color-brand-hover: #8cbbff;
+  --color-brand-soft: #a9cbff;
+  --color-brand-muted: #6ea8ff1f;
+  /* Texto sobre Ice Blue: el blanco no alcanza 4.5:1, el navy sí (~8.7:1). */
+  --color-brand-contrast: #080d18;
+  --color-accent: #48d6b0; /* Emerald Mint: detalles distintivos, nunca protagonista */
+
+  --color-success: #48d6b0;
+  --color-success-muted: #48d6b01a;
+  --color-warning: #f2c46d;
+  --color-warning-muted: #f2c46d1a;
+  --color-danger: #ff8a8a;
+  --color-danger-muted: #ff8a8a1a;
+  --color-info: #a9b6cb;
+  --color-info-muted: #a9b6cb1a;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  --shadow-card: 0 1px 0 0 #ffffff0a inset, 0 16px 40px -16px #02050cb3;
+  --shadow-glow: 0 0 0 1px #6ea8ff40, 0 8px 40px -8px #6ea8ff59;
+
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+
+  ::selection {
+    background-color: #6ea8ff4d;
+    color: var(--color-text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -3rem;
+    z-index: 100;
+    transition: top 150ms ease;
+  }
+
+  .skip-link:focus {
+    top: 1rem;
+  }
+
+  /* Rejilla técnica de fondo: se desvanece hacia los bordes para no competir con el contenido. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, #6ea8ff0d 1px, transparent 1px),
+      linear-gradient(to bottom, #6ea8ff0d 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(#a9cbff1f 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  /*
+   * Aurora submarina: manchas de luz muy difuminadas que derivan despacio. Solo anima `transform`
+   * (compuesto en GPU, sin repintar) y con movimiento reducido queda quieta.
+   */
+  .aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(80px);
+    will-change: transform;
+  }
+
+  .aurora-blob--a {
+    animation: aurora-a 26s ease-in-out infinite alternate;
+  }
+
+  .aurora-blob--b {
+    animation: aurora-b 32s ease-in-out infinite alternate;
+  }
+
+  .aurora-blob--c {
+    animation: aurora-c 38s ease-in-out infinite alternate;
+  }
+
+  @keyframes aurora-a {
+    from {
+      transform: translate3d(-6%, -4%, 0) scale(1);
+    }
+    to {
+      transform: translate3d(8%, 6%, 0) scale(1.15);
+    }
+  }
+
+  @keyframes aurora-b {
+    from {
+      transform: translate3d(6%, 2%, 0) scale(1.1);
+    }
+    to {
+      transform: translate3d(-8%, -6%, 0) scale(0.95);
+    }
+  }
+
+  @keyframes aurora-c {
+    from {
+      transform: translate3d(0, 6%, 0) scale(0.9);
+    }
+    to {
+      transform: translate3d(-4%, -4%, 0) scale(1.1);
+    }
+  }
+
+  .text-gradient {
+    background: linear-gradient(100deg, var(--color-text) 35%, var(--color-brand-soft) 72%, var(--color-accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
