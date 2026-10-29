@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SiteBackground } from "@/components/background/SiteBackground";
+import { ScrollLine } from "@/components/layout/ScrollLine";
 
 export function Layout() {
   return (
@@ -14,6 +15,7 @@ export function Layout() {
       <main id="main-content" className="flex-1">
         <Outlet />
       </main>
+      <ScrollLine />
       <Footer />
     </div>
   );
