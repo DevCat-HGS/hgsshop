@@ -34,7 +34,7 @@ export function ProductCoverArt({
         {visual.motif}
       </svg>
       {showLabel && (
-        <span className="absolute bottom-2.5 left-3 font-mono text-[10px] uppercase tracking-wider text-text-subtle">
+        <span className="absolute bottom-2.5 left-3 text-[12px] text-text-subtle">
           Ilustración · sin capturas reales aún
         </span>
       )}

@@ -6,11 +6,11 @@ import { site } from "@/config/site";
 function LegalLayout({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Container className="max-w-3xl py-16">
-      <h1 className="text-3xl font-semibold tracking-tight text-text">{title}</h1>
+      <h1 className="font-display text-[length:var(--text-step-head)] text-text">{title}</h1>
       <p className="mt-2 text-xs text-text-subtle">
         Borrador inicial: debe revisarse con asesoría legal según el país desde el que se opere antes del lanzamiento comercial.
       </p>
-      <div className="mt-10 flex flex-col gap-8 text-sm leading-relaxed text-text-muted [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-text">
+      <div className="mt-10 flex flex-col gap-8 text-base leading-relaxed text-text [&_h2]:mb-2 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-text">
         {children}
       </div>
     </Container>

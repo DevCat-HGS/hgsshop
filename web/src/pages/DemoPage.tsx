@@ -59,18 +59,18 @@ function DemoView({ product }: { product: Product }) {
 
       <div
         role="note"
-        className="mt-6 flex flex-col gap-1 rounded-md border border-warning/40 bg-warning-muted px-4 py-3 text-sm sm:flex-row sm:items-center sm:gap-3"
+        className="mt-6 flex flex-col gap-1 rounded-sm bg-warning-muted px-4 py-3 text-[15px] sm:flex-row sm:items-center sm:gap-3"
       >
         <span className="font-semibold text-warning">ENTORNO DE DEMOSTRACIÓN</span>
         <span className="text-text-muted">Datos ficticios. Nada de lo que hagas aquí se guarda ni se envía a ningún servidor.</span>
       </div>
 
-      <h1 className="mt-6 text-2xl font-semibold text-text">Demo de {product.name}</h1>
+      <h1 className="font-display text-[length:var(--text-step-head)] text-text mt-8">Demo de {product.name}</h1>
 
       {product.demo && Demo ? (
         <>
           <p className="mt-2 max-w-2xl text-sm text-text-muted">{product.demo.instructions}</p>
-          <div className="mt-8 rounded-xl border border-border bg-surface p-4 sm:p-6">
+          <div data-ui className="mt-8 rounded-[6px] border border-border-strong bg-surface p-4 sm:p-6">
             <Suspense
               fallback={
                 <div className="flex items-center justify-center gap-2 py-20 text-sm text-text-muted">
@@ -109,7 +109,7 @@ function DemoView({ product }: { product: Product }) {
         </div>
       )}
 
-      <div className="mt-10 flex flex-wrap gap-3 border-t border-border pt-8">
+      <div className="mt-12 flex flex-wrap gap-3">
         <Button to={`/desarrollo-a-medida?producto=${product.slug}`}>Me interesa: solicitar cotización</Button>
         <Button to={`/productos/${product.slug}`} variant="secondary">
           Volver al producto

@@ -11,7 +11,6 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 import { Pagination } from "@/components/product/Pagination";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SearchIcon } from "@/components/icons";
-import { Eyebrow } from "@/components/ui/SectionHeading";
 
 const PAGE_SIZE = 9;
 const SEARCH_DEBOUNCE_MS = 250;
@@ -94,16 +93,15 @@ export function CatalogPage() {
   return (
     <Container className="pb-12 pt-14 sm:pt-20">
       <div className="max-w-2xl">
-        <Eyebrow>Catálogo</Eyebrow>
-        <h1 className="mt-5 text-4xl font-semibold tracking-[-0.03em] text-balance text-text sm:text-5xl">
+        <h1 className="font-display text-[length:var(--text-step-head)] text-balance text-text">
           Todo lo que hay en el taller
         </h1>
-        <p className="mt-4 text-lg text-pretty text-text-muted">
+        <p className="mt-5 text-lg text-pretty text-text">
           Cada producto muestra su etapa real. Filtra por categoría o estado para encontrar lo que necesitas.
         </p>
       </div>
 
-      <div className="mt-10 flex flex-col gap-4 rounded-2xl border border-border bg-surface/60 p-4 backdrop-blur-sm sm:p-5">
+      <div className="mt-10 flex flex-col gap-4 rounded-sm bg-surface p-4 sm:p-5">
         <SearchBar value={queryInput} onChange={setQueryInput} isLoading={isLoading} />
         <ProductFilters
           categories={categories}
@@ -116,7 +114,7 @@ export function CatalogPage() {
         />
       </div>
 
-      <p className="mt-8 font-mono text-xs text-text-subtle" aria-live="polite">
+      <p className="mt-8 text-[15px] text-text-muted" aria-live="polite">
         {isLoading && results === null ? "Cargando…" : `${sorted.length} ${sorted.length === 1 ? "resultado" : "resultados"}`}
       </p>
 

@@ -6,7 +6,6 @@ import type { Product } from "@/types/product";
 import { Container } from "@/components/ui/Container";
 import { QuoteForm } from "@/components/forms/QuoteForm";
 import { CheckList } from "@/components/product/InfoList";
-import { Eyebrow } from "@/components/ui/SectionHeading";
 
 const projectTypes = [
   { title: "Aplicaciones web", description: "Paneles de gestión, portales de clientes y herramientas internas." },
@@ -50,11 +49,10 @@ export function CustomDevelopmentPage() {
     <>
       <section>
         <Container className="pb-12 pt-14 sm:pt-20">
-          <Eyebrow>Desarrollo a medida</Eyebrow>
-          <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.03em] text-balance text-text sm:text-5xl">
+          <h1 className="font-display text-[length:var(--text-step-head)] text-text max-w-4xl">
             Software diseñado para tu caso, no al revés
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-pretty text-text-muted">
+          <p className="mt-6 max-w-2xl text-lg text-pretty text-text">
             Si ningún producto del catálogo encaja, desarrollo aplicaciones, automatizaciones e integraciones a partir
             de tu problema real. No doy precios ni fechas cerradas sin entender antes el alcance: la primera respuesta
             siempre es una conversación, no una cifra.
@@ -67,7 +65,7 @@ export function CustomDevelopmentPage() {
           <h2 className="text-xl font-semibold text-text">Qué tipo de proyectos</h2>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {projectTypes.map((type) => (
-              <div key={type.title} className="rounded-xl border border-border bg-surface/60 p-5 backdrop-blur-sm">
+              <div key={type.title} className="rounded-sm bg-surface p-6">
                 <h3 className="text-sm font-semibold text-text">{type.title}</h3>
                 <p className="mt-1.5 text-sm text-text-muted">{type.description}</p>
               </div>
@@ -112,7 +110,7 @@ export function CustomDevelopmentPage() {
               Cuanto más concreto seas sobre el problema, más útil será la primera respuesta. El presupuesto y el plazo
               son orientativos: sirven para proponerte algo realista, no te comprometen a nada.
             </p>
-            <div className="mt-6 rounded-xl border border-border bg-surface/60 p-5 backdrop-blur-sm">
+            <div className="mt-6 rounded-sm bg-surface p-6">
               <h3 className="text-sm font-semibold text-text">Qué pasa después</h3>
               <p className="mt-1.5 text-sm text-text-muted">
                 Reviso la solicitud personalmente y te respondo por correo con preguntas sobre el alcance o una primera
@@ -120,7 +118,7 @@ export function CustomDevelopmentPage() {
               </p>
             </div>
           </div>
-          <div className="rounded-2xl border border-border bg-surface/80 p-6 shadow-card backdrop-blur-sm sm:p-8">
+          <div className="rounded-sm bg-surface p-6 sm:p-8">
             {products ? (
               <QuoteForm products={products} initialProductSlug={searchParams.get("producto") ?? ""} />
             ) : (
