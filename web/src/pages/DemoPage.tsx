@@ -1,12 +1,14 @@
 import { Suspense, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useDocumentHead } from "@/hooks/useDocumentHead";
 import { getProductBySlug } from "@/lib/catalog";
 import { trackEvent } from "@/lib/analytics";
 import type { Product } from "@/types/product";
 import { inAppDemos } from "@/demos/registry";
+import { clearDemoData } from "@/demos/kit/storage";
+import { Btn, ConfirmButton, Dialog } from "@/demos/kit/ui";
+import { LogoMark } from "@/components/layout/Logo";
 import { Container } from "@/components/ui/Container";
-import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LimitationsList } from "@/components/product/InfoList";
@@ -33,6 +35,10 @@ export function DemoPage() {
   return <DemoView product={product} />;
 }
 
+/**
+ * La demo ocupa toda la pestaña, como la aplicación real. Una barra fina arriba recuerda que es un entorno de
+ * prueba y da las salidas: volver al producto, cotizar, reiniciar los datos y leer los límites de la demo.
+ */
 function DemoView({ product }: { product: Product }) {
   useDocumentHead({
     title: `Demo de ${product.name}`,
@@ -41,81 +47,99 @@ function DemoView({ product }: { product: Product }) {
     noindex: true,
   });
 
-  const Demo = inAppDemos[product.slug];
+  const App = inAppDemos[product.slug];
+  // Cambiar la clave vuelve a montar la app, que relee el almacenamiento ya vacío y siembra los datos de ejemplo.
+  const [generation, setGeneration] = useState(0);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   useEffect(() => {
-    if (Demo) trackEvent("demo_opened", { product: product.slug });
-  }, [Demo, product.slug]);
+    if (App) trackEvent("demo_opened", { product: product.slug });
+  }, [App, product.slug]);
 
-  return (
-    <Container className="py-10">
-      <Breadcrumbs
-        items={[
-          { label: "Productos", to: "/productos" },
-          { label: product.name, to: `/productos/${product.slug}` },
-          { label: "Demo" },
-        ]}
-      />
-
-      <div
-        role="note"
-        className="mt-6 flex flex-col gap-1 rounded-sm bg-warning-muted px-4 py-3 text-[15px] sm:flex-row sm:items-center sm:gap-3"
-      >
-        <span className="font-semibold text-warning">ENTORNO DE DEMOSTRACIÓN</span>
-        <span className="text-text-muted">Datos ficticios. Nada de lo que hagas aquí se guarda ni se envía a ningún servidor.</span>
-      </div>
-
-      <h1 className="font-display text-[length:var(--text-step-head)] text-text mt-8">Demo de {product.name}</h1>
-
-      {product.demo && Demo ? (
-        <>
-          <p className="mt-2 max-w-2xl text-sm text-text-muted">{product.demo.instructions}</p>
-          <div data-ui className="mt-8 rounded-[6px] border border-border-strong bg-surface p-4 sm:p-6">
-            <Suspense
-              fallback={
-                <div className="flex items-center justify-center gap-2 py-20 text-sm text-text-muted">
-                  <SpinnerIcon className="size-4" aria-hidden="true" /> Cargando demo…
-                </div>
-              }
-            >
-              <Demo />
-            </Suspense>
-          </div>
-
-          <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
-            <div>
-              <h2 className="text-sm font-semibold text-text">Aislamiento</h2>
-              <p className="mt-2 text-sm text-text-muted">{product.demo.isolation}</p>
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-text">Limitaciones de la demo</h2>
-              <div className="mt-2">
-                <LimitationsList items={product.demo.limitations} />
-              </div>
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="mt-8">
-          <EmptyState
-            title="Este producto todavía no tiene demo"
-            description="Preferimos decirlo claramente antes que mostrar algo que aparente funcionar. Puedes pedir una sesión guiada para ver su estado real."
-            action={
-              <Button to={`/desarrollo-a-medida?producto=${product.slug}`} size="sm" className="mt-2">
+  if (!product.demo || !App) {
+    return (
+      <Container className="py-16">
+        <EmptyState
+          title="Este producto todavía no tiene demo"
+          description="Preferimos decirlo claramente antes que mostrar algo que aparente funcionar. Puedes pedir una sesión guiada para ver su estado real."
+          action={
+            <div className="mt-2 flex flex-wrap justify-center gap-3">
+              <Button to={`/desarrollo-a-medida?producto=${product.slug}`} size="sm">
                 Solicitar sesión guiada
               </Button>
-            }
-          />
-        </div>
-      )}
+              <Button to={`/productos/${product.slug}`} variant="secondary" size="sm">
+                Volver al producto
+              </Button>
+            </div>
+          }
+        />
+      </Container>
+    );
+  }
 
-      <div className="mt-12 flex flex-wrap gap-3">
-        <Button to={`/desarrollo-a-medida?producto=${product.slug}`}>Me interesa: solicitar cotización</Button>
-        <Button to={`/productos/${product.slug}`} variant="secondary">
-          Volver al producto
-        </Button>
+  return (
+    <div className="flex h-dvh flex-col bg-bg">
+      <div role="note" aria-label="Entorno de demostración" className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-surface px-3 py-2 sm:px-4">
+        <Link to={`/productos/${product.slug}`} className="flex items-center gap-2 rounded-sm text-sm font-semibold text-text-muted hover:text-text">
+          <LogoMark className="size-5" />
+          <span>
+            <span className="sr-only">Volver a </span>
+            {product.name}
+          </span>
+        </Link>
+        <p className="min-w-0 flex-1 text-[13px] text-text-muted">
+          <span className="font-semibold text-warning">Entorno de demostración</span>
+          <span className="hidden sm:inline"> · Datos ficticios, guardados solo en este navegador.</span>
+        </p>
+        <div className="flex items-center gap-1">
+          <Btn variant="ghost" size="sm" onClick={() => setAboutOpen(true)}>
+            Acerca de la demo
+          </Btn>
+          <ConfirmButton
+            label="Reiniciar datos"
+            title="Reiniciar la demo"
+            message="Se borran los cambios que hiciste y vuelven los datos de ejemplo. No afecta nada fuera de este navegador."
+            confirmLabel="Reiniciar"
+            onConfirm={() => {
+              clearDemoData(product.slug);
+              setGeneration((g) => g + 1);
+            }}
+          />
+          <Button to={`/desarrollo-a-medida?producto=${product.slug}`} size="sm" className="ml-1 !py-1 !text-[13px]">
+            Cotizar
+          </Button>
+        </div>
       </div>
-    </Container>
+
+      <h1 className="sr-only">Demo de {product.name}</h1>
+      <main className="min-h-0 flex-1">
+        <Suspense
+          fallback={
+            <div className="flex h-full items-center justify-center gap-2 text-sm text-text-muted">
+              <SpinnerIcon className="size-4" aria-hidden="true" /> Cargando demo…
+            </div>
+          }
+        >
+          <App key={generation} />
+        </Suspense>
+      </main>
+
+      <Dialog open={aboutOpen} onClose={() => setAboutOpen(false)} title={`Acerca de la demo de ${product.name}`}>
+        <div className="flex flex-col gap-5 text-sm">
+          <p className="text-text">{product.demo.instructions}</p>
+          <div>
+            <h3 className="font-semibold text-text">Aislamiento</h3>
+            <p className="mt-1 text-text-muted">{product.demo.isolation}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-text">Limitaciones de la demo</h3>
+            <div className="mt-2">
+              <LimitationsList items={product.demo.limitations} />
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </div>
   );
 }
 

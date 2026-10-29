@@ -64,7 +64,7 @@ test("el formulario de contacto se envía", async ({ page }) => {
   await page.getByLabel("Nombre").fill("Luis");
   await page.getByLabel("Correo electrónico").fill("luis@correo.com");
   await page.getByLabel("Asunto").selectOption("producto");
-  await page.getByRole("textbox", { name: /^Mensaje/ }).fill("¿DevPanel tendrá versión para equipos?");
+  await page.getByRole("textbox", { name: /^Mensaje/ }).fill("¿TaskPro tendrá versión para equipos?");
   await page.getByLabel(/Acepto que/).check();
   await page.getByRole("button", { name: "Enviar mensaje" }).click();
 

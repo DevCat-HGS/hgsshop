@@ -48,7 +48,6 @@ export const router = createBrowserRouter([
           { path: "/", element: <HomePage /> },
           { path: "/productos", element: withSuspense(<CatalogPage />) },
           { path: "/productos/:slug", element: withSuspense(<ProductDetailPage />) },
-          { path: "/demos/:slug", element: withSuspense(<DemoPage />) },
           { path: "/desarrollo-a-medida", element: withSuspense(<CustomDevelopmentPage />) },
           { path: "/contacto", element: withSuspense(<ContactPage />) },
           { path: "/privacidad", element: withSuspense(<PrivacyPage />) },
@@ -56,6 +55,8 @@ export const router = createBrowserRouter([
           { path: "*", element: <NotFoundPage /> },
         ],
       },
+      // Las demos son aplicaciones a pantalla completa: sin la cabecera ni el pie del sitio.
+      { path: "/demos/:slug", element: withSuspense(<DemoPage />) },
     ],
   },
 ]);

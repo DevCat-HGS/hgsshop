@@ -9,7 +9,7 @@ const columns = [
     title: "Producto",
     links: [
       { to: "/productos", label: "Catálogo" },
-      { to: "/demos/devpanel", label: "Demo de DevPanel" },
+      { to: "/demos/taskpro", label: "Demo de TaskPro" },
       { to: "/desarrollo-a-medida", label: "Desarrollo a medida" },
     ],
   },

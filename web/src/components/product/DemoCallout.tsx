@@ -1,5 +1,6 @@
 import type { Product } from "@/types/product";
 import { Button } from "@/components/ui/Button";
+import { DemoButton } from "@/components/product/DemoButton";
 
 export function DemoCallout({ product }: { product: Product }) {
   if (product.status === "idea") {
@@ -36,9 +37,7 @@ export function DemoCallout({ product }: { product: Product }) {
     <div className="rounded-sm bg-brand-muted p-6">
       <p className="text-base font-semibold text-text">Demo disponible</p>
       <p className="mt-2 text-base text-text">{product.demo.instructions}</p>
-      <Button to={product.demo.url} size="sm" className="mt-4">
-        Abrir demo
-      </Button>
+      <DemoButton product={product} label="Abrir demo" className="mt-4" />
     </div>
   );
 }

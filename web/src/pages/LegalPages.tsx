@@ -54,6 +54,11 @@ export function PrivacyPage() {
           Los envíos se reciben a través de Netlify Forms (Netlify, Inc.), el proveedor que aloja esta web, y se
           conservan mientras dure la conversación comercial o hasta que pidas su eliminación.
         </p>
+        <p>
+          Lo que hagas dentro de una demo se guarda solo en el almacenamiento local de tu navegador, para que no se
+          pierda al recargar. Nunca se envía a ningún servidor; lo borras con "Reiniciar datos" en la demo o limpiando
+          los datos del sitio en tu navegador.
+        </p>
       </section>
       <section>
         <h2>Tus derechos</h2>
@@ -83,7 +88,7 @@ export function TermsPage() {
         <h2>Sobre las demos</h2>
         <p>
           Las demos usan datos ficticios, están aisladas de cualquier dato real y pueden reiniciarse o cambiar sin
-          aviso. No introduzcas información personal o sensible en ellas.
+          aviso. Lo que escribas en ellas se queda en tu navegador. No introduzcas información personal o sensible.
         </p>
       </section>
       <section>

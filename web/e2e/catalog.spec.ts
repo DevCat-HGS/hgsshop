@@ -32,7 +32,19 @@ test.describe("descubrimiento de productos", () => {
     await page.getByLabel("Categoría").selectOption("herramientas-dev");
     await expect(page).toHaveURL(/categoria=herramientas-dev/);
     await expect(page.getByRole("link", { name: /ver detalle/i })).toHaveCount(1);
-    await expect(page.getByRole("main").getByRole("link", { name: /DevPanel/ })).toBeVisible();
+    await expect(page.getByRole("main").getByRole("link", { name: "TaskPro: ver detalle" })).toBeVisible();
+  });
+
+  test("las tarjetas con demo la abren en una pestaña nueva; las demás no la ofrecen", async ({ page }) => {
+    await page.goto("/productos");
+    const demos = page.getByRole("link", { name: /^Probar demo de .* \(se abre en una pestaña nueva\)$/ });
+    await expect(demos).toHaveCount(4);
+    await expect(page.getByRole("link", { name: /Probar demo de FlowAuto/ })).toHaveCount(0);
+
+    const [demo] = await Promise.all([page.waitForEvent("popup"), page.getByRole("link", { name: /Probar demo de RoboAcademy/ }).click()]);
+    await expect(demo).toHaveURL(/\/demos\/roboacademy$/);
+    await expect(demo.getByRole("note", { name: "Entorno de demostración" })).toBeVisible();
+    await expect(page).toHaveURL(/\/productos$/);
   });
 
   test("el campo de búsqueda sigue a la URL y los parámetros inválidos se ignoran", async ({ page }) => {
@@ -56,13 +68,13 @@ test.describe("descubrimiento de productos", () => {
     await expect(page.getByText("No encontramos productos con esos filtros")).toBeVisible();
   });
 
-  test("el detalle de un prototipo muestra su estado real y no finge una demo", async ({ page }) => {
-    await page.goto("/productos/stockflow");
-    await expect(page.getByRole("heading", { level: 1, name: "StockFlow" })).toBeVisible();
-    await expect(page.getByText("Prototipo").first()).toBeVisible();
+  test("el detalle de un servicio a medida muestra su estado real y no finge una demo", async ({ page }) => {
+    await page.goto("/productos/flowauto");
+    await expect(page.getByRole("heading", { level: 1, name: "FlowAuto" })).toBeVisible();
+    await expect(page.getByText("Bajo cotización").first()).toBeVisible();
     await expect(page.getByText("Demo aún no disponible")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Abrir demo" })).toHaveCount(0);
-    await expect(page).toHaveTitle("StockFlow · HGS Digital");
+    await expect(page.getByRole("link", { name: /Abrir demo/ })).toHaveCount(0);
+    await expect(page).toHaveTitle("FlowAuto · HGS Digital");
   });
 
   test("una idea en exploración no aparenta ser un producto", async ({ page }) => {
@@ -80,37 +92,33 @@ test.describe("descubrimiento de productos", () => {
   });
 });
 
-test.describe("demo de DevPanel", () => {
-  test("se abre desde el producto y permite interactuar", async ({ page }) => {
-    await page.goto("/productos/devpanel");
-    await page.getByRole("link", { name: "Abrir demo" }).click();
-
-    await expect(page.getByText("ENTORNO DE DEMOSTRACIÓN")).toBeVisible();
-    await page.getByLabel("Nueva tarea").fill("Tarea creada en la prueba");
-    await page.getByRole("button", { name: "Agregar" }).click();
-
-    const pending = page.getByRole("region", { name: "Pendiente" });
-    await expect(pending.getByText("Tarea creada en la prueba")).toBeVisible();
-
-    await page.getByRole("button", { name: 'Eliminar "Tarea creada en la prueba"' }).click();
-    await expect(page.getByText("Tarea creada en la prueba")).toHaveCount(0);
+test.describe("demo de TaskPro", () => {
+  test("se abre desde el producto en una pestaña nueva, a pantalla completa", async ({ page: product }) => {
+    await product.goto("/productos/taskpro");
+    const [page] = await Promise.all([product.waitForEvent("popup"), product.getByRole("link", { name: /Abrir demo/ }).click()]);
+    await expect(page).toHaveURL(/\/demos\/taskpro$/);
+    await expect(product).toHaveURL(/\/productos\/taskpro$/);
+    await expect(page.getByRole("note", { name: "Entorno de demostración" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Secciones de TaskPro" })).toBeVisible();
+    // La demo ocupa la pestaña: sin la cabecera del sitio.
+    await expect(page.getByRole("navigation", { name: "Navegación principal", exact: true })).toHaveCount(0);
   });
 });
 
 test.describe("navegación", () => {
   test("Volver regresa a la página anterior", async ({ page }) => {
     await page.goto("/productos");
-    await page.getByRole("link", { name: "DevPanel: ver detalle" }).click();
-    await expect(page).toHaveURL(/\/productos\/devpanel$/);
+    await page.getByRole("link", { name: "TaskPro: ver detalle" }).click();
+    await expect(page).toHaveURL(/\/productos\/taskpro$/);
 
     await page.getByRole("button", { name: "Volver" }).click();
     await expect(page).toHaveURL(/\/productos$/);
   });
 
   test("sin historial, Volver lleva a la página padre", async ({ page }) => {
-    await page.goto("/demos/devpanel");
+    await page.goto("/productos/taskpro");
     await page.getByRole("button", { name: "Volver" }).click();
-    await expect(page).toHaveURL(/\/productos\/devpanel$/);
+    await expect(page).toHaveURL(/\/productos$/);
   });
 
   test("el cierre solo aparece en la portada, que no tiene botón Volver", async ({ page }) => {

@@ -2,7 +2,7 @@ import { CheckIcon, SearchIcon } from "@/components/icons";
 
 /*
  * Fotogramas de la tira de S1. Son fragmentos de interfaz de la plataforma con contenido real de sus
- * pantallas (los textos de los formularios, el tablero de DevPanel de la demo). Solo el tablero de estado
+ * pantallas (los textos de los formularios, el tablero de TaskPro de la demo). Solo el tablero de estado
  * es navegable; estos acompañan a la frase y se ocultan a los lectores de pantalla para no duplicar
  * contenido que existe en su página.
  */
@@ -56,11 +56,11 @@ const devTasks = [
   { title: "Definir modelo de datos", column: "Hecho" },
 ];
 
-export function DevPanelFrame() {
+export function TaskProFrame() {
   return (
     <div data-ui aria-hidden="true" className={frame}>
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-        <span className="font-semibold text-text">DevPanel · tablero</span>
+        <span className="font-semibold text-text">TaskPro · tablero</span>
         <span className="text-text-muted">1 de 5 tareas hechas</span>
       </div>
       <div className="grid flex-1 grid-cols-3 gap-2 p-3">

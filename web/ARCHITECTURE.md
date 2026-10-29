@@ -13,7 +13,7 @@ coinciden, el documento está desactualizado: corrígelo en el mismo cambio.
 | Rutas | `react-router-dom` 7, una ruta = un chunk | — |
 | Catálogo | Datos tipados en `src/data/`, leídos solo vía `src/lib/catalog.ts` | Fase 2: base de datos + panel |
 | Formularios | Netlify Forms (envío real, sin backend propio) | Fase 2: backend propio con la misma validación |
-| Demos | Registro en `src/demos/registry.ts`; DevPanel corre en la app | Demos pesadas: subdominio propio |
+| Demos | Registro en `src/demos/registry.ts`; StockFlow, Clientia, RoboAcademy y TaskPro corren en la app | Demos pesadas: subdominio propio |
 | Analítica | Capa sin proveedor (`src/lib/analytics.ts`), no envía nada | Al elegir proveedor respetuoso con la privacidad |
 | Pagos | **No existen** | Fase 4, con demanda validada |
 | Despliegue | Netlify (`netlify.toml`), Base directory `web` | — |
@@ -83,7 +83,7 @@ producto actúa en la página en lugar de describirse. Hoja guardada en `.taste-
   16 px o más en la tinta principal. `node .claude/skills/design-taste-frontend/scripts/lint.mjs web/src` lo
   comprueba; las excepciones intencionales llevan `taste-skill-ignore` con su motivo.
 - **Fragmentos de interfaz (`data-ui`):** la portada muestra piezas reales de la plataforma (tablero de
-  estado, buscador, DevPanel) con sus propias convenciones de interfaz.
+  estado, buscador, TaskPro) con sus propias convenciones de interfaz.
 - **Fotografías de archivo:** una por categoría, de colecciones abiertas (dominio público, CC0 o sin
   restricciones conocidas), con un único tratamiento monocromo en la paleta (`ArchivePhoto`), pie de foto y
   crédito en el footer. Muestran el oficio, nunca el producto. Fuentes en `src/assets/photos/credits.json`;
@@ -145,11 +145,18 @@ propio más allá del de Netlify.
 `src/demos/registry.ts` asocia un slug de producto con una demo que corre dentro de la app (cargada bajo
 demanda). Una demo desplegada aparte no se registra: basta con que `product.demo.url` sea absoluta.
 
-Criterio para elegir: demos ligeras y sin backend → dentro de la app (como DevPanel). Demos con backend,
+Criterio para elegir: demos ligeras y sin backend → dentro de la app (como TaskPro). Demos con backend,
 base de datos o autenticación → despliegue propio en un subdominio (`demo-<producto>.…`), con su propia
 base de datos de prueba que se reinicia, nunca compartiendo datos ni credenciales con producción.
 
-La demo de DevPanel es 100 % local: estado de React, sin red ni almacenamiento; recargar la reinicia. Las
+Hay cuatro demos internas (StockFlow, Clientia, RoboAcademy y TaskPro). Cada una es la aplicación completa,
+a pantalla completa en `/demos/<slug>` (fuera del `Layout`, con una barra de entorno de prueba). Comparten
+`src/demos/kit/`: `AppShell` (navegación), `useView` (pantalla en `?vista=`), `usePersistentState`
+(localStorage con el prefijo `hgs-demo:<slug>:`, con respaldo en memoria si no hay almacenamiento) y piezas
+de interfaz. Sin red: nada sale del navegador, y "Reiniciar datos" borra el prefijo y vuelve a montar la
+app. Lo que la demo simula (los envíos de recordatorios de Clientia) lo dice en pantalla y en la ficha.
+FlowAuto no tiene demo a propósito: es un servicio a medida sin un flujo genérico que mostrar. La sección S5
+de la portada incrusta TaskPro con `embedded` (pantalla en estado local, sin tocar la URL). Las
 páginas `/demos/*` llevan `noindex` (meta y cabecera `X-Robots-Tag`) y están fuera del sitemap.
 
 ## SEO
@@ -200,13 +207,13 @@ implementarlo en `src/lib/analytics.ts` y ampliar `script-src`/`connect-src` en 
 
 - `npm test`: Vitest, unitarias de validación, catálogo y formato (`src/**/*.test.ts`).
 - `npm run test:e2e`: Playwright en escritorio y móvil (`e2e/`): búsqueda, filtros en la URL, estado
-  vacío, ficha de prototipo sin demo fingida, 404 con `noindex`, demo interactiva, salto de contenido con
+  vacío, ficha de servicio sin demo fingida, 404 con `noindex`, las cuatro demos (`e2e/demo-*.spec.ts`), salto de contenido con
   teclado, y los dos formularios (validación, envío, error del servidor). El POST de Netlify Forms se
   intercepta: el envío real solo se puede comprobar en un deploy preview de Netlify.
 
 ## Fases
 
-1. **Fundamentos y MVP — hecho.** Catálogo, búsqueda, filtros, fichas por estado, demo de DevPanel,
+1. **Fundamentos y MVP — hecho.** Catálogo, búsqueda, filtros, fichas por estado, demo de TaskPro,
    formularios reales, SEO base, diseño responsive y accesible, pruebas.
 2. **Administración y persistencia — pendiente.** Propuesta: Supabase (PostgreSQL + Auth + Storage) por
    cubrir base de datos, autenticación y archivos con políticas RLS sin operar un servidor. El panel

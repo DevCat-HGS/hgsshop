@@ -3,10 +3,10 @@ import type { Product } from "@/types/product";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { StatusBoard } from "@/components/home/StatusBoard";
-import { DevPanelFrame, QuoteFrame, ReceivedFrame, SearchFrame } from "@/components/home/ReelFrames";
+import { TaskProFrame, QuoteFrame, ReceivedFrame, SearchFrame } from "@/components/home/ReelFrames";
 import { ArrowRightIcon } from "@/components/icons";
 
-// Pasos de la tira: catálogo → solicitud de cotización → DevPanel. Cada uno ocupa una pantalla de scroll.
+// Pasos de la tira: catálogo → solicitud de cotización → TaskPro. Cada uno ocupa una pantalla de scroll.
 const STEPS = 3;
 const HEADER_HEIGHT = 64;
 // Alto de un fotograma: 35vw de ancho en 16:9. Los asomos del anterior y el siguiente miden 60 px + 24 de hueco.
@@ -58,7 +58,7 @@ export function Portada({ products, ideaCount }: { products: Product[]; ideaCoun
     <SearchFrame key="buscar" />,
     <StatusBoard key="estado" products={products} ideaCount={ideaCount} compact />,
     <QuoteFrame key="cotizar" />,
-    <DevPanelFrame key="devpanel" />,
+    <TaskProFrame key="taskpro" />,
     <ReceivedFrame key="recibido" />,
   ];
 

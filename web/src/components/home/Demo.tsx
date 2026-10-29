@@ -3,17 +3,20 @@ import type { Product } from "@/types/product";
 import { inAppDemos } from "@/demos/registry";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
+import { DemoButton } from "@/components/product/DemoButton";
 import { Slide } from "@/components/home/Slide";
 import { SpinnerIcon } from "@/components/icons";
 import { ProductVideo } from "@/components/product/ProductVideo";
 import { clipFor } from "@/components/product/productClips";
 
 /**
- * S5 · Demo. La demo real de DevPanel, incrustada a tamaño de interfaz sobre un campo Ocean Blue: se
- * usa aquí mismo, sin registro. Si ningún producto tuviera demo, la sección no se muestra.
+ * S5 · Demo. La demo real de TaskPro, incrustada a tamaño de interfaz sobre un campo Ocean Blue: se
+ * usa aquí mismo, sin registro. El texto describe ese tablero, así que la sección lo prefiere aunque haya
+ * otras demos; si TaskPro dejara de tenerla, usa la primera disponible, y sin ninguna no se muestra.
  */
 export function Demo({ products }: { products: Product[] }) {
-  const product = products.find((p) => p.demo && inAppDemos[p.slug]);
+  const withDemo = products.filter((p) => p.demo && inAppDemos[p.slug]);
+  const product = withDemo.find((p) => p.slug === "taskpro") ?? withDemo[0];
   const Board = product ? inAppDemos[product.slug] : undefined;
   if (!product?.demo || !Board) return null;
   const clip = clipFor(product.slug);
@@ -26,13 +29,11 @@ export function Demo({ products }: { products: Product[] }) {
             {product.name} funciona aquí mismo
           </h2>
           <p className="max-w-md text-lg text-pretty text-text">
-            Crea una tarea, márcala como hecha, cambia de proyecto. Todo ocurre en tu navegador: no se envía nada y al
-            recargar vuelve a empezar.
+            Es la aplicación completa: tablero, proyectos, notas y registro de tiempo. Lo que hagas se guarda solo en tu
+            navegador y no se envía a ningún sitio.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button to={product.demo.url} size="lg">
-              Abrir la demo completa
-            </Button>
+            <DemoButton product={product} label="Abrir la demo completa" size="lg" />
             <Button to={`/productos/${product.slug}`} variant="ink" size="lg">
               Ver el producto
             </Button>
@@ -41,16 +42,16 @@ export function Demo({ products }: { products: Product[] }) {
 
         {clip && <ProductVideo clip={clip} className="lg:hidden" />}
 
-        {/* En pantallas pequeñas el tablero en vivo queda apretado: se muestra la grabación y, en escritorio, la demo. */}
-        <div data-ui data-reveal className={`rounded-[6px] border border-border-strong bg-bg p-4 sm:p-6 ${clip ? "hidden lg:block" : ""}`}>
+        {/* En pantallas pequeñas la aplicación queda apretada: si hay grabación se muestra esa y, en escritorio, la demo. */}
+        <div data-reveal className={`h-[34rem] overflow-hidden rounded-[6px] border border-border-strong ${clip ? "hidden lg:block" : ""}`}>
           <Suspense
             fallback={
-              <div className="flex items-center justify-center gap-2 py-24 text-[15px] text-text-muted">
+              <div className="flex h-full items-center justify-center gap-2 text-[15px] text-text-muted">
                 <SpinnerIcon className="size-4" aria-hidden="true" /> Cargando la demo…
               </div>
             }
           >
-            <Board />
+            <Board embedded />
           </Suspense>
         </div>
       </Container>

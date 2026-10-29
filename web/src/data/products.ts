@@ -44,11 +44,21 @@ export const products: Product[] = [
       "Es un prototipo funcional: el flujo de inventario y reportes básicos ya funcionan, pero no está validado con un negocio real todavía.",
       "No incluye todavía integración con lectores de código de barras ni facturación electrónica.",
     ],
+    demo: {
+      url: "/demos/stockflow",
+      instructions:
+        "Inventario y pedidos de una ferretería ficticia. Registra entradas, salidas y ajustes, despacha un pedido (o intenta despachar uno sin stock) y cambia de usuario con \"Usar la demo como\" para ver cómo cambian los permisos por rol.",
+      isolation: "100% local: los datos se guardan solo en este navegador y no se envían a ningún servidor. \"Reiniciar datos\" vuelve a los de ejemplo.",
+      limitations: [
+        "Sin cuentas reales: el usuario se elige en un selector, sin contraseñas ni invitaciones.",
+        "Una sola bodega, sin lector de código de barras, facturación ni exportación de reportes.",
+      ],
+    },
     faqs: [
       {
         question: "¿Puedo probarlo antes de decidir?",
         answer:
-          "Todavía no hay una demo pública disponible. Mientras tanto, puedes solicitar una sesión guiada o una cotización y te muestro el estado real del producto.",
+          "Sí: la demo muestra el flujo de inventario con datos ficticios. Para verlo con los productos de tu negocio, solicita una sesión guiada o una cotización.",
       },
       {
         question: "¿Funciona para más de una bodega o sucursal?",
@@ -79,8 +89,9 @@ export const products: Product[] = [
     features: [
       "Calendario de citas con disponibilidad configurable",
       "Ficha de cliente con historial de citas",
-      "Recordatorios automáticos antes de cada cita",
-      "Vista de agenda diaria y semanal",
+      "Recordatorios automáticos antes de cada cita, con plantilla editable",
+      "Vista de agenda diaria y semanal, compartida entre profesionales",
+      "Servicios con duración y precio, y control de asistencia",
     ],
     technologies: ["React", "Firebase"],
     benefits: [
@@ -89,13 +100,23 @@ export const products: Product[] = [
       "Agenda compartida si hay más de una persona atendiendo",
     ],
     limitations: [
-      "En desarrollo: el calendario y la ficha de cliente están implementados; los recordatorios automáticos todavía no.",
-      "Por ahora no hay demo pública.",
+      "En desarrollo: los recordatorios se programan y redactan, pero el envío real por WhatsApp o correo requiere conectar un proveedor al contratar.",
     ],
+    demo: {
+      url: "/demos/clientia",
+      instructions:
+        "Agenda citas en la vista semanal o diaria del Estudio Brisa e intenta ocupar un horario ya tomado o el almuerzo. Marca la asistencia desde el Panel, abre la ficha de un cliente con su historial y gasto, y ajusta los recordatorios para ver la bandeja de salida simulada.",
+      isolation: "100% local: los datos se guardan solo en este navegador y no se envían a ningún servidor. \"Reiniciar datos\" vuelve a los de ejemplo.",
+      limitations: [
+        "Los recordatorios se simulan: no se envía nada por WhatsApp ni por correo.",
+        "Sin cuentas ni sincronización: los datos viven solo en este navegador.",
+        "No hay citas recurrentes ni pagos o abonos.",
+      ],
+    },
     faqs: [
       {
         question: "¿Envía recordatorios por WhatsApp?",
-        answer: "Es la idea, pero todavía no está implementado. Hoy el recordatorio es solo dentro de la agenda.",
+        answer: "La agenda ya programa los recordatorios por cliente y canal (WhatsApp o correo) con una plantilla editable; en la demo el envío es simulado. El envío real se activa al contratar, conectando una cuenta de WhatsApp Business o de correo.",
       },
     ],
     relatedSlugs: ["roboacademy", "stockflow"],
@@ -120,10 +141,11 @@ export const products: Product[] = [
     coverImage: "",
     screenshots: [],
     features: [
-      "Gestión de grupos y horarios",
-      "Registro de asistencia por sesión",
-      "Seguimiento del módulo o proyecto de cada estudiante",
-      "Vista de pagos pendientes por estudiante",
+      "Gestión de grupos, horarios, cupos y módulos",
+      "Registro de asistencia por sesión, con excusas",
+      "Seguimiento del módulo de cada estudiante y notas del profesor",
+      "Mensualidades: pagos pendientes, recaudo y método de pago",
+      "Reporte imprimible para acudientes",
     ],
     benefits: [
       "Una sola vista de grupos, asistencia y progreso",
@@ -131,8 +153,19 @@ export const products: Product[] = [
     ],
     limitations: [
       "Prototipo construido a partir de un caso real; falta adaptarlo a academias distintas a la original.",
-      "No incluye todavía reportes para entregar a los padres.",
+      "Los reportes para acudientes se imprimen o guardan como PDF; todavía no se envían por correo ni WhatsApp.",
     ],
+    demo: {
+      url: "/demos/roboacademy",
+      instructions:
+        "Una academia ficticia con cuatro grupos y veinte estudiantes. Toma asistencia de una sesión, avanza a un estudiante de módulo, registra una mensualidad pendiente y genera el reporte imprimible para su acudiente.",
+      isolation: "100% local: los datos se guardan solo en este navegador y no se envían a ningún servidor. \"Reiniciar datos\" vuelve a los de ejemplo.",
+      limitations: [
+        "Sin cuentas reales ni roles: los datos viven solo en este navegador.",
+        "Los reportes se imprimen o se guardan como PDF desde el navegador; no se envían al acudiente.",
+        "No hay recordatorios de pago ni pasarela: los pagos se registran a mano.",
+      ],
+    },
     faqs: [
       {
         question: "¿Se adapta a mi academia aunque no sea de robótica?",
@@ -143,14 +176,14 @@ export const products: Product[] = [
     isSampleContent: true,
   },
   {
-    id: "devpanel",
-    slug: "devpanel",
-    name: "DevPanel",
+    id: "taskpro",
+    slug: "taskpro",
+    name: "TaskPro",
     categorySlug: "herramientas-dev",
-    shortDescription: "Panel de productividad para desarrolladores: tareas, proyectos y notas en un solo lugar.",
+    shortDescription: "Tareas, proyectos, notas y tiempo para desarrolladores y equipos pequeños, en un solo lugar.",
     description: [
-      "DevPanel es una herramienta de productividad pensada para desarrolladores y equipos pequeños que necesitan ver sus tareas, proyectos activos y notas técnicas sin saltar entre cinco aplicaciones distintas.",
-      "Es, a la vez, el panel con el que HGS Digital organiza su propio trabajo — por eso es el producto con la demo más avanzada del catálogo.",
+      "TaskPro es una herramienta de productividad pensada para desarrolladores y equipos pequeños que necesitan ver sus tareas, proyectos activos y notas técnicas sin saltar entre cinco aplicaciones distintas.",
+      "Junta en un solo lugar el tablero de cada proyecto, las notas técnicas y el tiempo que se le dedica a cada cliente. La demo es la aplicación completa: tablero, proyectos, notas con markdown y registro de tiempo.",
     ],
     problem:
       "Los desarrolladores independientes y equipos pequeños reparten su trabajo entre apps de notas, tableros de tareas y hojas sueltas, y pierden tiempo buscando en qué estaban en lugar de trabajar.",
@@ -161,9 +194,11 @@ export const products: Product[] = [
     coverImage: "",
     screenshots: [],
     features: [
-      "Tablero de tareas por proyecto",
-      "Notas técnicas vinculadas a cada proyecto",
-      "Vista rápida de lo que está en progreso",
+      "Tablero kanban por proyecto con prioridad, etiquetas, fecha límite y subtareas",
+      "Notas técnicas vinculadas a cada proyecto, con vista previa de markdown",
+      "Vista \"Hoy\": lo que está en progreso, lo que vence y lo atrasado",
+      "Registro de tiempo con temporizador y totales por proyecto",
+      "Proyectos con cliente, estado y progreso",
     ],
     technologies: ["React", "TypeScript"],
     benefits: [
@@ -171,22 +206,24 @@ export const products: Product[] = [
       "Pensado para flujo de trabajo individual, sin fricción de herramientas corporativas",
     ],
     limitations: [
-      "La demo usa datos ficticios guardados solo en tu navegador: se reinician si borras el caché o cambias de dispositivo.",
-      "Todavía no hay sincronización en la nube ni cuentas de usuario.",
+      "Todavía no hay sincronización en la nube ni cuentas de usuario: los datos viven en un solo navegador.",
+      "No se conecta a Git ni envía recordatorios de vencimiento.",
     ],
     demo: {
-      url: "/demos/devpanel",
-      instructions: "Se abre directamente en el navegador. Puedes crear, completar y eliminar tareas de ejemplo: ningún dato se envía a ningún servidor.",
-      isolation: "100% local: el estado vive solo en la memoria de tu navegador durante la sesión.",
+      url: "/demos/taskpro",
+      instructions:
+        "Crea una tarea en el Tablero y muévela con las flechas o arrastrándola; luego inicia el temporizador desde Hoy, recarga la página y verás que sigue contando. Prueba también una nota con markdown y fíjala para verla en Hoy.",
+      isolation: "100% local: los datos se guardan solo en este navegador y no se envían a ningún servidor. \"Reiniciar datos\" vuelve a los de ejemplo.",
       limitations: [
-        "No hay persistencia entre sesiones ni sincronización entre dispositivos.",
-        "Las tareas y proyectos son de ejemplo; no representan datos reales de ningún cliente.",
+        "Sin cuentas ni sincronización entre dispositivos.",
+        "El repositorio de cada proyecto es solo texto: no se conecta a Git.",
+        "El markdown cubre lo básico: sin enlaces, tablas ni imágenes.",
       ],
     },
     faqs: [
       {
         question: "¿Mis tareas de la demo se guardan?",
-        answer: "No. La demo es completamente local a tu navegador y se reinicia al recargar la página; es intencional, para no mezclar datos de prueba con datos reales.",
+        answer: "Sí, pero solo en este navegador: sobreviven a recargar la página hasta que pulses \"Reiniciar datos\". Nada se envía a ningún servidor, para no mezclar datos de prueba con datos reales.",
       },
       {
         question: "¿Cuándo habrá una versión con cuenta propia?",
@@ -233,7 +270,7 @@ export const products: Product[] = [
         answer: "Cuéntame el proceso actual, paso a paso, desde la página de desarrollo a medida. Te digo con honestidad si tiene sentido automatizarlo y qué implicaría.",
       },
     ],
-    relatedSlugs: ["stockflow", "devpanel"],
+    relatedSlugs: ["stockflow", "taskpro"],
     isSampleContent: true,
   },
   // --- Ideas en exploración: todavía no existen. Se muestran para validar interés, no como oferta. ---
