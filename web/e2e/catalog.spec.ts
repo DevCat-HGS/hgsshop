@@ -1,12 +1,23 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("descubrimiento de productos", () => {
-  test("la portada busca en el catálogo", async ({ page }) => {
+  test("la portada busca en el catálogo mientras se escribe", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/HGS Digital/);
-    await page.getByLabel("Buscar en el catálogo").fill("inventario");
-    await page.getByRole("button", { name: "Buscar" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Software que se\s*puede probar/);
 
+    const buscador = page.locator("#buscador");
+    await buscador.getByLabel("Describe lo que necesitas resolver").fill("academia de robótica");
+    await expect(buscador.getByRole("link", { name: /RoboAcademy/ })).toBeVisible();
+
+    await buscador.getByRole("button", { name: "agenda de citas" }).click();
+    await expect(buscador.getByRole("link", { name: /Clientia/ })).toBeVisible();
+
+    await buscador.getByLabel("Describe lo que necesitas resolver").fill("zzz sin coincidencias");
+    await expect(buscador.getByText("Nada del catálogo lo cubre todavía.")).toBeVisible();
+
+    await buscador.getByLabel("Describe lo que necesitas resolver").fill("inventario");
+    await buscador.getByRole("link", { name: "Ver todos los resultados en el catálogo" }).click();
     await expect(page).toHaveURL(/\/productos\?q=inventario/);
     // Esperar al catálogo: mientras carga, la portada (con su propio enlace a StockFlow) sigue en pantalla.
     await expect(page.getByRole("heading", { level: 1, name: "Todo lo que hay en el taller" })).toBeVisible();

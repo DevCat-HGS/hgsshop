@@ -3,7 +3,8 @@ import { useDocumentHead } from "@/hooks/useDocumentHead";
 import { getCategories, getProducts } from "@/lib/catalog";
 import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
-import { Hero } from "@/components/home/Hero";
+import { Portada } from "@/components/home/Portada";
+import { Buscador } from "@/components/home/Buscador";
 import { CategoryGrid } from "@/components/home/CategoryGrid";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { DemoSpotlight } from "@/components/home/DemoSpotlight";
@@ -31,7 +32,8 @@ export function HomePage() {
 
   return (
     <>
-      <Hero products={products} />
+      <Portada products={products} />
+      <Buscador />
       <CategoryGrid categories={categories} products={products} />
       <FeaturedProducts products={products.slice(0, FEATURED_COUNT)} />
       <DemoSpotlight products={products} />
