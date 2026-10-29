@@ -4,7 +4,7 @@ import { Slide } from "@/components/home/Slide";
 import { ArrowRightIcon } from "@/components/icons";
 
 /**
- * S7 · A medida. "La placa de acción": una fila de tres placas como recortada de un tablero más largo.
+ * S8 · A medida. "La placa de acción": una fila de tres placas como recortada de un tablero más largo.
  * La central, en Ice Blue, lleva la única acción; las de los lados se salen de la pantalla: el isotipo
  * de FlowAuto (las automatizaciones a medida) y un campo plano.
  */

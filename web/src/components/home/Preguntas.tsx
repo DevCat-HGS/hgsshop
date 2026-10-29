@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { Slide } from "@/components/home/Slide";
 
 /**
- * S8 · Preguntas. "Índice de preguntas, una respuesta": a la izquierda todas las preguntas; a la
+ * S9 · Preguntas. "Índice de preguntas, una respuesta": a la izquierda todas las preguntas; a la
  * derecha, la respuesta seleccionada en grande y fija mientras se recorre la lista. La selección sigue
  * al puntero, al clic y al foco del teclado. En móvil la respuesta se abre bajo su pregunta.
  */

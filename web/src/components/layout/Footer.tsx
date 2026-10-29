@@ -31,7 +31,7 @@ const columns = [
 const currentYear = new Date().getFullYear();
 const linkClasses = "text-sm text-text-muted transition-colors hover:text-text";
 
-/** S10 · Footer. En la portada es el destino del último scroll, tras el cierre (snap-end). */
+/** S11 · Footer. En la portada es el destino del último scroll, tras el cierre (snap-end). */
 export function Footer() {
   return (
     <footer /* taste-skill-ignore: footer elegido por el cliente */ className="relative snap-end border-t border-border bg-bg/70 backdrop-blur-sm">

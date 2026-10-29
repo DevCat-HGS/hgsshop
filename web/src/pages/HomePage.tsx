@@ -10,6 +10,7 @@ import { Categorias } from "@/components/home/Categorias";
 import { Productos } from "@/components/home/Productos";
 import { Demo } from "@/components/home/Demo";
 import { Proceso } from "@/components/home/Proceso";
+import { Entregados } from "@/components/home/Entregados";
 import { AMedida } from "@/components/home/AMedida";
 import { Preguntas } from "@/components/home/Preguntas";
 import { ScrollLine } from "@/components/layout/ScrollLine";
@@ -44,6 +45,7 @@ export function HomePage() {
       <Productos products={built} ideaCount={ideaCount} />
       <Demo products={products} />
       <Proceso />
+      <Entregados />
       <AMedida />
       <Preguntas />
       <ScrollLine />

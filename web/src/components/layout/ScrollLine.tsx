@@ -7,7 +7,7 @@ const TRACE =
   "M-28.73 167.2c26.43 9.21 68.46-9.46 85.45-12.03 18.45-2.78 32.82 4.86 28.75 9.83-3.82 4.66-25.77-21.18-14.81-31.5 9.54-8.98 17.64 10.64 16.42 17.06-1.51-6.2 2.95-26.6 14.74-22.11 11.7 4.46-4.33 49.03-15.44 44.08-6.97-3.1 15.44-16.26 26.1-16 23.03.56 55.6 27.51 126.63 3.36";
 
 /**
- * S9 · Cierre. Última diapositiva de la portada (solo aparece ahí); el footer pide un scroll más.
+ * S10 · Cierre. Última diapositiva de la portada (solo aparece ahí); el footer pide un scroll más.
  * Al entrar la sección, el trazo se dibuja de izquierda a derecha con un punto luminoso en la punta, se
  * sostiene y vuelve a empezar (animación en index.css, `.trace-line` y `.trace-tip`). Solo corre con la
  * sección en pantalla; con movimiento reducido el trazo queda dibujado y quieto.

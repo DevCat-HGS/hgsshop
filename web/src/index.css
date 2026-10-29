@@ -184,7 +184,7 @@
     }
   }
 
-  /* Trazo del cierre (S9): se dibuja con el punto en la punta, se sostiene y vuelve a empezar. */
+  /* Trazo del cierre (S10): se dibuja con el punto en la punta, se sostiene y vuelve a empezar. */
   .trace-line {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;

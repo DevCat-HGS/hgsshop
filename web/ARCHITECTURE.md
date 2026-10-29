@@ -89,21 +89,21 @@ producto actúa en la página en lugar de describirse. Hoja guardada en `.taste-
   paleta y el color dice qué es: Ice Blue el software que existe, Emerald Mint el servicio a medida, Steel
   Blue las ideas. Dentro de su demo cada app conserva su acento. El sitio no lleva fotografías.
 - **Franjas claras (`.tone-paper`):** Cloud White de fondo con la paleta invertida (texto Midnight Navy,
-  acción Ocean Blue). Lo usan S4 Productos, S8 Preguntas y el problema de cada ficha.
+  acción Ocean Blue). Lo usan S4 Productos, S9 Preguntas y el problema de cada ficha.
 - **Fondo:** aurora en CSS (solo `transform`) y grano fino de película (ruido SVG incrustado). Las
   partículas del diseño original se retiraron a pedido. Todo quieto con `prefers-reduced-motion`.
 
 ### Portada en diapositivas
 
 Diez secciones de pantalla completa (`components/home/`, componente `Slide`), nombradas para poder
-referirse a ellas: S1 Portada, S2 Buscador, S3 Categorías, S4 Productos, S5 Demo, S6 Proceso, S7 A medida,
-S8 Preguntas, S9 Cierre y S10 Footer.
+referirse a ellas: S1 Portada, S2 Buscador, S3 Categorías, S4 Productos, S5 Demo, S6 Proceso, S7 Entregados, S8 A medida,
+S9 Preguntas, S10 Cierre y S11 Footer.
 
-- `useSlideDeck` activa `scroll-snap` nativo en escritorio: cada gesto encaja en la siguiente sección, S9 se
+- `useSlideDeck` activa `scroll-snap` nativo en escritorio: cada gesto encaja en la siguiente sección, S10 se
   detiene y el footer (`snap-end`) pide un scroll más. No se intercepta la rueda ni el teclado.
 - Si en la pantalla actual alguna sección no cabe entera, el encaje pasa de obligatorio a proximidad para no
   dejar contenido inalcanzable (en 1440×900 caben todas).
-- S9 Cierre existe solo en la portada. Las páginas interiores tienen un botón Volver (`BackButton`): un paso
+- S10 Cierre existe solo en la portada. Las páginas interiores tienen un botón Volver (`BackButton`): un paso
   atrás en el historial, o la página padre si se entró directo.
 
 ### Movimiento
