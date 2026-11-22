@@ -7,8 +7,8 @@
 
 export const site = {
   brand: {
-    name: "HGS Digital",
-    shortName: "HGS",
+    name: "ADSOFT",
+    shortName: "ADSOFT",
     tagline: "Software a medida para quienes construyen un negocio digital",
   },
 

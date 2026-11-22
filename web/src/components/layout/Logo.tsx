@@ -18,10 +18,7 @@ export function Logo() {
   return (
     <span className="flex items-center gap-2.5">
       <LogoMark />
-      <span className="font-display text-xl text-text">
-        {site.brand.shortName}
-        <span className="text-text-muted"> Digital</span>
-      </span>
+      <span className="font-display text-xl text-text">{site.brand.shortName}</span>
     </span>
   );
 }

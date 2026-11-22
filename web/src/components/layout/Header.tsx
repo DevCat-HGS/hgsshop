@@ -40,7 +40,7 @@ export function Header() {
   return (
     <header className={`sticky top-0 z-40 transition-colors duration-200 ${isScrolled || isMenuOpen ? "bg-bg" : "bg-transparent"}`}>
       <Container className="flex h-16 items-center justify-between gap-6">
-        <NavLink to="/" aria-label="HGS Digital, inicio" className="rounded-sm">
+        <NavLink to="/" aria-label="ADSOFT, inicio" className="rounded-sm">
           <Logo />
         </NavLink>
 

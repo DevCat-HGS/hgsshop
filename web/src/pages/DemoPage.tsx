@@ -249,7 +249,7 @@ function DataDialog({ open, onClose, product, onChanged }: { open: boolean; onCl
     try {
       const backup = JSON.parse(await file.text());
       if (backup?.app !== "hgs-demo" || typeof backup.data !== "object" || backup.data === null) {
-        setError("Ese archivo no es una copia de seguridad de una demo de HGS.");
+        setError("Ese archivo no es una copia de seguridad de una demo de ADSOFT.");
         return;
       }
       if (backup.product !== slug) {

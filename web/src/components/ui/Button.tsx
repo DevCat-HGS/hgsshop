@@ -39,9 +39,11 @@ export function Button(props: ButtonAsButton | ButtonAsLink) {
     const { variant = "primary", size = "md", className = "", children, to, ...linkProps } = props;
     const classes = `${base} ${variants[variant]} ${sizes[size]} ${className}`;
 
+    // Externo: pestaña nueva salvo que se pida otro `target`.
     if (typeof to === "string" && /^https?:\/\//.test(to)) {
+      const { target = "_blank", "aria-label": ariaLabel } = linkProps;
       return (
-        <a href={to} target="_blank" rel="noreferrer" className={classes}>
+        <a href={to} target={target} rel="noreferrer" aria-label={ariaLabel} className={classes}>
           {children}
         </a>
       );

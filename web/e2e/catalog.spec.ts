@@ -3,7 +3,7 @@ import { expect, test } from "./fixtures";
 test.describe("descubrimiento de productos", () => {
   test("la portada busca en el catálogo mientras se escribe", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/HGS Digital/);
+    await expect(page).toHaveTitle(/ADSOFT/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Software que se\s*puede probar/);
 
     const buscador = page.locator("#buscador");
@@ -35,15 +35,17 @@ test.describe("descubrimiento de productos", () => {
     await expect(page.getByRole("main").getByRole("link", { name: "TaskPro: ver detalle" })).toBeVisible();
   });
 
-  test("las tarjetas con demo la abren en una pestaña nueva; las demás no la ofrecen", async ({ page }) => {
+  test("las tarjetas con demo la abren en la misma pestaña; las demás no la ofrecen", async ({ page }) => {
     await page.goto("/productos");
-    const demos = page.getByRole("link", { name: /^Probar demo de .* \(se abre en una pestaña nueva\)$/ });
+    const demos = page.getByRole("link", { name: /^Probar demo de .*$/ });
     await expect(demos).toHaveCount(4);
     await expect(page.getByRole("link", { name: /Probar demo de FlowAuto/ })).toHaveCount(0);
 
-    const [demo] = await Promise.all([page.waitForEvent("popup"), page.getByRole("link", { name: /Probar demo de RoboAcademy/ }).click()]);
-    await expect(demo).toHaveURL(/\/demos\/roboacademy$/);
-    await expect(demo.getByRole("note", { name: "Entorno de demostración" })).toBeVisible();
+    await page.getByRole("link", { name: /Probar demo de RoboAcademy/ }).click();
+    await expect(page).toHaveURL(/\/demos\/roboacademy$/);
+    await expect(page.getByRole("note", { name: "Entorno de demostración" })).toBeVisible();
+    // Para volver basta el botón atrás del navegador.
+    await page.goBack();
     await expect(page).toHaveURL(/\/productos$/);
   });
 
@@ -74,7 +76,7 @@ test.describe("descubrimiento de productos", () => {
     await expect(page.getByText("Bajo cotización").first()).toBeVisible();
     await expect(page.getByText("Demo aún no disponible")).toBeVisible();
     await expect(page.getByRole("link", { name: /Abrir demo/ })).toHaveCount(0);
-    await expect(page).toHaveTitle("FlowAuto · HGS Digital");
+    await expect(page).toHaveTitle("FlowAuto · ADSOFT");
   });
 
   test("una idea en exploración no aparenta ser un producto", async ({ page }) => {
@@ -93,11 +95,10 @@ test.describe("descubrimiento de productos", () => {
 });
 
 test.describe("demo de TaskPro", () => {
-  test("se abre desde el producto en una pestaña nueva, a pantalla completa", async ({ page: product }) => {
-    await product.goto("/productos/taskpro");
-    const [page] = await Promise.all([product.waitForEvent("popup"), product.getByRole("link", { name: /Abrir demo/ }).click()]);
+  test("se abre desde el producto en la misma pestaña, a pantalla completa", async ({ page }) => {
+    await page.goto("/productos/taskpro");
+    await page.getByRole("link", { name: /Abrir demo/ }).click();
     await expect(page).toHaveURL(/\/demos\/taskpro$/);
-    await expect(product).toHaveURL(/\/productos\/taskpro$/);
     await expect(page.getByRole("note", { name: "Entorno de demostración" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Secciones de TaskPro" })).toBeVisible();
     // La demo ocupa la pestaña: sin la cabecera del sitio.
